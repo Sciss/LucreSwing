@@ -2,7 +2,7 @@
 
 ## statement
 
-LucreSwing is a Scala library which bridges between Swing (through the [Desktop](https://github.com/Sciss/Desktop/) project) and [LucreEvent](https://github.com/Sciss/LucreEvent/). It is (C)opyright 2004-2013 by Hanns Holger Rutz. All rights reserved. The project is released under the [GNU General Public License](https://raw.github.com/Sciss/ScalaAudioFile/master/LICENSE) v2+ and comes with absolutely no warranties. To contact the author, send an email to `contact at sciss.de`
+LucreSwing is a Scala library which bridges between Swing (through the [Desktop](https://github.com/Sciss/Desktop/) project) and [LucreEvent](https://github.com/Sciss/LucreEvent/). It is (C)opyright 2014 by Hanns Holger Rutz. All rights reserved. The project is released under the [GNU General Public License](https://raw.github.com/Sciss/ScalaAudioFile/master/LICENSE) v2+ and comes with absolutely no warranties. To contact the author, send an email to `contact at sciss.de`
 
 ## requirements / building
 
