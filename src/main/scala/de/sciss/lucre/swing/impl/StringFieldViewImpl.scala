@@ -1,5 +1,5 @@
 /*
- *  StringExprEditorImpl.scala
+ *  StringFieldViewImpl.scala
  *  (LucreSwing)
  *
  *  Copyright (c) 2014 Hanns Holger Rutz. All rights reserved.
@@ -26,9 +26,9 @@ import expr.Expr
 import de.sciss.model.Change
 import edit.EditExprVar
 
-object StringExprEditorImpl {
+object StringFieldViewImpl {
   def apply[S <: Sys[S]](expr: Expr[S, String], name: String, columns: Int)
-                        (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): StringExprEditor[S] = {
+                        (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): StringFieldView[S] = {
     import de.sciss.lucre.expr.String._
     val exprH     = expr match {
       case Expr.Var(exprV) => Some(tx.newHandle(exprV))
@@ -47,7 +47,7 @@ object StringExprEditorImpl {
   private final class Impl[S <: Sys[S]](exprH: Option[stm.Source[S#Tx, Expr.Var[S, String]]], value0: String,
                                         editName: String, columns0: Int)
                                        (implicit cursor: stm.Cursor[S], undoManager: UndoManager)
-    extends StringExprEditor[S] with ExprEditor[S, String, TextField] {
+    extends StringFieldView[S] with ExprEditor[S, String, TextField] {
 
     protected var value = value0
 
