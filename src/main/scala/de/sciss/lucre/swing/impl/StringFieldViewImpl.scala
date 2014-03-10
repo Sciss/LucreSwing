@@ -24,7 +24,6 @@ import scala.swing.event.EditDone
 import de.sciss.lucre.expr
 import expr.Expr
 import de.sciss.model.Change
-import edit.EditExprVar
 import de.sciss.serial.Serializer
 
 object StringFieldViewImpl extends ExprViewFactory[String] {
