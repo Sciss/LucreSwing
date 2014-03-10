@@ -21,10 +21,7 @@ import javax.swing.event.{UndoableEditEvent, UndoableEditListener}
 import de.sciss.lucre.event.Sys
 import java.awt.event.{KeyEvent, KeyListener, FocusEvent, FocusListener}
 
-//object ExprEditor {
-//
-//}
-trait ExprEditor[S <: Sys[S], A, Comp <: Component] extends ComponentHolder[Comp] {
+trait ExprEditor[S <: Sys[S], A, Comp <: Component] extends ComponentHolder[Comp] with ExprViewFactory.View[A] {
   // ---- abstract ----
 
   // the current ephemeral (but committed) value of the view. sub classes should
@@ -60,8 +57,8 @@ trait ExprEditor[S <: Sys[S], A, Comp <: Component] extends ComponentHolder[Comp
   protected def clearDirty(): Unit = dirty.foreach(_.visible = false)
 
   // called when the expression changes, so that the change will be reflected in the GUI
-  final def update(newValue: A)(implicit tx: S#Tx): Unit =
-    if (value != newValue) deferTx {
+  final def update(newValue: A): Unit =
+    if (value != newValue) {
       value = newValue
       valueToComponent()
       clearDirty()

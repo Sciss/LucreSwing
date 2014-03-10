@@ -14,13 +14,17 @@ licenses     := Seq("GPL v2+" -> url("http://www.gnu.org/licenses/gpl-2.0.txt"))
 
 lazy val eventVersion     = "2.6.+"
 
+lazy val stmVersion       = "2.0.2+"
+
 lazy val desktopVersion   = "0.4.2+"
 
 // lazy val treeTableVersion = "1.3.4+"
 
 libraryDependencies ++= Seq(
-  "de.sciss" %% "lucreevent" % eventVersion,
-  "de.sciss" %% "desktop"    % desktopVersion
+  "de.sciss" %% "lucreevent"   % eventVersion,
+  "de.sciss" %% "desktop"      % desktopVersion,
+  "de.sciss" %% "lucrestm-bdb" % stmVersion     % "test",
+  "de.sciss" %% "fileutil"     % "1.1.+"        % "test"
   // "de.sciss" %% "treetable-scala" % treeTableVersion
   // "org.scala-lang" %  "scala-swing"     % scalaVersion.value
 )
