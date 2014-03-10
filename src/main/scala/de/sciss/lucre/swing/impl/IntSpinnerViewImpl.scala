@@ -1,5 +1,5 @@
 /*
- *  DoubleSpinnerViewImpl.scala
+ *  IntSpinnerViewImpl.scala
  *  (LucreSwing)
  *
  *  Copyright (c) 2014 Hanns Holger Rutz. All rights reserved.
@@ -24,14 +24,14 @@ import javax.swing.SpinnerNumberModel
 import de.sciss.model.Change
 import de.sciss.serial.Serializer
 
-object DoubleSpinnerViewImpl extends ExprViewFactory[Double] {
-  def fromExpr[S <: Sys[S]](_expr: Expr[S, Double], name: String, width: Int)
+object IntSpinnerViewImpl extends ExprViewFactory[Int] {
+  def fromExpr[S <: Sys[S]](_expr: Expr[S, Int], name: String, width: Int)
                            (implicit tx: S#Tx, cursor: stm.Cursor[S],
-                            undoManager: UndoManager): DoubleSpinnerView[S] = {
-    // implicit val tpe: ExprType[Double] = expr.Double
+                            undoManager: UndoManager): IntSpinnerView[S] = {
+    // implicit val tpe: ExprType[Int] = expr.Int
     val res = new Impl[S](maxWidth = width) {
       impl =>
-      protected var (value, committer)          = mkExprCommitter(_expr, name)(tx, cursor, expr.Double)
+      protected var (value, committer)          = mkExprCommitter(_expr, name)(tx, cursor, expr.Int)
       protected val observer: Disposable[S#Tx]  = mkExprObserver (_expr, impl)
     }
 
@@ -39,14 +39,14 @@ object DoubleSpinnerViewImpl extends ExprViewFactory[Double] {
     res
   }
 
-  def fromMap[S <: Sys[S], A](map: expr.Map[S, A, Expr[S, Double], Change[Double]], key: A, default: Double,
-                             name: String, width: Int)
-                            (implicit tx: S#Tx, keySerializer: Serializer[S#Tx, S#Acc, A],
-                             cursor: stm.Cursor[S], undoManager: UndoManager): DoubleSpinnerView[S] = {
+  def fromMap[S <: Sys[S], A](map: expr.Map[S, A, Expr[S, Int], Change[Int]], key: A, default: Int,
+                              name: String, width: Int)
+                             (implicit tx: S#Tx, keySerializer: Serializer[S#Tx, S#Acc, A],
+                              cursor: stm.Cursor[S], undoManager: UndoManager): IntSpinnerView[S] = {
     val res = new Impl[S](maxWidth = width) {
       impl =>
       protected var (value, committer)          = mkMapCommitter(map, key, default, name)(
-                                                    tx, cursor, keySerializer, expr.Double)
+        tx, cursor, keySerializer, expr.Int)
       protected val observer: Disposable[S#Tx]  = mkMapObserver (map, key, impl)
     }
 
@@ -56,15 +56,15 @@ object DoubleSpinnerViewImpl extends ExprViewFactory[Double] {
 
   private abstract class Impl[S <: Sys[S]](maxWidth: Int)
                                           (implicit cursor: stm.Cursor[S], undoManager: UndoManager)
-    extends NumberSpinnerViewImpl[S, Double](maxWidth) with DoubleSpinnerView[S] {
+    extends NumberSpinnerViewImpl[S, Int](maxWidth) with IntSpinnerView[S] {
 
-    final protected val tpe = expr.Double
+    final protected val tpe = expr.Int
 
-    protected def parseModelValue(v: Any): Option[Double] = v match {
-      case i: Double  => Some(i)
-      case _          => None
+    protected def parseModelValue(v: Any): Option[Int] = v match {
+      case i: Int => Some(i)
+      case _      => None
     }
 
-    protected lazy val model: SpinnerNumberModel = new SpinnerNumberModel(value, Double.MinValue, Double.MaxValue, 0.1)
+    protected lazy val model: SpinnerNumberModel = new SpinnerNumberModel(value, Int.MinValue, Int.MaxValue, 1)
   }
 }

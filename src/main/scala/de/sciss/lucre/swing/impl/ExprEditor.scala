@@ -21,7 +21,9 @@ import javax.swing.event.{UndoableEditEvent, UndoableEditListener}
 import de.sciss.lucre.event.Sys
 import java.awt.event.{KeyEvent, KeyListener, FocusEvent, FocusListener}
 
-trait ExprEditor[S <: Sys[S], A, Comp <: Component] extends ComponentHolder[Comp] with ExprViewFactory.View[A] {
+trait ExprEditor[S <: Sys[S], A, Comp <: Component]
+  extends View[S] with ComponentHolder[Comp] with ExprViewFactory.View[A] {
+
   // ---- abstract ----
 
   // the current ephemeral (but committed) value of the view. sub classes should

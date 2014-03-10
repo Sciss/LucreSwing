@@ -18,6 +18,7 @@ import de.sciss.lucre.stm
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm.Disposable
 import scala.swing.Component
+import de.sciss.lucre.swing.impl.ComponentHolder
 
 object View {
   trait Cursor[S <: Sys[S]] extends View[S] {
@@ -30,6 +31,20 @@ object View {
 
   trait File {
     def file: java.io.File
+  }
+
+  def wrap[S <: Sys[S]](component: => Component)(implicit tx: S#Tx): View[S] = {
+    val res = new Wrap[S]
+    deferTx {
+      res.guiInit(component)
+    }
+    res
+  }
+
+  private final class Wrap[S <: Sys[S]] extends View[S] with ComponentHolder[Component] {
+    def guiInit(c: Component): Unit = component = c
+
+    def dispose()(implicit tx: S#Tx) = ()
   }
 }
 trait View[S <: Sys[S]] extends Disposable[S#Tx] {
