@@ -18,7 +18,7 @@ import de.sciss.lucre.event.Sys
 import de.sciss.lucre.expr.{Expr, ExprType}
 import de.sciss.lucre.{expr, stm}
 import javax.swing.undo.UndoableEdit
-import de.sciss.lucre.swing.edit.{EditExprMap, EditExprVar}
+import de.sciss.lucre.swing.edit.{EditExprMap, EditVar}
 import de.sciss.model.Change
 import de.sciss.serial.Serializer
 import language.{existentials, higherKinds}
@@ -44,7 +44,7 @@ trait ExprViewFactory[A] {
       val exprVarH = tx.newHandle(vr)
       new Committer[S, A] {
         def commit(newValue: A)(implicit tx: S#Tx): UndoableEdit = {
-          EditExprVar[S, A](s"Change $name", expr = exprVarH(), value = newConst[S](newValue))
+          EditVar.Expr[S, A](s"Change $name", expr = exprVarH(), value = newConst[S](newValue))
         }
       }
     }

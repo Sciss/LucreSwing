@@ -31,7 +31,7 @@ object EditExprMap {
     import valueType.{serializer, varSerializer}
     val before = map.get(key)
     val now: Option[Expr[S, B]] = (before, value) match {
-      case (Some(Expr.Var(vr)), Some(v)) => return EditExprVar(name, vr, v) // current value is variable
+      case (Some(Expr.Var(vr)), Some(v)) => return EditVar.Expr(name, vr, v) // current value is variable
       case (_, None) | (_, Some(Expr.Var(_))) => value  // new value is none or some variable, just put it
       case _ => value.map(valueType.newVar(_))          // new value is some non-variable, wrap it, then put it
     }
