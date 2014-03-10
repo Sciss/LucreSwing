@@ -25,63 +25,67 @@ import de.sciss.lucre.expr
 import expr.Expr
 import de.sciss.model.Change
 import edit.EditExprVar
+import de.sciss.serial.Serializer
 
-object StringFieldViewImpl {
-  def apply[S <: Sys[S]](expr: Expr[S, String], name: String, columns: Int)
-                        (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): StringFieldView[S] = {
-    import de.sciss.lucre.expr.String._
-    val exprH     = expr match {
-      case Expr.Var(exprV) => Some(tx.newHandle(exprV))
-      case _               => None
+object StringFieldViewImpl extends ExprViewFactory[String] {
+  def fromExpr[S <: Sys[S]](_expr: Expr[S, String], name: String, columns: Int)
+                           (implicit tx: S#Tx, cursor: stm.Cursor[S],
+                            undoManager: UndoManager): StringFieldView[S] = {
+    // implicit val tpe: ExprType[Int] = expr.Int
+    val res = new Impl[S](editName = name, columns0 = columns) {
+      impl =>
+      protected var (value, committer)          = mkExprCommitter(_expr, name)(tx, cursor, expr.String)
+      protected val observer: Disposable[S#Tx]  = mkExprObserver (_expr, impl)
     }
-    val value0    = expr.value
-    val res       = new Impl[S](exprH, value0 = value0, editName = name, columns0 = columns)
-    res.observer  = expr.changed.react { implicit tx => {
-      case Change(_, now) => res.update(now)
-    }}
 
     deferTx(res.guiInit())
     res
   }
 
-  private final class Impl[S <: Sys[S]](exprH: Option[stm.Source[S#Tx, Expr.Var[S, String]]], value0: String,
-                                        editName: String, columns0: Int)
+  def fromMap[S <: Sys[S], A](map: expr.Map[S, A, Expr[S, String], Change[String]], key: A, default: String,
+                              name: String, columns: Int)
+                             (implicit tx: S#Tx, keySerializer: Serializer[S#Tx, S#Acc, A],
+                              cursor: stm.Cursor[S], undoManager: UndoManager): StringFieldView[S] = {
+    val res = new Impl[S](editName = name, columns0 = columns) {
+      impl =>
+      protected var (value, committer)          = mkMapCommitter(map, key, default, name)(
+        tx, cursor, keySerializer, expr.String)
+      protected val observer: Disposable[S#Tx]  = mkMapObserver (map, key, impl)
+    }
+
+    deferTx(res.guiInit())
+    res
+  }
+
+  private abstract class Impl[S <: Sys[S]](editName: String, columns0: Int)
                                        (implicit cursor: stm.Cursor[S], undoManager: UndoManager)
     extends StringFieldView[S] with ExprEditor[S, String, TextField] {
 
-    protected var value = value0
+    protected def observer: Disposable[S#Tx]
 
-    var observer: Disposable[S#Tx] = _
-
-    // protected val tpe: Type[String] = Strings
+    protected def committer: Option[ExprViewFactory.Committer[S, String]]
 
     protected def valueToComponent(): Unit = if (component.text != value) component.text = value
-
-    // should be called when the GUI component has been edited. this will update `value`,
-    // transactionally update the expression (if editable), and register an undoable edit
-    protected def commit(newValue: String): Unit = {
-      if (value != newValue) {
-        exprH.foreach { h =>
-          val edit = cursor.step { implicit tx =>
-            import expr.String._
-            EditExprVar[S, String](s"Change $editName", expr = h(), value = newConst(newValue))
-          }
-          undoManager.add(edit)
-        }
-        value = newValue
-      }
-      clearDirty()
-    }
 
     protected def createComponent(): TextField = {
       val txt     = new TextField(value, columns0)
       dirty       = Some(DirtyBorder(txt))
 
-      txt.listenTo(txt)
-      txt.reactions += {
-        case EditDone(_) => commit(txt.text)
+      committer.foreach { com =>
+        txt.listenTo(txt)
+        txt.reactions += {
+          case EditDone(_) =>
+            val newValue = txt.text
+            if (value != newValue) {
+              cursor.step { implicit tx =>
+                com.commit(newValue)
+              }
+              value = newValue
+            }
+            clearDirty()
+        }
+        observeDirty(txt)
       }
-      observeDirty(txt)
       txt
     }
   }

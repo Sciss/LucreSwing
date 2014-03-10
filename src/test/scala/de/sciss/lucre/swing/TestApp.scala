@@ -1,6 +1,6 @@
 package de.sciss.lucre.swing
 
-import scala.swing.{Swing, Alignment, Label, GridPanel, MainFrame, Frame, SimpleSwingApplication}
+import scala.swing.{MenuItem, Menu, MenuBar, Swing, Alignment, Label, GridPanel, MainFrame, Frame, SimpleSwingApplication}
 import de.sciss.lucre.event.Durable
 import de.sciss.lucre.stm.store.BerkeleyDB
 import de.sciss.file.File
@@ -8,7 +8,7 @@ import scala.collection.immutable.{IndexedSeq => Vec}
 import de.sciss.lucre.expr
 import de.sciss.desktop.impl.UndoManagerImpl
 import de.sciss.desktop.Desktop
-import javax.swing.UIManager
+import javax.swing.{SwingUtilities, UIManager}
 
 object TestApp extends SimpleSwingApplication {
   type S = Durable
@@ -46,7 +46,14 @@ object TestApp extends SimpleSwingApplication {
   }
 
   lazy val top: Frame = {
-    new MainFrame {
+    val mb = new MenuBar {
+      contents += new Menu("Edit") {
+        contents += new MenuItem(undo.undoAction)
+        contents += new MenuItem(undo.redoAction)
+      }
+    }
+
+    val res = new MainFrame {
       title = "LucreSwing"
       contents = new GridPanel(rows0 = rows, cols0 = views.size/rows) {
         vGap = 2
@@ -54,8 +61,12 @@ object TestApp extends SimpleSwingApplication {
         border = Swing.EmptyBorder(4)
         contents ++= views.map(_.component)
       }
+      menuBar = mb
       pack().centerOnScreen()
       open()
     }
+    // SwingUtilities.updateComponentTreeUI(res.peer)
+    // SwingUtilities.updateComponentTreeUI(res.peer)
+    res
   }
 }
