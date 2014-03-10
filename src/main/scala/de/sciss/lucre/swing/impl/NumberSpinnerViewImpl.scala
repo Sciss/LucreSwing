@@ -62,8 +62,10 @@ abstract class NumberSpinnerViewImpl[S <: Sys[S], A](maxWidth: Int)
       sp.reactions += {
         case ValueChanged(_) =>
           parseModelValue(sp.value).foreach { newValue =>
-            if (value != newValue) cursor.step { implicit tx =>
-              val edit = com.commit(newValue)
+            if (value != newValue) {
+              val edit = cursor.step { implicit tx =>
+                com.commit(newValue)
+              }
               undoManager.add(edit)
               value = newValue
             }

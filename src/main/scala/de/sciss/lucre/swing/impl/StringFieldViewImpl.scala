@@ -77,9 +77,10 @@ object StringFieldViewImpl extends ExprViewFactory[String] {
           case EditDone(_) =>
             val newValue = txt.text
             if (value != newValue) {
-              cursor.step { implicit tx =>
+              val edit = cursor.step { implicit tx =>
                 com.commit(newValue)
               }
+              undoManager.add(edit)
               value = newValue
             }
             clearDirty()
