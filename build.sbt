@@ -18,13 +18,16 @@ lazy val stmVersion       = "2.0.2+"
 
 lazy val desktopVersion   = "0.4.2+"
 
+lazy val widgetsVersion   = "1.4.+"
+
 // lazy val treeTableVersion = "1.3.4+"
 
 libraryDependencies ++= Seq(
-  "de.sciss" %% "lucreevent"   % eventVersion,
-  "de.sciss" %% "desktop"      % desktopVersion,
-  "de.sciss" %% "lucrestm-bdb" % stmVersion     % "test",
-  "de.sciss" %% "fileutil"     % "1.1.+"        % "test"
+  "de.sciss" %% "lucreevent"         % eventVersion,
+  "de.sciss" %% "desktop"            % desktopVersion,
+  "de.sciss" %% "audiowidgets-swing" % widgetsVersion,  // TODO: should be possible to just depend on the range slider
+  "de.sciss" %% "lucrestm-bdb"       % stmVersion     % "test",
+  "de.sciss" %% "fileutil"           % "1.1.+"        % "test"
   // "de.sciss" %% "treetable-scala" % treeTableVersion
   // "org.scala-lang" %  "scala-swing"     % scalaVersion.value
 )

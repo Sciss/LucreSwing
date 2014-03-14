@@ -11,6 +11,8 @@ import de.sciss.desktop.Desktop
 import javax.swing.{SwingUtilities, UIManager}
 
 object TestApp extends SimpleSwingApplication {
+  de.sciss.lucre.event.showLog = true
+
   type S = Durable
   private implicit val system = Durable(BerkeleyDB.factory(File.createTemp(directory = true)))
 
