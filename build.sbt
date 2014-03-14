@@ -18,7 +18,7 @@ lazy val stmVersion       = "2.0.2+"
 
 lazy val desktopVersion   = "0.4.2+"
 
-lazy val widgetsVersion   = "1.4.+"
+lazy val widgetsVersion   = "1.5.+"
 
 // lazy val treeTableVersion = "1.3.4+"
 

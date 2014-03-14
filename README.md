@@ -13,3 +13,7 @@ To use the library in your project:
     "de.sciss" %% "lucreswing" % v
 
 The current version `v` is `"0.1.+"`
+
+## todo
+
+- collapse multiple undoable edits, especially with things like slider movements which produce many subsequent and related edits
