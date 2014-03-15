@@ -29,7 +29,7 @@ package object swing {
 
   private[this] def handleGUI(seq: Vec[() => Unit]): Unit = {
     def exec(): Unit =
-      log(s"handleGUI(seq.size = ${seq.size}")
+      log(s"handleGUI(seq.size = ${seq.size})")
       seq.foreach { fun =>
         try {
           fun()

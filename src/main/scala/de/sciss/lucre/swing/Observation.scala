@@ -22,7 +22,7 @@ object Observation {
   def apply[S <: Sys[S], U, A](value: A with Publisher[S, U])(
       observe: S#Tx => U => Unit)
      (implicit tx: S#Tx, serializer: Serializer[S#Tx, S#Acc, A with Publisher[S, U]]): Observation[S, A] = {
-    log(s"observation $observe for $value")
+    log(s"observation for $value")
     val obs = value.changed.react(observe)
     new Observation[S, A](tx.newHandle(value), obs)
   }
