@@ -22,6 +22,7 @@ object Observation {
   def apply[S <: Sys[S], U, A](value: A with Publisher[S, U])(
       observe: S#Tx => U => Unit)
      (implicit tx: S#Tx, serializer: Serializer[S#Tx, S#Acc, A with Publisher[S, U]]): Observation[S, A] = {
+    log(s"observation $observe for $value")
     val obs = value.changed.react(observe)
     new Observation[S, A](tx.newHandle(value), obs)
   }
@@ -43,4 +44,6 @@ class Observation[S <: Sys[S], A](val value: stm.Source[S#Tx, A], val observer: 
   extends Disposable[S#Tx] {
 
   def dispose()(implicit tx: S#Tx): Unit = observer.dispose()
+
+  override def toString = s"Observation@${hashCode.toHexString}($value, $observer)"
 }

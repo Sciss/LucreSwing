@@ -21,7 +21,7 @@ import stm.{Source, Cursor, Disposable}
 import expr.List
 import scala.swing.{ScrollPane, Component}
 import javax.swing.DefaultListModel
-import concurrent.stm.{Ref => STMRef}
+import concurrent.stm.Ref
 import scala.swing.event.ListSelectionChanged
 import de.sciss.serial.Serializer
 import ListView.Handler
@@ -52,57 +52,64 @@ object ListViewImpl {
                                                       (implicit cursor: Cursor[S],
                                                        listSer: Serializer[S#Tx, S#Acc, List[S, Elem, U]])
     extends ListView[S, Elem, U] with ComponentHolder[Component] with ModelImpl[ListView.Update] {
-    view =>
+    impl =>
 
     private var ggList: scala.swing.ListView[Data] = _
     private val mList   = new DefaultListModel
-    private val current = STMRef(Option.empty[(Source[S#Tx, List[S, Elem, U]], Disposable[S#Tx])])
+    private val current = Ref(Option.empty[Observation[S, List[S, Elem, U]]])
 
     def view = ggList
 
-    def list(implicit tx: S#Tx): Option[List[S, Elem, U]] =
-      current.get(tx.peer).map {
-        case (h, _) => h()
-      }
+    def list(implicit tx: S#Tx): Option[List[S, Elem, U]] = current.get(tx.peer).map(_.value())
 
     def list_=(newOption: Option[List[S, Elem, U]])(implicit tx: S#Tx): Unit = {
-      current.get(tx.peer).foreach {
-        case (_, obs) =>
-          disposeObserver(obs)
-      }
-      val newValue = newOption.map {
-        case ll =>
-          val obs = createObserver(ll)
-          (tx.newHandle(ll), obs)
-      }
-      current.set(newValue)(tx.peer)
-    }
-
-    private def disposeObserver(obs: Disposable[S#Tx])(implicit tx: S#Tx): Unit = {
-      obs.dispose()
-      deferTx {
-        view.clear()
-      }
-    }
-
-    private def createObserver(ll: List[S, Elem, U])(implicit tx: S#Tx): Disposable[S#Tx] = {
-      val items = ll.iterator.map(handler.data).toIndexedSeq
-      deferTx {
-        view.addAll(items)
-      }
-      ll.changed.react { implicit tx => upd => upd.changes.foreach {
-        case List.Added(  idx, elem)  => val item = handler.data(elem); deferTx(view.add(idx, item))
-        case List.Removed(idx, elem)  => deferTx(view.remove(idx))
-        case List.Element(elem, eu )  =>
-          val idx = upd.list.indexOf(elem)
-          if (idx >= 0) {
-            handler.dataUpdate(elem, eu).foreach { item =>
-              deferTx(view.update(idx, item))
+      disposeList()
+      val newObsOpt = newOption.map(Observation(_) { implicit tx => upd =>
+        log(s"ListView ${impl.hashCode.toHexString} react")
+        upd.changes.foreach {
+          case List.Added(  idx, elem)  => val item = handler.data(elem); deferTx(impl.insertItem(idx, item))
+          case List.Removed(idx, elem)  => deferTx(impl.removeItemAt(idx))
+          case List.Element(elem, eu )  =>
+            val idx = upd.list.indexOf(elem)
+            if (idx >= 0) {
+              handler.dataUpdate(elem, eu).foreach { item =>
+                deferTx(impl.updateItemAt(idx, item))
+              }
             }
-          }
-      }
+        }
+      })
+      current.set(newObsOpt)(tx.peer)
+      val items = newOption.fold(Vec.empty[Data])(ll => ll.iterator.map(handler.data).toIndexedSeq)
+      deferTx {
+        impl.replaceItems(items)
       }
     }
+
+    private def disposeList()(implicit tx: S#Tx): Unit = {
+      current.swap(None)(tx.peer).foreach { obs =>
+        log(s"disposeList(); obs = $obs")
+        obs.dispose()
+      }
+    }
+
+    //    private def createObserver(ll: List[S, Elem, U])(implicit tx: S#Tx): Disposable[S#Tx] = {
+    //      val items = ll.iterator.map(handler.data).toIndexedSeq
+    //      deferTx {
+    //        view.addAll(items)
+    //      }
+    //      ll.changed.react { implicit tx => upd => upd.changes.foreach {
+    //        case List.Added(  idx, elem)  => val item = handler.data(elem); deferTx(view.add(idx, item))
+    //        case List.Removed(idx, elem)  => deferTx(view.remove(idx))
+    //        case List.Element(elem, eu )  =>
+    //          val idx = upd.list.indexOf(elem)
+    //          if (idx >= 0) {
+    //            handler.dataUpdate(elem, eu).foreach { item =>
+    //              deferTx(view.update(idx, item))
+    //            }
+    //          }
+    //      }
+    //      }
+    //    }
 
     private def notifyViewObservers(current: Vec[Int]): Unit = {
       val evt = ListView.SelectionChanged(current)
@@ -133,20 +140,20 @@ object ListViewImpl {
       component = new ScrollPane(ggList)
     }
 
-    def clear(): Unit = mList.clear()
+    // def clearItems(): Unit = mList.clear()
 
-    def addAll(items: Vec[Data]): Unit = {
+    def replaceItems(items: Vec[Data]): Unit = {
       mList.clear()
       items.foreach(mList.addElement)
     }
 
-    def add(idx: Int, item: Data): Unit =
+    def insertItem(idx: Int, item: Data): Unit =
       mList.add(idx, item)
 
-    def remove(idx: Int): Unit =
+    def removeItemAt(idx: Int): Unit =
       mList.remove(idx)
 
-    def update(idx: Int, newItem: Data): Unit = {
+    def updateItemAt(idx: Int, newItem: Data): Unit = {
       mList.set(idx, newItem)
     }
 
