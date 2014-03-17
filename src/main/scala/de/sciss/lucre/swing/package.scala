@@ -28,7 +28,7 @@ package object swing {
   private[this] val guiCode = TxnLocal(init = Vec.empty[() => Unit], afterCommit = handleGUI)
 
   private[this] def handleGUI(seq: Vec[() => Unit]): Unit = {
-    def exec(): Unit =
+    def exec(): Unit = {
       log(s"handleGUI(seq.size = ${seq.size})")
       seq.foreach { fun =>
         try {
@@ -37,6 +37,7 @@ package object swing {
           case NonFatal(e) => e.printStackTrace()
         }
       }
+    }
 
     defer(exec())
   }
