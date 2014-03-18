@@ -16,7 +16,7 @@ object TestExprApp extends AppLike {
 
   private val rows = 4
 
-  private val views: Vec[View[S]] = system.step { implicit tx =>
+  private lazy val views: Vec[View[S]] = system.step { implicit tx =>
     val exprD1  = expr.Double.newVar[S](expr.Double.newConst( 0.0 ))
     val exprI1  = expr.Int   .newVar[S](expr.Int   .newConst( 0   ))
     val exprI2  = expr.Int   .newVar[S](expr.Int   .newConst(10   ))

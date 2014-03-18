@@ -15,7 +15,7 @@ package de.sciss.lucre
 package swing
 package impl
 
-import scala.swing.TextField
+import scala.swing.{Action, TextField}
 import de.sciss.lucre.event.Sys
 import de.sciss.lucre.stm.Disposable
 import de.sciss.lucre.stm
@@ -25,6 +25,8 @@ import de.sciss.lucre.expr
 import expr.Expr
 import de.sciss.model.Change
 import de.sciss.serial.Serializer
+import javax.swing.KeyStroke
+import java.awt.event.KeyEvent
 
 object StringFieldViewImpl extends ExprViewFactory[String] {
   def fromExpr[S <: Sys[S]](_expr: Expr[S, String], name: String, columns: Int)
@@ -67,8 +69,20 @@ object StringFieldViewImpl extends ExprViewFactory[String] {
     protected def valueToComponent(): Unit = if (component.text != value) component.text = value
 
     protected def createComponent(): TextField = {
-      val txt     = new TextField(value, columns0)
-      dirty       = Some(DirtyBorder(txt))
+      val txt       = new TextField(value, columns0)
+      val db        = DirtyBorder(txt)
+      dirty         = Some(db)
+      val aMap      = txt.peer.getActionMap
+      val iMap      = txt.peer.getInputMap
+      val keyAbort  = "de.sciss.Abort"
+
+      aMap.put(keyAbort, Action("Cancel Editing") {
+        if (db.visible) {
+          txt.text = value
+          clearDirty()
+        }
+      } .peer)
+      iMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), keyAbort)
 
       committer.foreach { com =>
         txt.listenTo(txt)

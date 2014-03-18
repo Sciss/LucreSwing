@@ -1,6 +1,6 @@
 name         := "LucreSwing"
 
-version      := "0.1.0-SNAPSHOT"
+version      := "0.1.0"
 
 organization := "de.sciss"
 
@@ -32,7 +32,7 @@ libraryDependencies ++= Seq(
   // "org.scala-lang" %  "scala-swing"     % scalaVersion.value
 )
 
-// retrieveManaged := true
+retrieveManaged := true
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
 

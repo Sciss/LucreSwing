@@ -7,18 +7,27 @@ import de.sciss.desktop.impl.UndoManagerImpl
 import scala.swing.{Component, Swing, GridPanel, MainFrame, MenuItem, Menu, MenuBar, Frame, SimpleSwingApplication}
 import de.sciss.desktop.Desktop
 import javax.swing.UIManager
+import scala.util.control.NonFatal
 
 trait AppLike extends SimpleSwingApplication {
   type S = Durable
   implicit val system = Durable(BerkeleyDB.factory(File.createTemp(directory = true)))
 
-  implicit val undo = new UndoManagerImpl {
+  implicit lazy val undo = new UndoManagerImpl {
     protected var dirty: Boolean = false
   }
 
   override def main(args: Array[String]): Unit = {
-    if (Desktop.isLinux) UIManager.getInstalledLookAndFeels.find(_.getName contains "GTK+").foreach { info =>
-      UIManager.setLookAndFeel(info.getClassName)
+    val lafs    = UIManager.getInstalledLookAndFeels
+    val gtkOpt  = if (Desktop.isLinux) lafs.find(_.getName contains "GTK+") else None
+    try {
+      val webClassName = "com.alee.laf.WebLookAndFeel"
+      UIManager.installLookAndFeel("Web Look And Feel", webClassName)
+      UIManager.setLookAndFeel(webClassName)
+    } catch {
+      case NonFatal(_) => gtkOpt.foreach { info =>
+        UIManager.setLookAndFeel(info.getClassName)
+      }
     }
     super.main(args)
   }
