@@ -1,22 +1,24 @@
-name         := "LucreSwing"
+name               := "LucreSwing"
 
-version      := "0.1.0"
+version            := "0.1.1-SNAPSHOT"
 
-organization := "de.sciss"
+organization       := "de.sciss"
 
-scalaVersion := "2.10.3"
+scalaVersion       := "2.11.0-RC3"
 
-description  := "Swing support for Lucre, and common views"
+crossScalaVersions := Seq("2.11.0-RC3", "2.10.4")
 
-homepage     := Some(url("https://github.com/Sciss/" + name.value))
+description        := "Swing support for Lucre, and common views"
 
-licenses     := Seq("GPL v2+" -> url("http://www.gnu.org/licenses/gpl-2.0.txt"))
+homepage           := Some(url("https://github.com/Sciss/" + name.value))
+ 
+licenses           := Seq("GPL v2+" -> url("http://www.gnu.org/licenses/gpl-2.0.txt"))
 
 lazy val eventVersion     = "2.6.+"
 
-lazy val stmVersion       = "2.0.2+"
+lazy val stmVersion       = "2.0.3+"
 
-lazy val desktopVersion   = "0.4.2+"
+lazy val desktopVersion   = "0.5.+"
 
 lazy val widgetsVersion   = "1.5.+"
 
@@ -32,7 +34,7 @@ libraryDependencies ++= Seq(
   // "org.scala-lang" %  "scala-swing"     % scalaVersion.value
 )
 
-retrieveManaged := true
+// retrieveManaged := true
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
 
