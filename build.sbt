@@ -1,10 +1,10 @@
 name               := "LucreSwing"
 
-version            := "0.1.1-SNAPSHOT"
+version            := "0.2.0"
 
 organization       := "de.sciss"
 
-scalaVersion       := "2.11.0-RC3"
+scalaVersion       := "2.10.4"
 
 crossScalaVersions := Seq("2.11.0-RC3", "2.10.4")
 
@@ -16,25 +16,27 @@ licenses           := Seq("GPL v2+" -> url("http://www.gnu.org/licenses/gpl-2.0.
 
 lazy val eventVersion     = "2.6.+"
 
-lazy val stmVersion       = "2.0.3+"
+lazy val stmVersion       = "2.0.2+"
 
 lazy val desktopVersion   = "0.5.+"
 
-lazy val widgetsVersion   = "1.5.+"
+lazy val widgetsVersion   = "1.6.+"
 
 // lazy val treeTableVersion = "1.3.4+"
+
+lazy val fileUtilVersion  = "1.1.+"
 
 libraryDependencies ++= Seq(
   "de.sciss" %% "lucreevent"         % eventVersion,
   "de.sciss" %% "desktop"            % desktopVersion,
   "de.sciss" %% "audiowidgets-swing" % widgetsVersion,  // TODO: should be possible to just depend on the range slider
-  "de.sciss" %% "lucrestm-bdb"       % stmVersion     % "test",
-  "de.sciss" %% "fileutil"           % "1.1.+"        % "test"
+  "de.sciss" %% "lucrestm-bdb"       % stmVersion      % "test",
+  "de.sciss" %% "fileutil"           % fileUtilVersion % "test"
   // "de.sciss" %% "treetable-scala" % treeTableVersion
   // "org.scala-lang" %  "scala-swing"     % scalaVersion.value
 )
 
-// retrieveManaged := true
+retrieveManaged := true
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
 
