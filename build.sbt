@@ -1,12 +1,12 @@
 name               := "LucreSwing"
 
-version            := "0.2.0"
+version            := "0.2.1"
 
 organization       := "de.sciss"
 
-scalaVersion       := "2.10.4"
+scalaVersion       := "2.11.0"
 
-crossScalaVersions := Seq("2.11.0-RC3", "2.10.4")
+crossScalaVersions := Seq("2.11.0", "2.10.4")
 
 description        := "Swing support for Lucre, and common views"
 
@@ -14,17 +14,17 @@ homepage           := Some(url("https://github.com/Sciss/" + name.value))
  
 licenses           := Seq("GPL v2+" -> url("http://www.gnu.org/licenses/gpl-2.0.txt"))
 
-lazy val eventVersion     = "2.6.+"
+lazy val eventVersion     = "2.6.1"
 
-lazy val stmVersion       = "2.0.2+"
+lazy val stmVersion       = "2.0.4"
 
-lazy val desktopVersion   = "0.5.+"
+lazy val desktopVersion   = "0.5.1"
 
-lazy val widgetsVersion   = "1.6.+"
+lazy val widgetsVersion   = "1.6.1"
 
 // lazy val treeTableVersion = "1.3.4+"
 
-lazy val fileUtilVersion  = "1.1.+"
+lazy val fileUtilVersion  = "1.1.1"
 
 libraryDependencies ++= Seq(
   "de.sciss" %% "lucreevent"         % eventVersion,
@@ -38,7 +38,7 @@ libraryDependencies ++= Seq(
 
 retrieveManaged := true
 
-scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
+scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-Xfuture")
 
 // ---- publishing ----
 
