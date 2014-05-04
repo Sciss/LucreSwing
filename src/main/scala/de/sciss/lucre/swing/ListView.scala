@@ -74,6 +74,6 @@ trait ListView[S <: Sys[S], Elem, U] extends Disposable[S#Tx] with Model[ListVie
 
   def guiSelection: Vec[Int]
 
-  def list(implicit tx: S#Tx): Option[List[S, Elem, U]]
+  def list                                  (implicit tx: S#Tx): Option[List[S, Elem, U]]
   def list_=(list: Option[List[S, Elem, U]])(implicit tx: S#Tx): Unit
 }

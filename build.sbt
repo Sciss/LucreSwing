@@ -1,6 +1,6 @@
 name               := "LucreSwing"
 
-version            := "0.2.1"
+version            := "0.2.2-SNAPSHOT"
 
 organization       := "de.sciss"
 
@@ -18,25 +18,25 @@ lazy val eventVersion     = "2.6.1"
 
 lazy val stmVersion       = "2.0.4"
 
-lazy val desktopVersion   = "0.5.1"
+lazy val desktopVersion   = "0.5.2"
 
-lazy val widgetsVersion   = "1.6.1"
+lazy val widgetsVersion   = "1.6.2"
 
-// lazy val treeTableVersion = "1.3.4+"
+lazy val treeTableVersion = "1.3.6"
 
 lazy val fileUtilVersion  = "1.1.1"
 
 libraryDependencies ++= Seq(
   "de.sciss" %% "lucreevent"         % eventVersion,
   "de.sciss" %% "desktop"            % desktopVersion,
-  "de.sciss" %% "audiowidgets-swing" % widgetsVersion,  // TODO: should be possible to just depend on the range slider
+  "de.sciss" %% "audiowidgets-swing" % widgetsVersion,   // TODO: should be possible to just depend on the range slider
+  "de.sciss" %% "treetable-scala"    % treeTableVersion, // TODO: should be going into a dedicated sub-project?
   "de.sciss" %% "lucrestm-bdb"       % stmVersion      % "test",
   "de.sciss" %% "fileutil"           % fileUtilVersion % "test"
-  // "de.sciss" %% "treetable-scala" % treeTableVersion
   // "org.scala-lang" %  "scala-swing"     % scalaVersion.value
 )
 
-retrieveManaged := true
+// retrieveManaged := true
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-Xfuture")
 
