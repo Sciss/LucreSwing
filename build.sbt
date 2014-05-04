@@ -26,14 +26,16 @@ lazy val treeTableVersion = "1.3.6"
 
 lazy val fileUtilVersion  = "1.1.1"
 
+lazy val webLaFVersion    = "1.27"
+
 libraryDependencies ++= Seq(
   "de.sciss" %% "lucreevent"         % eventVersion,
   "de.sciss" %% "desktop"            % desktopVersion,
   "de.sciss" %% "audiowidgets-swing" % widgetsVersion,   // TODO: should be possible to just depend on the range slider
   "de.sciss" %% "treetable-scala"    % treeTableVersion, // TODO: should be going into a dedicated sub-project?
   "de.sciss" %% "lucrestm-bdb"       % stmVersion      % "test",
-  "de.sciss" %% "fileutil"           % fileUtilVersion % "test"
-  // "org.scala-lang" %  "scala-swing"     % scalaVersion.value
+  "de.sciss" %% "fileutil"           % fileUtilVersion % "test",
+  "de.sciss" %  "weblaf"             % webLaFVersion   % "test"
 )
 
 // retrieveManaged := true

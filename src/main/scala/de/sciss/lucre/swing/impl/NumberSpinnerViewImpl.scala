@@ -37,7 +37,7 @@ abstract class NumberSpinnerViewImpl[S <: Sys[S], A](maxWidth: Int)
 
   protected def parseModelValue(v: Any): Option[A]
 
-  private var textValue: String = _
+  // private var textValue: String = _
 
   private class TextObserver(sp: Component, peer: TextComponent) {
     private var textCommitted = peer.text

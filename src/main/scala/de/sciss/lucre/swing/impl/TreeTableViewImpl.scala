@@ -30,6 +30,7 @@ import scala.annotation.tailrec
 import de.sciss.treetable.j.DefaultTreeTableCellEditor
 import scala.collection.immutable.{IndexedSeq => Vec}
 import de.sciss.serial.Serializer
+import java.awt.EventQueue
 
 object TreeTableViewImpl {
   private final val DEBUG = false
@@ -169,6 +170,29 @@ object TreeTableViewImpl {
 
     def markInsertion()(implicit tx: S#Tx): Unit = didInsert.update(true)(tx.peer)
 
+    def insertionPoint[A](pf: PartialFunction[Node, A])(implicit tx: S#Tx): Option[(A, Int)] = {
+      if (!EventQueue.isDispatchThread) throw new IllegalStateException("Must be called on the EDT")
+      selection match {
+        case singleView :: Nil =>
+          val single = singleView.modelData()
+          if (pf.isDefinedAt(single)) {
+            val res = pf(single)
+            val idx = handler.children(single).size
+            Some(res -> idx)
+          } else {
+            singleView.parentOption.flatMap { parentView =>
+              val parent = parentView.modelData()
+              if (pf.isDefinedAt(parent)) {
+                val res = pf(parent)
+                val idx = handler.children(parent).toIndexedSeq.indexOf(single)
+                Some(res -> idx)
+              } else None
+            }
+          }
+        case _ => None
+      }
+    }
+
     def elemAdded(parentOption: Option[VBranch], idx: Int, elem: Node, refresh: Boolean)
                  (implicit tx: S#Tx): VNode = {
 
@@ -295,7 +319,7 @@ object TreeTableViewImpl {
           }
           elemAdded(parentOption, idx, child, refresh = true)
         case TreeTableView.NodeRemoved(idx, child) =>
-          val parentOption = view match {
+          view match {
             case parent: VBranch  =>
               elemRemoved(parent, idx, child)
             case _            =>
@@ -341,7 +365,7 @@ object TreeTableViewImpl {
         def getValueAt(r: VNode, column: Int): Any = r
 
         def setValueAt(value: Any, r: VNode, column: Int): Unit = r match {
-          case node: VNode  => peer.setValueAt(value, node, column)
+          case node: VNode  => peer.setValueAt(value, node.renderData, column)
           case _            => throw new IllegalStateException(s"Trying to alter $r")
         }
 
@@ -351,7 +375,7 @@ object TreeTableViewImpl {
         def columnCount: Int = peer.columnCount
 
         def isCellEditable(r: VNode, column: Int): Boolean = r match {
-          case node: VNode  => peer.isCellEditable(node, column)
+          case node: VNode  => peer.isCellEditable(node.renderData, column)
           case _            => false
         }
 

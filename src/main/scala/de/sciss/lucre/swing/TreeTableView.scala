@@ -22,6 +22,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Disposable
 import de.sciss.serial.Serializer
 import impl.{TreeTableViewImpl => Impl}
+import scala.collection.immutable.{IndexedSeq => Vec}
 
 object TreeTableView {
   sealed trait ModelUpdate[+Node, +Data]
@@ -43,7 +44,10 @@ object TreeTableView {
       */
     def children(node: Node)(implicit tx: S#Tx): Option[de.sciss.lucre.data.Iterator[S#Tx, Node]]
 
-    def columns: TreeColumnModel[NodeView[S, Node, Data]]
+    /** Note: this model is wrapped. The `getParent` method is never used and can safely be implemented
+      * by returning `None` always.
+      */
+    def columns: TreeColumnModel[Data] // NodeView[S, Node, Data]]
 
     def renderer(view: TreeTableView[S, Node, Data], data: Data, row: Int, column: Int,
                  state: TreeTableCellRenderer.State): Component
@@ -56,7 +60,7 @@ object TreeTableView {
       * @param  update  the type of update
       * @param  data    the previous view data
       */
-    def update(node: Node, update: U, data: Data)(implicit tx: S#Tx): Option[ModelUpdate[Node, Data]]
+    def update(node: Node, update: U, data: Data)(implicit tx: S#Tx): Vec[ModelUpdate[Node, Data]]
   }
 
   def apply[S <: Sys[S], Node <: evt.Publisher[S, U], U, Data](root: Node, handler: Handler[S, Node, U, Data])(
@@ -95,9 +99,9 @@ trait TreeTableView[S <: Sys[S], Node, Data]
 
   def selection: List[NodeView]
 
-  // def insertionPoint()(implicit tx: S#Tx): (Node, Int)
-
   def markInsertion()(implicit tx: S#Tx): Unit
+
+  def insertionPoint[A](pf: PartialFunction[Node, A])(implicit tx: S#Tx): Option[(A, Int)]
 
   // /** Maps from view to underlying model data. */
   // def data(view: Node)(implicit tx: S#Tx): TreeLike.Node[T#Branch, T#Leaf]
