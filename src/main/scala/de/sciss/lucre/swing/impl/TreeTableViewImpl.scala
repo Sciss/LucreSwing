@@ -164,10 +164,15 @@ object TreeTableViewImpl {
 
       def getParent(node: VNodeL): Option[VNodeL] = node.parentOption1
 
-      def getPath(node: VNode): TreeTable.Path[VNode] = {
-        @tailrec def loop(n: VNode, res: TreeTable.Path[VNode]): TreeTable.Path[VNode] = {
+      //      def getParent(node: VNodeL): Option[VNodeL] = node match {
+      //        case _: VRoot => None
+      //        case n: VNode => n.parentOption
+      //      }
+
+      def getPath(node: VNode): TreeTable.Path[VNodeL] = {
+        @tailrec def loop(n: VNodeL, res: TreeTable.Path[VNodeL]): TreeTable.Path[VNodeL] = {
           val res1 = n +: res
-          n.parentOption match {
+          n.parentOption1 match {
             case Some(p)  => loop(p, res1)
             case _        => res1
           }
@@ -227,7 +232,7 @@ object TreeTableViewImpl {
               case b: VBranch => handler.branchOption(b.modelData()).getOrElse(throw new IllegalStateException())
               case r: VRoot   => r.rootH()
             }
-            val idx = handler.children(parentBranch).toIndexedSeq.indexOf(single)
+            val idx = handler.children(parentBranch).toIndexedSeq.indexOf(single) + 1
             (parentBranch, idx)
 
           } { b =>
@@ -254,7 +259,7 @@ object TreeTableViewImpl {
         if (refresh) deferTx {
           _model.elemAdded(parent, idx, v)
           if (edit) {
-            val path = _model.getPath(v)
+            val path    = _model.getPath(v)
             val row     = t.getRowForPath(path)
             val column  = t.hierarchicalColumn
             t.requestFocus()
