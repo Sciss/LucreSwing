@@ -19,27 +19,27 @@ import de.sciss.treetable.{TreeTable, TreeTableCellRenderer, TreeColumnModel}
 import scala.swing.Component
 import de.sciss.model.Model
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Disposable
+import de.sciss.lucre.stm.{Identifiable, Disposable}
 import de.sciss.serial.Serializer
 import impl.{TreeTableViewImpl => Impl}
 import scala.collection.immutable.{IndexedSeq => Vec}
 
 object TreeTableView {
-  sealed trait ModelUpdate[+Node, +Data]
-  final case class NodeAdded  [Node](index: Int, child: Node) extends ModelUpdate[Node   , Nothing]
-  final case class NodeRemoved[Node](index: Int, child: Node) extends ModelUpdate[Node   , Nothing]
-  final case class NodeChanged[Node, Data](child: Node, data: Data) extends ModelUpdate[Node, Data]
+  sealed trait ModelUpdate[/*+ */Node, +Branch, +Data]
+  final case class NodeAdded  [Node, Branch](parent: Branch, index: Int, child: Node) extends ModelUpdate[Node, Branch, Nothing]
+  final case class NodeRemoved[Node, Branch](parent: Branch, index: Int, child: Node) extends ModelUpdate[Node, Branch, Nothing]
+  final case class NodeChanged[Node, Data](node: Node, data: Data) extends ModelUpdate[Node, Nothing, Data]
 
-  final case class Nested[Node, Data](index: Int, child: Node, u: ModelUpdate[Node, Data])
-    extends ModelUpdate[Node, Data]
+  //  final case class Nested[Node, Data](index: Int, child: Node, u: ModelUpdate[Node, Data])
+  //    extends ModelUpdate[Node, Data]
 
   trait Handler[S <: Sys[S], Node, Branch, U, Data] {
     def branchOption(node: Node): Option[Branch]
 
-    /** The `Node` type must have an identifier. It is used to map between nodes
-      * and their views. This method queries the identifier of a given node.
-      */
-    def nodeID(node: Node): S#ID
+    //    /** The `Node` type must have an identifier. It is used to map between nodes
+    //      * and their views. This method queries the identifier of a given node.
+    //      */
+    //    def nodeID(node: Node): S#ID
 
     /** Queries the opaque rendering data for a given node. The data can be used by the renderer. */
     def data(node: Node)(implicit tx: S#Tx): Data
@@ -65,12 +65,12 @@ object TreeTableView {
       * @param  update  the type of update
       * @param  data    the previous view data
       */
-    def update(/* node: Node, */ update: U /* , data: Data */)(implicit tx: S#Tx): Vec[ModelUpdate[Node, Data]]
+    def update(/* node: Node, */ update: U /* , data: Data */)(implicit tx: S#Tx): Vec[ModelUpdate[Node, Branch, Data]]
   }
 
-  def apply[S <: Sys[S], Node, Branch <: evt.Publisher[S, U], U, Data](root: Branch,
-                                                                       handler: Handler[S, Node, Branch, U, Data])(
-      implicit tx: S#Tx, nodeSerializer: Serializer[S#Tx, S#Acc, Node],
+  def apply[S <: Sys[S], Node <: Identifiable[S#ID], Branch <: evt.Publisher[S, U] with Identifiable[S#ID], U, Data](
+        root: Branch, handler: Handler[S, Node, Branch, U, Data])(
+        implicit tx: S#Tx, nodeSerializer: Serializer[S#Tx, S#Acc, Node],
       branchSerializer: Serializer[S#Tx, S#Acc, Branch]): TreeTableView[S, Node, Branch, Data] =
     Impl(root, handler)
 

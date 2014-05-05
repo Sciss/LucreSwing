@@ -15,14 +15,15 @@ import de.sciss.serial.{DataOutput, DataInput, Serializer}
 import de.sciss.treetable.j.DefaultTreeTableCellRenderer
 import javax.swing.JComponent
 import scala.collection.immutable.{IndexedSeq => Vec}
+import scala.annotation.tailrec
 
 object TestTreeTableApp extends AppLike {
   import lucre.expr.Int.serializer
 
   object Node {
     object Update {
-      case class Branch(peer: expr.List.Update[S, Node, Node.Update]) extends Update
-      case class Leaf  (leaf: TestTreeTableApp.Leaf, peer: Change[Int]) extends Update
+      case class Branch(branch: TestTreeTableApp.Branch, peer: expr.List.Update[S, Node, Node.Update]) extends Update
+      case class Leaf  (leaf  : TestTreeTableApp.Leaf, peer: Change[Int]) extends Update
     }
     trait Update
 
@@ -68,7 +69,7 @@ object TestTreeTableApp extends AppLike {
       children.dispose()
 
     def foldUpdate(generated: Option[Node.Update], input: expr.List.Update[S, Node, Node.Update])
-                  (implicit tx: S#Tx): Option[Node.Update] = Some(Node.Update.Branch(input))
+                  (implicit tx: S#Tx): Option[Node.Update] = Some(Node.Update.Branch(this, input))
   }
   class Leaf(val targets: evt.Targets[S], val expr: Expr.Var[S, Int])
     extends Node with evt.impl.MappingGenerator[S, Node.Update, Change[Int], Node] {
@@ -118,18 +119,17 @@ object TestTreeTableApp extends AppLike {
 
     def branchOption(node: Node): Option[Branch] = node.branchOption
 
-    def update(/* node: Node, */ update: Update /* , data: Data */)(implicit tx: S#Tx): Vec[ModelUpdate[Node, Data]] =
-      update match {
-        case Update.Branch(peer) =>
-          val ch1: Vec[ModelUpdate[Node, Data]] = peer.changes.collect {
-            case expr.List.Added  (idx, elem) => TreeTableView.NodeAdded  (idx, elem)
-            case expr.List.Removed(idx, elem) => TreeTableView.NodeRemoved(idx, elem)
-            case expr.List.Element(elem, Node.Update.Leaf(_, Change(_, now))) =>
-              TreeTableView.NodeChanged(elem, Data.Leaf(now))
-//            case expr.List.Element(elem, eUpd) =>
-//              println(s"Unhandled: $eUpd") // TreeTableView.Nested()
+    def update(upd: Update)(implicit tx: S#Tx): Vec[ModelUpdate[Node, Branch, Data]] =
+      upd match {
+        case Update.Branch(parent, peer) =>
+          peer.changes.flatMap {
+            case expr.List.Added  (idx, elem) => Vec(TreeTableView.NodeAdded  (parent, idx, elem))
+            case expr.List.Removed(idx, elem) => Vec(TreeTableView.NodeRemoved(parent, idx, elem))
+        //            case expr.List.Element(elem, Node.Update.Leaf(_, Change(_, now))) =>
+        //              TreeTableView.NodeChanged(elem, Data.Leaf(now))
+            case expr.List.Element(elem, eUpd) =>
+              update(eUpd)
           }
-          ch1
 
         case Update.Leaf(l, Change(_, now)) => Vec(TreeTableView.NodeChanged(l, Data.Leaf(now)))
       }
