@@ -22,7 +22,7 @@ object TestTreeTableApp extends AppLike {
   object Node {
     object Update {
       case class Branch(peer: expr.List.Update[S, Node, Node.Update]) extends Update
-      case class Leaf  (peer: Change[Int]) extends Update
+      case class Leaf  (leaf: TestTreeTableApp.Leaf, peer: Change[Int]) extends Update
     }
     trait Update
 
@@ -49,12 +49,15 @@ object TestTreeTableApp extends AppLike {
     extends evt.Publisher[S, Node.Update] with evt.Node[S] {
 
     def reader = Node.Ser
+    def branchOption: Option[Branch]
   }
 
   class Branch(val targets: evt.Targets[S], val children: expr.List.Modifiable[S, Node, Node.Update])
     extends Node with evt.impl.MappingGenerator[S, Node.Update, expr.List.Update[S, Node, Node.Update], Node] {
 
     def inputEvent = children.changed
+
+    def branchOption = Some(this)
 
     def writeData(out: DataOutput): Unit = {
       out.writeByte(0)
@@ -72,6 +75,8 @@ object TestTreeTableApp extends AppLike {
 
     def inputEvent = expr.changed
 
+    def branchOption = None
+
     def writeData(out: DataOutput): Unit = {
       out.writeByte(1)
       expr.write(out)
@@ -81,7 +86,7 @@ object TestTreeTableApp extends AppLike {
       expr.dispose()
 
     def foldUpdate(generated: Option[Node.Update], input: Change[Int])
-                  (implicit tx: S#Tx): Option[Node.Update] = Some(Node.Update.Leaf(input))
+                  (implicit tx: S#Tx): Option[Node.Update] = Some(Node.Update.Leaf(this, input))
   }
 
   implicit object BranchSer extends Serializer[S#Tx, S#Acc, Branch] with evt.Reader[S, Branch] {
@@ -106,31 +111,32 @@ object TestTreeTableApp extends AppLike {
   }
   sealed trait Data
 
-  private val h = new TreeTableView.Handler[S, Node, Node.Update, Data] {
+  private val h = new TreeTableView.Handler[S, Node, Branch, Node.Update, Data] {
     def nodeID(node: Node): S#ID = node.id
 
-    def children(node: Node)(implicit tx: S#Tx): Option[Iterator[S#Tx, Node]] = node match {
-      case b: Branch  => Some(b.children.iterator)
-      case _          => None
-    }
+    def children(b: Branch)(implicit tx: S#Tx): Iterator[S#Tx, Node] = b.children.iterator
 
-    def update(node: Node, update: Update, data: Data)(implicit tx: S#Tx): Vec[ModelUpdate[Node, Data]] =
+    def branchOption(node: Node): Option[Branch] = node.branchOption
+
+    def update(/* node: Node, */ update: Update /* , data: Data */)(implicit tx: S#Tx): Vec[ModelUpdate[Node, Data]] =
       update match {
         case Update.Branch(peer) =>
           val ch1: Vec[ModelUpdate[Node, Data]] = peer.changes.collect {
             case expr.List.Added  (idx, elem) => TreeTableView.NodeAdded  (idx, elem)
             case expr.List.Removed(idx, elem) => TreeTableView.NodeRemoved(idx, elem)
-            case expr.List.Element(_, Node.Update.Leaf(Change(_, now))) =>
-              TreeTableView.NodeChanged(Data.Leaf(now))
+            case expr.List.Element(elem, Node.Update.Leaf(_, Change(_, now))) =>
+              TreeTableView.NodeChanged(elem, Data.Leaf(now))
+//            case expr.List.Element(elem, eUpd) =>
+//              println(s"Unhandled: $eUpd") // TreeTableView.Nested()
           }
           ch1
 
-        case Update.Leaf(Change(_, now)) => Vec(TreeTableView.NodeChanged(Data.Leaf(now)))
+        case Update.Leaf(l, Change(_, now)) => Vec(TreeTableView.NodeChanged(l, Data.Leaf(now)))
       }
 
     private val r = new DefaultTreeTableCellRenderer
 
-    def renderer(view: TreeTableView[S, Node, Data], data: Data, row: Int, column: Int,
+    def renderer(view: TreeTableView[S, Node, Branch, Data], data: Data, row: Int, column: Int,
                  state: State): Component = {
       val value = data match {
         case Data.Branch  => if (column == 0) "Branch" else ""
@@ -213,12 +219,8 @@ object TestTreeTableApp extends AppLike {
   }
 
   private def add(child: Node)(implicit tx: S#Tx): Unit = {
-    val opt = view.insertionPoint {
-      case b: Branch => b
-    }
-    opt.foreach { case (parent, idx) =>
-      parent.children.insert(idx, child)
-    }
+    val (parent, idx) = view.insertionPoint()
+    parent.children.insert(idx, child)
   }
 
   private def addBranchAction(): Unit = system.step { implicit tx =>
