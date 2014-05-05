@@ -233,11 +233,10 @@ object TestTreeTableApp extends AppLike {
 
   private def removeAction(): Unit = system.step { implicit tx =>
     val toRemove = view.selection.flatMap { childView =>
-      childView.parentOption.flatMap { p =>
-        p.modelData() match {
-          case b: Branch => Some(b -> childView.modelData())
-          case _ => None
-        }
+      val parent = childView.parentOption.fold[Node](treeH())(_.modelData())
+      parent match {
+        case b: Branch  => Some(b -> childView.modelData())
+        case _          => None
       }
     }
     toRemove.reverse.foreach { case (parent, child) =>
