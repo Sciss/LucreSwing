@@ -43,13 +43,13 @@ object TreeTableViewImpl {
     }
 
     sealed trait BranchOrRoot[S <: Sys[S], Node, Data] extends Base[S, Node, Data] {
-      var children = Vec.empty[NodeViewImpl[S, Node, Data]]
-      def isLeaf = false
+      var children    = Vec.empty[NodeViewImpl[S, Node, Data]]
+      def isLeaf      = false
       def numChildren = children.size
     }
 
     class Branch[S <: Sys[S], Node, Data](val parent: BranchOrRoot[S, Node, Data],
-                                          var renderData: Data,
+                                          val renderData: Data,
                                           val modelData: stm.Source[S#Tx, Node])
       extends BranchOrRoot[S, Node, Data] with NodeViewImpl[S, Node, Data] {
 
@@ -57,7 +57,7 @@ object TreeTableViewImpl {
     }
 
     class Leaf[S <: Sys[S], Node, Data](val parent: BranchOrRoot[S, Node, Data],
-                                        var renderData: Data,
+                                        val renderData: Data,
                                         val modelData: stm.Source[S#Tx, Node])
       extends NodeViewImpl[S, Node, Data] {
 
@@ -84,7 +84,7 @@ object TreeTableViewImpl {
 
     def parent: NodeViewImpl.BranchOrRoot[S, Node, Data]
 
-    var renderData: Data
+    val renderData: Data
 
     def parentOption1: Option[NodeViewImpl.BranchOrRoot[S, Node, Data]] = Some(parent)
 
@@ -145,6 +145,8 @@ object TreeTableViewImpl {
     private val didInsert = TxnLocal(false)
 
     def root: stm.Source[S#Tx, Branch] = rootView.rootH
+
+    def nodeView(node: Node)(implicit tx: S#Tx): Option[NodeView] = mapViews.get(node.id)
 
     private class ElementTreeModel extends AbstractTreeModel[VNodeL] {
       lazy val root: VNodeL = rootView // ! must be lazy
@@ -222,7 +224,7 @@ object TreeTableViewImpl {
 
     def markInsertion()(implicit tx: S#Tx): Unit = didInsert.update(true)(tx.peer)
 
-    def insertionPoint()(implicit tx: S#Tx): (Branch, Int) = {
+    def insertionPoint(implicit tx: S#Tx): (Branch, Int) = {
       if (!EventQueue.isDispatchThread) throw new IllegalStateException("Must be called on the EDT")
       selection match {
         case singleView :: Nil =>
@@ -381,20 +383,13 @@ object TreeTableViewImpl {
         case TreeTableView.NodeRemoved(parent, idx, child) =>
           withParentView(parent)(elemRemoved(_, idx, child))
 
-        case TreeTableView.NodeChanged(node, newData) =>
+        case TreeTableView.NodeChanged(node) =>
           val nodeID = node.id // handler.nodeID(node)
           mapViews.get(nodeID).fold(warnNoView(node)) { view =>
-            if (newData != view.renderData) {
-              view.renderData = newData
-              deferTx {
-                _model.elemUpdated(view)
-              }
+            deferTx {
+              _model.elemUpdated(view)
             }
-        }
-        //          case TreeTableView.Nested(idx, child, u1) =>
-        //            val view1 = mapViews.get(handler.nodeID(child))
-        //              .getOrElse(throw new IllegalStateException(s"No view for $child"))
-        //            loop(u1, view1)
+          }
       }
     }
 

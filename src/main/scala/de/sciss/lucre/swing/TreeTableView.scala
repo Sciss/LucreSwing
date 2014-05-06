@@ -25,10 +25,10 @@ import impl.{TreeTableViewImpl => Impl}
 import scala.collection.immutable.{IndexedSeq => Vec}
 
 object TreeTableView {
-  sealed trait ModelUpdate[/*+ */Node, +Branch, +Data]
-  final case class NodeAdded  [Node, Branch](parent: Branch, index: Int, child: Node) extends ModelUpdate[Node, Branch, Nothing]
-  final case class NodeRemoved[Node, Branch](parent: Branch, index: Int, child: Node) extends ModelUpdate[Node, Branch, Nothing]
-  final case class NodeChanged[Node, Data](node: Node, data: Data) extends ModelUpdate[Node, Nothing, Data]
+  sealed trait ModelUpdate[/*+ */Node, +Branch]
+  final case class NodeAdded  [Node, Branch](parent: Branch, index: Int, child: Node) extends ModelUpdate[Node, Branch]
+  final case class NodeRemoved[Node, Branch](parent: Branch, index: Int, child: Node) extends ModelUpdate[Node, Branch]
+  final case class NodeChanged[Node](node: Node) extends ModelUpdate[Node, Nothing]
 
   //  final case class Nested[Node, Data](index: Int, child: Node, u: ModelUpdate[Node, Data])
   //    extends ModelUpdate[Node, Data]
@@ -61,11 +61,9 @@ object TreeTableView {
       * to one of the resolved `ModelUpdate` types. If the update is irrelevant for the view, the method
       * should return `None`.
       *
-      * @param  node    the  node which has been updated
       * @param  update  the type of update
-      * @param  data    the previous view data
       */
-    def update(/* node: Node, */ update: U /* , data: Data */)(implicit tx: S#Tx): Vec[ModelUpdate[Node, Branch, Data]]
+    def update(/* node: Node, */ update: U /* , data: Data */)(implicit tx: S#Tx): Vec[ModelUpdate[Node, Branch]]
   }
 
   def apply[S <: Sys[S], Node <: Identifiable[S#ID], Branch <: evt.Publisher[S, U] with Identifiable[S#ID], U, Data](
@@ -106,11 +104,13 @@ trait TreeTableView[S <: Sys[S], Node, Branch, Data]
 
   def root: stm.Source[S#Tx, Branch]
 
+  def nodeView(node: Node)(implicit tx: S#Tx): Option[NodeView]
+
   def selection: List[NodeView]
 
   def markInsertion()(implicit tx: S#Tx): Unit
 
-  def insertionPoint()(implicit tx: S#Tx): (Branch, Int)
+  def insertionPoint(implicit tx: S#Tx): (Branch, Int)
 
   // /** Maps from view to underlying model data. */
   // def data(view: Node)(implicit tx: S#Tx): TreeLike.Node[T#Branch, T#Leaf]
