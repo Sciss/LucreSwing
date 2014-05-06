@@ -101,21 +101,20 @@ object TreeTableViewImpl {
        handler: Handler[S, Node, Branch, U, Data])(implicit tx: S#Tx, nodeSerializer: Serializer[S#Tx, S#Acc, Node],
                                                    branchSerializer: Serializer[S#Tx, S#Acc, Branch])
       : TreeTableView[S, Node, Branch, Data] = {
-    val _handler = handler
+    val _handler  = handler
+    val _root     = root
     new Impl[S, Node, Branch, U, Data] {
       val mapViews    = tx.newInMemoryIDMap[VNode]      // node IDs to renderers
       val mapBranches = tx.newInMemoryIDMap[VBranchL]   // node IDs to renderers
       val handler     = _handler
-      val rootView    = new NodeViewImpl.Root[S, Node, Branch, Data](tx.newHandle(root))
-      mapBranches.put(root.id, rootView)
-      handler.children(root).toList.zipWithIndex.foreach { case (c, ci) =>
+      val rootView    = new NodeViewImpl.Root[S, Node, Branch, Data](tx.newHandle(_root))
+      mapBranches.put(_root.id, rootView)
+      handler.children(_root).toList.zipWithIndex.foreach { case (c, ci) =>
         elemAdded(rootView, ci, c, refresh = false)
       }
-      val observer = root.changed.react { implicit tx => upd =>
+      val observer = _root.changed.react { implicit tx => upd =>
         processUpdate(upd)
       }
-
-      // val rootView  = elemAdded(None, -1, root, refresh = false)
 
       deferTx {
         guiInit()
@@ -144,6 +143,8 @@ object TreeTableViewImpl {
     protected def handler     : Handler[S, Node, Branch, U, Data]
 
     private val didInsert = TxnLocal(false)
+
+    def root: stm.Source[S#Tx, Branch] = rootView.rootH
 
     private class ElementTreeModel extends AbstractTreeModel[VNodeL] {
       lazy val root: VNodeL = rootView // ! must be lazy
@@ -284,6 +285,7 @@ object TreeTableViewImpl {
       }
 
       val data  = handler.data(elem)
+      // println(s"Data = $data")
       val id    = elem.id // handler.nodeID(elem)
       val src   = tx.newHandle(elem)(nodeSerializer)
 
@@ -453,9 +455,11 @@ object TreeTableViewImpl {
 
         def getRendererComponent(treeTable: TreeTable[_, _], value: Any, row: Int, column: Int,
                                  state: TreeTableCellRenderer.State): Component = {
+          // XXX TODO: this shows that somehow the transformed value from the table column model is used initially:
+          // println(s"getRendererComponent; value = $value (${value.getClass}), row = $row, col = $column")
           value match {
-            case _: VRoot =>
-              wrapSelf
+            // case _: VRoot =>
+            //   wrapSelf
             case b: VNode =>
               handler.renderer(view, b.renderData, row = row, column = column, state = state)
             case _ =>

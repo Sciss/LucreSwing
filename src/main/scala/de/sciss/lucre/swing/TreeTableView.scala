@@ -104,6 +104,8 @@ trait TreeTableView[S <: Sys[S], Node, Branch, Data]
   def component: Component
   def treeTable: TreeTable[_, _]
 
+  def root: stm.Source[S#Tx, Branch]
+
   def selection: List[NodeView]
 
   def markInsertion()(implicit tx: S#Tx): Unit
