@@ -33,7 +33,7 @@ import de.sciss.serial.Serializer
 import java.awt.EventQueue
 
 object TreeTableViewImpl {
-  private final val DEBUG = false
+  var DEBUG = false
 
   private object NodeViewImpl {
     sealed trait Base[S <: Sys[S], Node, Data] {
@@ -67,16 +67,12 @@ object TreeTableViewImpl {
       override def toString = s"Leaf($modelData, $renderData)"
     }
 
-    //    sealed trait OrRoot[S <: Sys[S], Node, Data] {
-    //      def parentOption: Option[NodeViewImpl.Branch[S, Node, Data]]
-    //      var observer: Disposable[S#Tx] = _
-    //      def numChildren: Int
-    //    }
-
     class Root[S <: Sys[S], Node, Branch, Data](val rootH: stm.Source[S#Tx, Branch])
       extends BranchOrRoot[S, Node, Data] {
 
       def parentOption1: Option[NodeViewImpl.BranchOrRoot[S, Node, Data]] = None
+
+      override def toString = "Root"
     }
   }
   private sealed trait NodeViewImpl[S <: Sys[S], Node, Data]
@@ -148,7 +144,7 @@ object TreeTableViewImpl {
 
     def nodeView(node: Node)(implicit tx: S#Tx): Option[NodeView] = mapViews.get(node.id)
 
-    private class ElementTreeModel extends AbstractTreeModel[VNodeL] {
+    private object treeModel extends AbstractTreeModel[VNodeL] {
       lazy val root: VNodeL = rootView // ! must be lazy
 
       def getChildCount(parent: VNodeL): Int = parent.numChildren
@@ -187,11 +183,15 @@ object TreeTableViewImpl {
         println(s"valueForPathChanged($path, $newValue)")
 
       def elemAdded(parent: VBranchL, idx: Int, view: VNode): Unit = {
+        elemAddedNoRefresh(parent, idx, view)
+        fireNodesInserted(view)
+      }
+
+      def elemAddedNoRefresh(parent: VBranchL, idx: Int, view: VNode): Unit = {
         if (DEBUG) println(s"model.elemAdded($parent, $idx, $view)")
         val g       = parent  // Option.getOrElse(_root)
         require(idx >= 0 && idx <= g.children.size)
         g.children  = g.children.patch(idx, Vector(view), 0)
-        fireNodesInserted(view)
       }
 
       def elemRemoved(parent: VBranchL, idx: Int): Unit = {
@@ -211,7 +211,6 @@ object TreeTableViewImpl {
       }
     }
 
-    private var _model: ElementTreeModel  = _
     private var t: TreeTable[VNodeL, TreeColumnModel[VNodeL]] = _
 
     def treeTable: TreeTable[_, _] = t
@@ -259,30 +258,34 @@ object TreeTableViewImpl {
       def addView(id: S#ID, v: VNode): Unit = {
         mapViews.put(id, v)
 
-        if (refresh) deferTx {
-          _model.elemAdded(parent, idx, v)
-          if (edit) {
-            val path    = _model.getPath(v)
-            val row     = t.getRowForPath(path)
-            val column  = t.hierarchicalColumn
-            t.requestFocus()
-            t.changeSelection(row, column, toggle = false, extend = false)
-            t.editCellAt     (row, column)
+        if (refresh) {
+          deferTx {
+            treeModel.elemAdded(parent, idx, v)
+            if (edit) {
+              val path    = treeModel.getPath(v)
+              val row     = t.getRowForPath(path)
+              val column  = t.hierarchicalColumn
+              t.requestFocus()
+              t.changeSelection(row, column, toggle = false, extend = false)
+              t.editCellAt     (row, column)
 
-            // TODO: this doesn't work yet, it doesn't activate the cursor, see TreeTable issue #12
+              // TODO: this doesn't work yet, it doesn't activate the cursor, see TreeTable issue #12
 
-            //            val tej = t.peer.getEditorComponent
-            //            EventQueue.invokeLater(new Runnable {
-            //              def run(): Unit = tej.requestFocus()
-            //            })
-            //            tej match {
-            //              case tf: javax.swing.JTextField => ...
-            //              case _ =>
-            //            }
+              //            val tej = t.peer.getEditorComponent
+              //            EventQueue.invokeLater(new Runnable {
+              //              def run(): Unit = tej.requestFocus()
+              //            })
+              //            tej match {
+              //              case tf: javax.swing.JTextField => ...
+              //              case _ =>
+              //            }
 
-            // })
-            // t.editCellAt(row, column)
+              // })
+              // t.editCellAt(row, column)
+            }
           }
+        } else {
+          treeModel.elemAddedNoRefresh(parent, idx, v)
         }
       }
 
@@ -330,7 +333,7 @@ object TreeTableViewImpl {
       }
       mapViews.remove(id)
       deferTx {
-        _model.elemRemoved(parent, idx)
+        treeModel.elemRemoved(parent, idx)
       }
     }
 
@@ -387,7 +390,7 @@ object TreeTableViewImpl {
           val nodeID = node.id // handler.nodeID(node)
           mapViews.get(nodeID).fold(warnNoView(node)) { view =>
             deferTx {
-              _model.elemUpdated(view)
+              treeModel.elemUpdated(view)
             }
           }
       }
@@ -417,8 +420,6 @@ object TreeTableViewImpl {
     protected def guiInit(): Unit = {
       requireEDT()
 
-      _model = new ElementTreeModel
-
       val tcm = new TreeColumnModel[VNodeL] {
         private val peer = handler.columns
 
@@ -442,7 +443,7 @@ object TreeTableViewImpl {
         def hierarchicalColumn: Int = peer.hierarchicalColumn
       }
 
-      t = new TreeTable(_model, tcm: TreeColumnModel[VNodeL])
+      t = new TreeTable(treeModel, tcm: TreeColumnModel[VNodeL])
       t.rootVisible = false
       val r = new DefaultTableCellRenderer with TreeTableCellRenderer {
         // private lazy val lb = new Label
@@ -527,7 +528,7 @@ object TreeTableViewImpl {
         // case e => println(s"other: $e")
       }
       t.showsRootHandles  = true
-      t.expandPath(TreeTable.Path(_model.root))
+      t.expandPath(TreeTable.Path(treeModel.root))
       t.dragEnabled       = true
       t.dropMode          = DropMode.ON_OR_INSERT_ROWS
 
