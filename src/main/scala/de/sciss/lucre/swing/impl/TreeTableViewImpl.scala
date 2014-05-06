@@ -449,7 +449,7 @@ object TreeTableViewImpl {
         // private lazy val lb = new Label
         private lazy val wrapSelf = Component.wrap(this)
 
-        def getRendererComponent(treeTable: TreeTable[_, _], value: Any, row: Int, column: Int,
+        override def getRendererComponent(treeTable: TreeTable[_, _], value: Any, row: Int, column: Int,
                                  state: TreeTableCellRenderer.State): Component = {
           // XXX TODO: this shows that somehow the transformed value from the table column model is used initially:
           // println(s"getRendererComponent; value = $value (${value.getClass}), row = $row, col = $column")
@@ -459,7 +459,7 @@ object TreeTableViewImpl {
             case b: VNode =>
               handler.renderer(view, b.renderData, row = row, column = column, state = state)
             case _ =>
-              wrapSelf
+              wrapSelf // super.getRendererComponent(treeTable, value, row, column, state)
           }
         }
       }
@@ -482,33 +482,26 @@ object TreeTableViewImpl {
 
       val ej = new DefaultTreeTableCellEditor(new javax.swing.JTextField()) {
         override def getTreeTableCellEditorComponent(treeTable: j.TreeTable, value: Any, selected: Boolean,
-                                                     row: Int, column: Int): java.awt.Component = {
-          val v1 = value match {
-            case b: VBranch  =>
-              // println(s"branchRenderer(${b.data}, row = $row)")
-              b.renderData
-            case l: VLeaf     =>
-              // println(s"leafRenderer(${l.data}, row = $row)")
-              l.renderData
-            case _ => value
-          }
-          super.getTreeTableCellEditorComponent(treeTable, v1, selected, row, column)
+                                                     row: Int, column: Int): java.awt.Component =
+          value match {
+            case b: VNode => handler.editor(view, b.renderData, row = row, column = column, selected = selected).peer
+            case _ => super.getTreeTableCellEditorComponent(treeTable, value, selected, row, column)
+//          val v1 = value match {
+//            case b: VBranch  =>
+//              // println(s"branchRenderer(${b.data}, row = $row)")
+//              b.renderData
+//            case l: VLeaf     =>
+//              // println(s"leafRenderer(${l.data}, row = $row)")
+//              l.renderData
+//            case _ => value
+//          }
+//          super.getTreeTableCellEditorComponent(treeTable, v1, selected, row, column)
         }
 
         override def getTreeTableCellEditorComponent(treeTable: j.TreeTable, value: Any, selected: Boolean,
                                                      row: Int, column: Int, expanded: Boolean,
-                                                     leaf: Boolean): java.awt.Component = {
-          val v1 = value match {
-            case b: VBranch  =>
-              // println(s"branchRenderer(${b.data}, row = $row)")
-              b.renderData
-            case l: VLeaf     =>
-              // println(s"leafRenderer(${l.data}, row = $row)")
-              l.renderData
-            case _ => value
-          }
-          super.getTreeTableCellEditorComponent(treeTable, v1, selected, row, column, expanded, leaf)
-        }
+                                                     leaf: Boolean): java.awt.Component =
+            getTreeTableCellEditorComponent(treeTable, value, selected, row, column)
       }
 
       val cm = t.peer.getColumnModel

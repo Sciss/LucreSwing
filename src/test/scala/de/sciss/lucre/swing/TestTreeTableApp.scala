@@ -12,10 +12,11 @@ import de.sciss.treetable.TreeTableCellRenderer.State
 import de.sciss.lucre.swing.TestTreeTableApp.Node.Update
 import de.sciss.lucre.data.Iterator
 import de.sciss.serial.{DataOutput, DataInput, Serializer}
-import de.sciss.treetable.j.DefaultTreeTableCellRenderer
-import javax.swing.JComponent
+import de.sciss.treetable.j.{DefaultTreeTableCellEditor, DefaultTreeTableCellRenderer}
+import javax.swing.{JTextField, JComponent}
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.annotation.tailrec
+import scala.util.control.NonFatal
 
 object TestTreeTableApp extends AppLike {
   import lucre.expr.Int.serializer
@@ -108,7 +109,9 @@ object TestTreeTableApp extends AppLike {
 
   object Data {
     case object Branch extends Data
-    case class Leaf(value: Int) extends Data
+    class Leaf(var value: Int) extends Data {
+      override def toString = s"Data.Leaf($value)"
+    }
   }
   sealed trait Data
 
@@ -119,7 +122,7 @@ object TestTreeTableApp extends AppLike {
 
     def branchOption(node: Node): Option[Branch] = node.branchOption
 
-    def update(upd: Update)(implicit tx: S#Tx): Vec[ModelUpdate[Node, Branch, Data]] =
+    def update(upd: Update)(implicit tx: S#Tx): Vec[ModelUpdate[Node, Branch]] =
       upd match {
         case Update.Branch(parent, peer) =>
           peer.changes.flatMap {
@@ -131,16 +134,27 @@ object TestTreeTableApp extends AppLike {
               update(eUpd)
           }
 
-        case Update.Leaf(l, Change(_, now)) => Vec(TreeTableView.NodeChanged(l, Data.Leaf(now)))
+        case Update.Leaf(l, Change(_, now)) =>
+          view.nodeView(l).fold[Vec[ModelUpdate[Node, Branch]]](Vec.empty) { nv =>
+            nv.renderData match {
+              case ld: Data.Leaf =>
+                deferTx {
+                  ld.value = now
+                }
+                Vec(TreeTableView.NodeChanged(l)) // , Data.Leaf(now)))
+              case _ => Vec.empty
+            }
+          }
       }
 
     private val r = new DefaultTreeTableCellRenderer
+    private val e = new DefaultTreeTableCellEditor(new JTextField)
 
     def renderer(view: TreeTableView[S, Node, Branch, Data], data: Data, row: Int, column: Int,
                  state: State): Component = {
       val value = data match {
         case Data.Branch  => if (column == 0) "Branch" else ""
-        case Data.Leaf(v) => if (column == 0) "Leaf"   else v.toString
+        case l: Data.Leaf => if (column == 0) "Leaf"   else l.value.toString
       }
 
       val c = state.tree.fold {
@@ -152,10 +166,20 @@ object TestTreeTableApp extends AppLike {
       Component.wrap(c.asInstanceOf[JComponent])
     }
 
+    def editor(view: TreeTableView[S, Node, Branch, Data], data: Data, row: Int, column: Int,
+               selected: Boolean): Component = {
+      val value = data match {
+        case Data.Branch  => if (column == 0) "Branch" else "?!"
+        case l: Data.Leaf => if (column == 0) "Leaf"   else l.value.toString
+      }
+      val c = e.getTreeTableCellEditorComponent(view.treeTable.peer, value, selected, row, column)
+      Component.wrap(c.asInstanceOf[JComponent])
+    }
+
     val col1 = new TreeColumnModel.Column[Data, String]("Foo") {
       def apply(data: Data): String = data match {
         case Data.Branch  => "Branch"
-        case Data.Leaf(_) => "Leaf"
+        case l: Data.Leaf => "Leaf"
       }
 
       def isEditable(node: Data): Boolean = false
@@ -166,17 +190,24 @@ object TestTreeTableApp extends AppLike {
     val col2 = new TreeColumnModel.Column[Data, String]("Bar") {
       def apply(data: Data): String = data match {
         case Data.Branch  => ""
-        case Data.Leaf(v) => v.toString
+        case l: Data.Leaf => l.value.toString
       }
 
-      def isEditable(node: Data): Boolean = true
+      def isEditable(node: Data): Boolean = node.isInstanceOf[Data.Leaf]
 
-      def update(data: Data, value: String): Unit = ()
-//        try {
-//        val i = Integer.parseInt(value)
-//      } catch {
-//        case NonFatal(_) =>
-//      }
+      def update(data: Data, value: String): Unit = {
+        println(s"update($data, $value)")
+        data match {
+          case l: Data.Leaf =>
+            try {
+              l.value = Integer.parseInt(value)
+            } catch {
+              case NonFatal(_) =>
+            }
+
+          case _ =>
+        }
+      }
     }
 
     val columns: TreeColumnModel[Data] = new TreeColumnModel.Tuple2(col1, col2) {
@@ -185,7 +216,7 @@ object TestTreeTableApp extends AppLike {
 
     def data(node: Node)(implicit tx:  S#Tx): Data = node match {
       case b: Branch  => Data.Branch
-      case l: Leaf    => Data.Leaf(l.expr.value)
+      case l: Leaf    => new Data.Leaf(l.expr.value)
     }
   }
 
@@ -201,7 +232,7 @@ object TestTreeTableApp extends AppLike {
     new Leaf(tgt, ex)
   }
 
-  private lazy val (treeH, view) = system.step { implicit tx =>
+  private lazy val (treeH, view: TreeTableView[S, Node, Branch, Data]) = system.step { implicit tx =>
     val root = newBranch()
     tx.newHandle(root) -> TreeTableView(root, h)
   }
@@ -219,7 +250,7 @@ object TestTreeTableApp extends AppLike {
   }
 
   private def add(child: Node)(implicit tx: S#Tx): Unit = {
-    val (parent, idx) = view.insertionPoint()
+    val (parent, idx) = view.insertionPoint
     parent.children.insert(idx, child)
   }
 

@@ -57,6 +57,11 @@ object TreeTableView {
     def renderer(view: TreeTableView[S, Node, Branch, Data], data: Data, row: Int, column: Int,
                  state: TreeTableCellRenderer.State): Component
 
+    // def isEditable(data: Data, row: Int, column: Int): Boolean
+
+    def editor(view: TreeTableView[S, Node, Branch, Data], data: Data, row: Int,
+               column: Int, selected: Boolean): Component
+
     /** Notifies the handler that a node has seen an update. The handler then casts that opaque update type
       * to one of the resolved `ModelUpdate` types. If the update is irrelevant for the view, the method
       * should return `None`.
