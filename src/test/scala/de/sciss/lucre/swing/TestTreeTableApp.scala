@@ -13,7 +13,7 @@ import de.sciss.lucre.swing.TestTreeTableApp.Node.Update
 import de.sciss.lucre.data.Iterator
 import de.sciss.serial.{DataOutput, DataInput, Serializer}
 import de.sciss.treetable.j.{DefaultTreeTableCellEditor, DefaultTreeTableCellRenderer}
-import javax.swing.{JTextField, JComponent}
+import javax.swing.{JTextField, JComponent, CellEditor}
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.annotation.tailrec
 import scala.util.control.NonFatal
@@ -122,7 +122,7 @@ object TestTreeTableApp extends AppLike {
 
     def branchOption(node: Node): Option[Branch] = node.branchOption
 
-    def update(upd: Update)(implicit tx: S#Tx): Vec[ModelUpdate[Node, Branch]] =
+    def mapUpdate(upd: Update)(implicit tx: S#Tx): Vec[ModelUpdate[Node, Branch]] =
       upd match {
         case Update.Branch(parent, peer) =>
           peer.changes.flatMap {
@@ -131,7 +131,7 @@ object TestTreeTableApp extends AppLike {
         //            case expr.List.Element(elem, Node.Update.Leaf(_, Change(_, now))) =>
         //              TreeTableView.NodeChanged(elem, Data.Leaf(now))
             case expr.List.Element(elem, eUpd) =>
-              update(eUpd)
+              mapUpdate(eUpd)
           }
 
         case Update.Leaf(l, Change(_, now)) =>
@@ -150,69 +150,49 @@ object TestTreeTableApp extends AppLike {
     private val r = new DefaultTreeTableCellRenderer
     private val e = new DefaultTreeTableCellEditor(new JTextField)
 
-    def renderer(view: TreeTableView[S, Node, Branch, Data], data: Data, row: Int, column: Int,
-                 state: State): Component = {
-      val value = data match {
+    def renderer(tt: TreeTableView[S, Node, Branch, Data], node: TreeTableView.NodeView[S, Node, Data],
+                 row: Int, column: Int, state: State): Component = {
+      val value = node.renderData match {
         case Data.Branch  => if (column == 0) "Branch" else ""
         case l: Data.Leaf => if (column == 0) "Leaf"   else l.value.toString
       }
 
       val c = state.tree.fold {
-        r.getTreeTableCellRendererComponent(view.treeTable.peer, value, state.selected, state.focused, row, column)
+        r.getTreeTableCellRendererComponent(tt.treeTable.peer, value, state.selected, state.focused, row, column)
       } { ts =>
-        r.getTreeTableCellRendererComponent(view.treeTable.peer, value, state.selected, state.focused,
+        r.getTreeTableCellRendererComponent(tt.treeTable.peer, value, state.selected, state.focused,
           row, column, ts.expanded, ts.leaf)
       }
       Component.wrap(c.asInstanceOf[JComponent])
     }
 
-    def editor(view: TreeTableView[S, Node, Branch, Data], data: Data, row: Int, column: Int,
-               selected: Boolean): Component = {
-      val value = data match {
+    def editor(tt: TreeTableView[S, Node, Branch, Data], node: TreeTableView.NodeView[S, Node, Data],
+               row: Int, column: Int, selected: Boolean): (Component, CellEditor) = {
+      val value = node.renderData match {
         case Data.Branch  => if (column == 0) "Branch" else "?!"
         case l: Data.Leaf => if (column == 0) "Leaf"   else l.value.toString
       }
-      val c = e.getTreeTableCellEditorComponent(view.treeTable.peer, value, selected, row, column)
-      Component.wrap(c.asInstanceOf[JComponent])
+      val c = e.getTreeTableCellEditorComponent(tt.treeTable.peer, value, selected, row, column)
+      Component.wrap(c.asInstanceOf[JComponent]) -> e
     }
 
-    val col1 = new TreeColumnModel.Column[Data, String]("Foo") {
-      def apply(data: Data): String = data match {
-        case Data.Branch  => "Branch"
-        case l: Data.Leaf => "Leaf"
-      }
+    val columnNames = Vec("Foo", "Bar")
 
-      def isEditable(node: Data): Boolean = false
+    def isEditable(data: Data, column: Int): Boolean = column == 1 && data.isInstanceOf[Data.Leaf]
 
-      def update(node: Data, value: String): Unit = ()
-    }
-
-    val col2 = new TreeColumnModel.Column[Data, String]("Bar") {
-      def apply(data: Data): String = data match {
-        case Data.Branch  => ""
-        case l: Data.Leaf => l.value.toString
-      }
-
-      def isEditable(node: Data): Boolean = node.isInstanceOf[Data.Leaf]
-
-      def update(data: Data, value: String): Unit = {
-        println(s"update($data, $value)")
-        data match {
-          case l: Data.Leaf =>
-            try {
-              l.value = Integer.parseInt(value)
-            } catch {
-              case NonFatal(_) =>
-            }
-
-          case _ =>
-        }
-      }
-    }
-
-    val columns: TreeColumnModel[Data] = new TreeColumnModel.Tuple2(col1, col2) {
-      def getParent(data: Data): Option[Data] = None
-    }
+    //    def update(data: Data, value: String): Unit = {
+    //      println(s"update($data, $value)")
+    //      data match {
+    //        case l: Data.Leaf =>
+    //          try {
+    //            l.value = Integer.parseInt(value)
+    //          } catch {
+    //            case NonFatal(_) =>
+    //          }
+    //
+    //        case _ =>
+    //      }
+    //    }
 
     def data(node: Node)(implicit tx:  S#Tx): Data = node match {
       case b: Branch  => Data.Branch

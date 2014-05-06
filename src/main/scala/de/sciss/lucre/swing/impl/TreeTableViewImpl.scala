@@ -17,20 +17,24 @@ package impl
 import scala.swing.{ScrollPane, Component}
 import de.sciss.lucre.stm.{Identifiable, Source, Disposable, IdentifierMap}
 import de.sciss.model.impl.ModelImpl
-import javax.swing.DropMode
+import javax.swing.{JTable, DropMode}
 import de.sciss.treetable.{j, TreeTableSelectionChanged, TreeTableCellRenderer, TreeColumnModel, AbstractTreeModel, TreeTable}
 import de.sciss.lucre.{event => evt}
 import evt.Sys
 import TreeTableView.Handler
-import javax.swing.table.DefaultTableCellRenderer
+import javax.swing.table.{TableCellEditor, DefaultTableCellRenderer}
 import de.sciss.lucre.stm
 import collection.breakOut
 import scala.concurrent.stm.TxnLocal
 import scala.annotation.tailrec
 import de.sciss.treetable.j.DefaultTreeTableCellEditor
+import de.sciss.treetable.j.TreeTableCellEditor
 import scala.collection.immutable.{IndexedSeq => Vec}
 import de.sciss.serial.Serializer
 import java.awt.EventQueue
+import javax.swing.event.CellEditorListener
+import java.awt
+import javax.swing.CellEditor
 
 object TreeTableViewImpl {
   var DEBUG = false
@@ -372,7 +376,7 @@ object TreeTableViewImpl {
       println("Warning: should not refer to root node")
 
     def processUpdate(update0: U)(implicit tx: S#Tx): Unit = {
-      val mUpd0 = handler.update(/* view0.modelData(), */ update0 /* , view0.renderData */)
+      val mUpd0 = handler.mapUpdate(/* view0.modelData(), */ update0 /* , view0.renderData */)
 
       def withParentView(parent: Branch)(fun: VBranchL => Unit): Unit = {
         val parentID = parent.id // handler.nodeID(parent)
@@ -421,26 +425,36 @@ object TreeTableViewImpl {
       requireEDT()
 
       val tcm = new TreeColumnModel[VNodeL] {
-        private val peer = handler.columns
+        // private val peer = handler.columns
 
         def getValueAt(r: VNodeL, column: Int): Any = r
 
-        def setValueAt(value: Any, r: VNodeL, column: Int): Unit = r match {
-          case node: VNode  => peer.setValueAt(value, node.renderData, column)
-          case _            => throw new IllegalStateException(s"Trying to alter $r")
+        def setValueAt(value: Any, r: VNodeL, column: Int): Unit = ()
+        //          r match {
+        //          case node: VNode  =>
+        //            //            val ex = new Exception
+        //            //            ex.fillInStackTrace()
+        //            //            ex.printStackTrace()
+        //            // println(s"setValueAt($value, $r, $column")
+        //            // peer.setValueAt(value, node.renderData, column)
+        //          case _            => throw new IllegalStateException(s"Trying to alter $r")
+        //        }
+
+        def getColumnName (column: Int): String   = {
+          // peer.getColumnName (column)
+          handler.columnNames(column)
         }
 
-        def getColumnName (column: Int): String   = peer.getColumnName (column)
         def getColumnClass(column: Int): Class[_] = classOf[AnyRef] // classOf[V] // peer.getColumnClass(column)
 
-        def columnCount: Int = peer.columnCount
+        def columnCount: Int = handler.columnNames.size
 
         def isCellEditable(r: VNodeL, column: Int): Boolean = r match {
-          case node: VNode  => peer.isCellEditable(node.renderData, column)
+          case node: VNode  => handler.isEditable(node.renderData, column)
           case _            => false
         }
 
-        def hierarchicalColumn: Int = peer.hierarchicalColumn
+        def hierarchicalColumn: Int = 0 // peer.hierarchicalColumn
       }
 
       t = new TreeTable(treeModel, tcm: TreeColumnModel[VNodeL])
@@ -457,14 +471,14 @@ object TreeTableViewImpl {
             // case _: VRoot =>
             //   wrapSelf
             case b: VNode =>
-              handler.renderer(view, b.renderData, row = row, column = column, state = state)
+              handler.renderer(view, b /* .renderData */, row = row, column = column, state = state)
             case _ =>
               wrapSelf // super.getRendererComponent(treeTable, value, row, column, state)
           }
         }
       }
 
-      val rj = new DefaultTableCellRenderer with j.TreeTableCellRenderer {
+      val rj: DefaultTableCellRenderer = new DefaultTableCellRenderer with j.TreeTableCellRenderer {
         def getTreeTableCellRendererComponent(treeTable: j.TreeTable, value: Any, selected: Boolean,
                                               hasFocus: Boolean, row: Int, column: Int): java.awt.Component = {
           val state = TreeTableCellRenderer.State(selected = selected, focused = hasFocus, tree = None)
@@ -480,32 +494,77 @@ object TreeTableViewImpl {
         }
       }
 
-      val ej = new DefaultTreeTableCellEditor(new javax.swing.JTextField()) {
-        override def getTreeTableCellEditorComponent(treeTable: j.TreeTable, value: Any, selected: Boolean,
-                                                     row: Int, column: Int): java.awt.Component =
-          value match {
-            case b: VNode => handler.editor(view, b.renderData, row = row, column = column, selected = selected).peer
-            case _ => super.getTreeTableCellEditorComponent(treeTable, value, selected, row, column)
-//          val v1 = value match {
-//            case b: VBranch  =>
-//              // println(s"branchRenderer(${b.data}, row = $row)")
-//              b.renderData
-//            case l: VLeaf     =>
-//              // println(s"leafRenderer(${l.data}, row = $row)")
-//              l.renderData
-//            case _ => value
-//          }
-//          super.getTreeTableCellEditorComponent(treeTable, v1, selected, row, column)
+      //      val ej = new DefaultTreeTableCellEditor(new javax.swing.JTextField()) {
+      //        override def getTreeTableCellEditorComponent(treeTable: j.TreeTable, value: Any, selected: Boolean,
+      //                                                     row: Int, column: Int): java.awt.Component =
+      //          value match {
+      //            case b: VNode => handler.editor(view, b.renderData, row = row, column = column, selected = selected).peer
+      //            case _ => super.getTreeTableCellEditorComponent(treeTable, value, selected, row, column)
+      //            //          val v1 = value match {
+      //            //            case b: VBranch  =>
+      //            //              // println(s"branchRenderer(${b.data}, row = $row)")
+      //            //              b.renderData
+      //            //            case l: VLeaf     =>
+      //            //              // println(s"leafRenderer(${l.data}, row = $row)")
+      //            //              l.renderData
+      //            //            case _ => value
+      //            //          }
+      //            //          super.getTreeTableCellEditorComponent(treeTable, v1, selected, row, column)
+      //          }
+      //
+      //        override def getTreeTableCellEditorComponent(treeTable: j.TreeTable, value: Any, selected: Boolean,
+      //                                                     row: Int, column: Int, expanded: Boolean,
+      //                                                     leaf: Boolean): java.awt.Component =
+      //          getTreeTableCellEditorComponent(treeTable, value, selected, row, column)
+      //      }
+
+      val ej: TreeTableCellEditor with TableCellEditor = new TreeTableCellEditor with TableCellEditor {
+        private var currentEditor = Option.empty[CellEditor]
+
+        def getTreeTableCellEditorComponent(treeTable: j.TreeTable, value: Any, selected: Boolean,
+                                                     row: Int, column: Int): java.awt.Component = {
+          val res = value match {
+            case b: VNode => handler.editor(view, b /* .renderData */, row = row, column = column, selected = selected)
+            case _ => throw new IllegalStateException(s"Not a node: $value")
+          }
+          currentEditor = Some(res._2)
+          res._1.peer
         }
 
-        override def getTreeTableCellEditorComponent(treeTable: j.TreeTable, value: Any, selected: Boolean,
+        def getTreeTableCellEditorComponent(treeTable: j.TreeTable, value: Any, selected: Boolean,
                                                      row: Int, column: Int, expanded: Boolean,
                                                      leaf: Boolean): java.awt.Component =
-            getTreeTableCellEditorComponent(treeTable, value, selected, row, column)
+          getTreeTableCellEditorComponent(treeTable, value, selected, row, column)
+
+        def getTableCellEditorComponent(table: JTable, value: Any, selected: Boolean, row: Int,
+                                        column: Int): awt.Component = {
+          getTreeTableCellEditorComponent(treeTable.peer, value, selected, row, column)
+        }
+
+        def addCellEditorListener(l: CellEditorListener): Unit = currentEditor.foreach { ed =>
+          ed.addCellEditorListener(l)
+        }
+
+        def getCellEditorValue: AnyRef = currentEditor.map(_.getCellEditorValue).orNull
+
+        def shouldSelectCell(e: java.util.EventObject): Boolean = currentEditor.exists(_.shouldSelectCell(e))
+
+        def isCellEditable(e: java.util.EventObject): Boolean = {
+          // currentEditor.exists(_.shouldSelectCell(e))
+          true
+        }
+
+        def stopCellEditing(): Boolean = currentEditor.exists(_.stopCellEditing())
+
+        def removeCellEditorListener(l: CellEditorListener): Unit = currentEditor.foreach { ed =>
+          ed.removeCellEditorListener(l)
+        }
+
+        def cancelCellEditing(): Unit = currentEditor.foreach(_.cancelCellEditing())
       }
 
       val cm = t.peer.getColumnModel
-      for (col <- 0 until handler.columns.columnCount) {
+      for (col <- 0 until handler.columnNames.size) {
         // assert(r.isInstanceOf[TreeTableCellRenderer])
         val c = cm.getColumn(col)
         c.setCellRenderer(rj)

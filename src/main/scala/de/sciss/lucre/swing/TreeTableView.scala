@@ -23,6 +23,7 @@ import de.sciss.lucre.stm.{Identifiable, Disposable}
 import de.sciss.serial.Serializer
 import impl.{TreeTableViewImpl => Impl}
 import scala.collection.immutable.{IndexedSeq => Vec}
+import javax.swing.CellEditor
 
 object TreeTableView {
   sealed trait ModelUpdate[/*+ */Node, +Branch]
@@ -49,18 +50,22 @@ object TreeTableView {
       */
     def children(branch: Branch)(implicit tx: S#Tx): de.sciss.lucre.data.Iterator[S#Tx, Node]
 
-    /** Note: this model is wrapped. The `getParent` method is never used and can safely be implemented
-      * by returning `None` always.
-      */
-    def columns: TreeColumnModel[Data] // NodeView[S, Node, Data]]
+    //    /** Note: this model is wrapped. The `getParent` method is never used and can safely be implemented
+    //      * by returning `None` always.
+    //      */
+    //    def columns: TreeColumnModel[Data] // NodeView[S, Node, Data]]
 
-    def renderer(view: TreeTableView[S, Node, Branch, Data], data: Data, row: Int, column: Int,
-                 state: TreeTableCellRenderer.State): Component
+    def renderer(treeTable: TreeTableView[S, Node, Branch, Data], node: NodeView[S, Node, Data],
+                 row: Int, column: Int, state: TreeTableCellRenderer.State): Component
 
     // def isEditable(data: Data, row: Int, column: Int): Boolean
 
-    def editor(view: TreeTableView[S, Node, Branch, Data], data: Data, row: Int,
-               column: Int, selected: Boolean): Component
+    def editor(treeTable: TreeTableView[S, Node, Branch, Data], node: NodeView[S, Node, Data],
+               row: Int, column: Int, selected: Boolean): (Component, CellEditor)
+    
+    def isEditable(data: Data, column: Int): Boolean
+
+    def columnNames: Vec[String]
 
     /** Notifies the handler that a node has seen an update. The handler then casts that opaque update type
       * to one of the resolved `ModelUpdate` types. If the update is irrelevant for the view, the method
@@ -68,7 +73,7 @@ object TreeTableView {
       *
       * @param  update  the type of update
       */
-    def update(/* node: Node, */ update: U /* , data: Data */)(implicit tx: S#Tx): Vec[ModelUpdate[Node, Branch]]
+    def mapUpdate(/* node: Node, */ update: U /* , data: Data */)(implicit tx: S#Tx): Vec[ModelUpdate[Node, Branch]]
   }
 
   def apply[S <: Sys[S], Node <: Identifiable[S#ID], Branch <: evt.Publisher[S, U] with Identifiable[S#ID], U, Data](
