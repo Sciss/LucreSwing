@@ -17,6 +17,7 @@ import javax.swing.{JTextField, JComponent, CellEditor}
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.annotation.tailrec
 import scala.util.control.NonFatal
+import javax.swing.event.{ChangeEvent, CellEditorListener}
 
 object TestTreeTableApp extends AppLike {
   import lucre.expr.Int.serializer
@@ -147,8 +148,32 @@ object TestTreeTableApp extends AppLike {
           }
       }
 
-    private val r = new DefaultTreeTableCellRenderer
-    private val e = new DefaultTreeTableCellEditor(new JTextField)
+    private var editingNode = Option.empty[TreeTableView.NodeView[S, Node, Data]]
+
+    private lazy val r = new DefaultTreeTableCellRenderer
+    private lazy val e = {
+      val res = new DefaultTreeTableCellEditor(new JTextField)
+      res.addCellEditorListener(new CellEditorListener {
+        def editingCanceled(e: ChangeEvent): Unit = println("editingCanceled")
+        def editingStopped (e: ChangeEvent): Unit = {
+          println("editingStopped")
+          try {
+            val i = res.getCellEditorValue.toString.toInt
+            editingNode.foreach { nodeView =>
+              system.step { implicit tx =>
+                nodeView.modelData() match {
+                  case l: Leaf => l.expr() = lucre.expr.Int.newConst(i)
+                  case _ =>
+                }
+              }
+            }
+          } catch {
+            case _: NumberFormatException =>
+          }
+        }
+      })
+      res
+    }
 
     def renderer(tt: TreeTableView[S, Node, Branch, Data], node: TreeTableView.NodeView[S, Node, Data],
                  row: Int, column: Int, state: State): Component = {
@@ -168,9 +193,13 @@ object TestTreeTableApp extends AppLike {
 
     def editor(tt: TreeTableView[S, Node, Branch, Data], node: TreeTableView.NodeView[S, Node, Data],
                row: Int, column: Int, selected: Boolean): (Component, CellEditor) = {
+      editingNode = None
       val value = node.renderData match {
         case Data.Branch  => if (column == 0) "Branch" else "?!"
-        case l: Data.Leaf => if (column == 0) "Leaf"   else l.value.toString
+        case l: Data.Leaf => if (column == 0) "Leaf"   else {
+          editingNode = Some(node)
+          l.value.toString
+        }
       }
       val c = e.getTreeTableCellEditorComponent(tt.treeTable.peer, value, selected, row, column)
       Component.wrap(c.asInstanceOf[JComponent]) -> e

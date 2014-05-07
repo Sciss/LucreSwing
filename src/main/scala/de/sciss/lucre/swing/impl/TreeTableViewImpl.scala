@@ -549,9 +549,10 @@ object TreeTableViewImpl {
 
         def shouldSelectCell(e: java.util.EventObject): Boolean = currentEditor.exists(_.shouldSelectCell(e))
 
-        def isCellEditable(e: java.util.EventObject): Boolean = {
-          // currentEditor.exists(_.shouldSelectCell(e))
-          true
+        // cf, https://community.oracle.com/thread/2140909?start=0&tstart=0
+        def isCellEditable(e: java.util.EventObject): Boolean = e match {
+          case m: java.awt.event.MouseEvent => m.getClickCount == 2
+          case _ => true
         }
 
         def stopCellEditing(): Boolean = currentEditor.exists(_.stopCellEditing())
