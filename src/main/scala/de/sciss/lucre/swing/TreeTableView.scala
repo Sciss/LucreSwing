@@ -110,7 +110,14 @@ trait TreeTableView[S <: Sys[S], Node, Branch, Data]
   type NodeView <: TreeTableView.NodeView[S, Node, Data]
 
   def component: Component
+
   def treeTable: TreeTable[_, _]
+
+  /** The drop location in a drag-and-drop operation. This returns `None` if no drop action is currently
+    * being performed. Please note that the root element is removed. It is thus possible that
+    * the path is empty!
+    */
+  def dropLocation: Option[TreeTable.DropLocation[NodeView]]
 
   def root: stm.Source[S#Tx, Branch]
 

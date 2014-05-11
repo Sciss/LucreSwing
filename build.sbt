@@ -1,6 +1,6 @@
 name               := "LucreSwing"
 
-version            := "0.2.2-SNAPSHOT"
+version            := "0.3.0"
 
 organization       := "de.sciss"
 
@@ -18,11 +18,11 @@ lazy val eventVersion     = "2.6.1"
 
 lazy val stmVersion       = "2.0.4"
 
-lazy val desktopVersion   = "0.5.2"
+lazy val desktopVersion   = "0.5.3"
 
 lazy val widgetsVersion   = "1.6.2"
 
-lazy val treeTableVersion = "1.3.6"
+lazy val treeTableVersion = "1.3.7"
 
 lazy val fileUtilVersion  = "1.1.1"
 

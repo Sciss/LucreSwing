@@ -35,6 +35,7 @@ import java.awt.EventQueue
 import javax.swing.event.CellEditorListener
 import java.awt
 import javax.swing.CellEditor
+import de.sciss.treetable.TreeTable.Path
 
 object TreeTableViewImpl {
   var DEBUG = false
@@ -134,6 +135,7 @@ object TreeTableViewImpl {
     type VNodeL   = NodeViewImpl.Base         [S, Node, Data]
     type VRoot    = NodeViewImpl.Root         [S, Node, Branch, Data]
     type TPath    = TreeTable.Path[VBranch]
+
     type NodeView = VNode // alias in the interface
 
     protected def rootView    : VRoot
@@ -220,6 +222,18 @@ object TreeTableViewImpl {
     def treeTable: TreeTable[_, _] = t
 
     // def selection: List[VNode] = t.selection.paths.flatMap(_.lastOption)(breakOut)
+
+    //    def dropLocation: Option[NodeView] = t.dropLocation.flatMap { dl => dl.path match {
+    //      case _ :+ (last: NodeView) => Some(last)
+    //      case _ => None
+    //    }}
+
+    def dropLocation: Option[TreeTable.DropLocation[NodeView]] =
+      Option(t.peer.getDropLocation).map { j =>
+        new TreeTable.DropLocation[NodeView](j) {
+          override def path: Path[NodeView] = super.path.drop(1)
+        }
+      }
 
     def selection: List[VNode] = t.selection.paths.collect {
       case init :+ (last: VNode) => last
