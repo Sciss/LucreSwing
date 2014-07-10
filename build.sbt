@@ -1,6 +1,6 @@
 name               := "LucreSwing"
 
-version            := "0.4.0-SNAPSHOT"
+version            := "0.4.0"
 
 organization       := "de.sciss"
 
@@ -14,9 +14,9 @@ homepage           := Some(url("https://github.com/Sciss/" + name.value))
  
 licenses           := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt"))
 
-lazy val eventVersion     = "2.7.0-SNAPSHOT"
+lazy val eventVersion     = "2.7.0"
 
-lazy val stmVersion       = "2.1.0-SNAPSHOT"
+lazy val stmVersion       = "2.1.0"
 
 lazy val desktopVersion   = "0.5.4"
 
