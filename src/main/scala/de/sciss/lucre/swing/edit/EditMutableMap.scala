@@ -15,7 +15,7 @@ package de.sciss.lucre
 package swing
 package edit
 
-import de.sciss.lucre.{expr, stm, event => evt}
+import de.sciss.lucre.{event => evt}
 import evt.{Publisher, Sys}
 import javax.swing.undo.{UndoableEdit, AbstractUndoableEdit}
 import de.sciss.serial
@@ -52,15 +52,14 @@ object EditMutableMap {
       cursor.step { implicit tx => perform() }
     }
 
-    private def perform(exprH: stm.Source[S#Tx, Option[B]])(implicit tx: S#Tx): Unit =
-      cursor.step { implicit tx =>
-        val map = mapH()
-        exprH().fold {
-          map.remove(key)
-        } { expr =>
-          map.put(key, expr)
-        }
+    private def perform(exprH: stm.Source[S#Tx, Option[B]])(implicit tx: S#Tx): Unit = {
+      val map = mapH()
+      exprH().fold {
+        map.remove(key)
+      } { expr =>
+        map.put(key, expr)
       }
+    }
 
     def perform()(implicit tx: S#Tx): Unit = perform(nowH)
 
