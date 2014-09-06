@@ -13,19 +13,18 @@ trait AppLike extends SimpleSwingApplication {
   type S = Durable
   implicit val system = Durable(BerkeleyDB.factory(File.createTemp(directory = true)))
 
-  implicit lazy val undo = new UndoManagerImpl {
-    protected var dirty: Boolean = false
-  }
+  implicit lazy val undo = new UndoManagerImpl
 
   override def main(args: Array[String]): Unit = {
-    val lafs    = UIManager.getInstalledLookAndFeels
-    val gtkOpt  = if (Desktop.isLinux) lafs.find(_.getName contains "GTK+") else None
     try {
       val webClassName = "com.alee.laf.WebLookAndFeel"
       UIManager.installLookAndFeel("Web Look And Feel", webClassName)
       UIManager.setLookAndFeel(webClassName)
     } catch {
-      case NonFatal(_) => gtkOpt.foreach { info =>
+      case NonFatal(_) =>
+        val lafs    = UIManager.getInstalledLookAndFeels
+        val gtkOpt  = if (Desktop.isLinux) lafs.find(_.getName contains "GTK+") else None
+        gtkOpt.foreach { info =>
         UIManager.setLookAndFeel(info.getClassName)
       }
     }

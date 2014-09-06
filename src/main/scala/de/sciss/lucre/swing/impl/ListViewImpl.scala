@@ -15,19 +15,19 @@ package de.sciss.lucre
 package swing
 package impl
 
-import de.sciss.lucre.{stm, expr, event => evt}
+import de.sciss.lucre.{event => evt}
 import evt.Sys
-import stm.{Source, Cursor, Disposable}
+import stm.Cursor
 import expr.List
 import scala.swing.{ScrollPane, Component}
-import javax.swing.DefaultListModel
 import concurrent.stm.Ref
 import scala.swing.event.ListSelectionChanged
 import de.sciss.serial.Serializer
-import ListView.Handler
+import de.sciss.lucre.swing.ListView.Handler
 import de.sciss.model.impl.ModelImpl
 import scala.collection.immutable.{IndexedSeq => Vec}
-import de.sciss.swingplus.Implicits._
+import de.sciss.swingplus
+import swingplus.Implicits._
 
 object ListViewImpl {
   def empty[S <: Sys[S], Elem, U, Data](handler: Handler[S, Elem, U, Data])
@@ -54,8 +54,8 @@ object ListViewImpl {
     extends ListView[S, Elem, U] with ComponentHolder[Component] with ModelImpl[ListView.Update] {
     impl =>
 
-    private var ggList: scala.swing.ListView[Data] = _
-    private val mList   = new DefaultListModel
+    private var ggList: swingplus.ListView[Data] = _
+    private val mList   = swingplus.ListView.Model.empty[Data]
     private val current = Ref(Option.empty[Observation[S, List[S, Elem, U]]])
 
     def view = ggList
@@ -128,9 +128,8 @@ object ListViewImpl {
       //               super.getListCellRendererComponent( c, showFun( elem.asInstanceOf[ Elem ]), idx, selected, focused )
       //            }
       //         }
-      ggList = new scala.swing.ListView[Data] {
+      ggList = new swingplus.ListView[Data](mList) {
         this.dragEnabled = true
-        peer.setModel(mList)
         listenTo(selection)
         reactions += {
           case l: ListSelectionChanged[_] => notifyViewObservers(l.range)
@@ -144,17 +143,17 @@ object ListViewImpl {
 
     def replaceItems(items: Vec[Data]): Unit = {
       mList.clear()
-      items.foreach(mList.addElement)
+      mList.insertAll(0, items)
     }
 
     def insertItem(idx: Int, item: Data): Unit =
-      mList.add(idx, item)
+      mList.insert(idx, item)
 
     def removeItemAt(idx: Int): Unit =
       mList.remove(idx)
 
     def updateItemAt(idx: Int, newItem: Data): Unit = {
-      mList.set(idx, newItem)
+      mList.update(idx, newItem)
     }
 
     def dispose()(implicit tx: S#Tx): Unit = {

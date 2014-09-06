@@ -22,6 +22,7 @@ import impl.{ListViewImpl => Impl}
 import de.sciss.serial.Serializer
 import de.sciss.model.Model
 import scala.collection.immutable.{IndexedSeq => Vec}
+import de.sciss.swingplus
 
 object ListView {
   object Handler {
@@ -70,7 +71,7 @@ object ListView {
 }
 trait ListView[S <: Sys[S], Elem, U] extends Disposable[S#Tx] with Model[ListView.Update] {
   def component: Component
-  def view: scala.swing.ListView[_]
+  def view: swingplus.ListView[_]
 
   def guiSelection: Vec[Int]
 
