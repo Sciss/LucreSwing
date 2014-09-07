@@ -6,7 +6,7 @@ LucreSwing is a Scala library which bridges between Swing (through the [Desktop]
 
 ## requirements / building
 
-ScalaAudioFile currently compiles against Scala 2.11, 2.10 using sbt 0.13. Because of a compatibility problem with generified Java Swing, one must currently compile using JDK 6 and not JDK 7 or newer. If you see an `IndexOutOfBoundsException` in the scalac typer, this is because you are not running on JDK 6. The compiled library of course works with any Java version.
+This project compiles against Scala 2.11, 2.10 using sbt 0.13.
 
 To use the library in your project:
 
