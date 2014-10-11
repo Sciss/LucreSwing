@@ -1,27 +1,23 @@
 package de.sciss.lucre.swing
 
-import scala.swing.{Button, FlowPanel, BorderPanel, Component}
-import de.sciss.model.Change
-import de.sciss.lucre.expr.Expr
+import javax.swing.event.{CellEditorListener, ChangeEvent}
+import javax.swing.{CellEditor, JComponent, JTextField}
+
 import de.sciss.lucre
-import de.sciss.lucre.{event => evt, expr}
-import scala.concurrent.stm.{Ref, Txn}
-import de.sciss.treetable.{TreeTableCellRenderer, TreeColumnModel}
-import de.sciss.lucre.swing.TreeTableView.{ModelUpdate, NodeView}
-import de.sciss.treetable.TreeTableCellRenderer.State
-import de.sciss.lucre.swing.TestTreeTableApp.Node.Update
 import de.sciss.lucre.data.Iterator
-import de.sciss.serial.{DataOutput, DataInput, Serializer}
+import de.sciss.lucre.expr.Expr
+import de.sciss.lucre.swing.TestTreeTableApp.Node.Update
+import de.sciss.lucre.swing.TreeTableView.ModelUpdate
+import de.sciss.lucre.{expr, event => evt}
+import de.sciss.model.Change
+import de.sciss.serial.{DataInput, DataOutput, Serializer}
+import de.sciss.treetable.TreeTableCellRenderer.State
 import de.sciss.treetable.j.{DefaultTreeTableCellEditor, DefaultTreeTableCellRenderer}
-import javax.swing.{JTextField, JComponent, CellEditor}
+
 import scala.collection.immutable.{IndexedSeq => Vec}
-import scala.annotation.tailrec
-import scala.util.control.NonFatal
-import javax.swing.event.{ChangeEvent, CellEditorListener}
+import scala.swing.{BorderPanel, Button, Component, FlowPanel}
 
 object TestTreeTableApp extends AppLike {
-  import lucre.expr.Int.serializer
-
   object Node {
     object Update {
       case class Branch(branch: TestTreeTableApp.Branch, peer: expr.List.Update[S, Node, Node.Update]) extends Update
@@ -148,7 +144,7 @@ object TestTreeTableApp extends AppLike {
           }
       }
 
-    private var editingNode = Option.empty[TreeTableView.NodeView[S, Node, Data]]
+    private var editingNode = Option.empty[TreeTableView.NodeView[S, Node, Branch, Data]]
 
     private lazy val r = new DefaultTreeTableCellRenderer
     private lazy val e = {
@@ -162,7 +158,7 @@ object TestTreeTableApp extends AppLike {
             editingNode.foreach { nodeView =>
               system.step { implicit tx =>
                 nodeView.modelData() match {
-                  case l: Leaf => l.expr() = lucre.expr.Int.newConst(i)
+                  case l: Leaf => l.expr() = lucre.expr.Int.newConst[S](i)
                   case _ =>
                 }
               }
@@ -175,7 +171,7 @@ object TestTreeTableApp extends AppLike {
       res
     }
 
-    def renderer(tt: TreeTableView[S, Node, Branch, Data], node: TreeTableView.NodeView[S, Node, Data],
+    def renderer(tt: TreeTableView[S, Node, Branch, Data], node: TreeTableView.NodeView[S, Node, Branch, Data],
                  row: Int, column: Int, state: State): Component = {
       val value = node.renderData match {
         case Data.Branch  => if (column == 0) "Branch" else ""
@@ -191,7 +187,7 @@ object TestTreeTableApp extends AppLike {
       Component.wrap(c.asInstanceOf[JComponent])
     }
 
-    def editor(tt: TreeTableView[S, Node, Branch, Data], node: TreeTableView.NodeView[S, Node, Data],
+    def editor(tt: TreeTableView[S, Node, Branch, Data], node: TreeTableView.NodeView[S, Node, Branch, Data],
                row: Int, column: Int, selected: Boolean): (Component, CellEditor) = {
       editingNode = None
       val value = node.renderData match {
@@ -273,7 +269,7 @@ object TestTreeTableApp extends AppLike {
 
   private def removeAction(): Unit = system.step { implicit tx =>
     val toRemove = view.selection.flatMap { childView =>
-      val parent = childView.parentOption.fold[Node](treeH())(_.modelData())
+      val parent = childView.parentView.fold[Node](treeH())(_.modelData())
       parent match {
         case b: Branch  => Some(b -> childView.modelData())
         case _          => None

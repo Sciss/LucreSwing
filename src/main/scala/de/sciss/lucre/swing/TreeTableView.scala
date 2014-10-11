@@ -15,7 +15,7 @@ package de.sciss.lucre.swing
 
 import de.sciss.lucre.{event => evt}
 import evt.Sys
-import de.sciss.treetable.{TreeTable, TreeTableCellRenderer, TreeColumnModel}
+import de.sciss.treetable.{TreeTable, TreeTableCellRenderer}
 import scala.swing.Component
 import de.sciss.model.Model
 import de.sciss.lucre.stm
@@ -55,12 +55,12 @@ object TreeTableView {
     //      */
     //    def columns: TreeColumnModel[Data] // NodeView[S, Node, Data]]
 
-    def renderer(treeTable: TreeTableView[S, Node, Branch, Data], node: NodeView[S, Node, Data],
+    def renderer(treeTable: TreeTableView[S, Node, Branch, Data], node: NodeView[S, Node, Branch, Data],
                  row: Int, column: Int, state: TreeTableCellRenderer.State): Component
 
     // def isEditable(data: Data, row: Int, column: Int): Boolean
 
-    def editor(treeTable: TreeTableView[S, Node, Branch, Data], node: NodeView[S, Node, Data],
+    def editor(treeTable: TreeTableView[S, Node, Branch, Data], node: NodeView[S, Node, Branch, Data],
                row: Int, column: Int, selected: Boolean): (Component, CellEditor)
     
     def isEditable(data: Data, column: Int): Boolean
@@ -86,14 +86,15 @@ object TreeTableView {
   case object SelectionChanged extends Update
 
   /** The node view encapsulates the rendering data. */
-  trait NodeView[S <: Sys[S], Node, Data] {
+  trait NodeView[S <: Sys[S], Node, Branch, Data] {
     def isLeaf: Boolean
     // def isExpanded: Boolean
 
     def renderData: Data
     // def modelData()(implicit tx: S#Tx): TreeLike.Node[T#Branch, T#Leaf]
     def modelData: stm.Source[S#Tx, Node]
-    def parentOption: Option[NodeView[S, Node, Data]]
+    def parentView: Option[NodeView[S, Node, Branch, Data]]
+    def parent(implicit tx: S#Tx): Branch
   }
 }
 
@@ -107,7 +108,7 @@ trait TreeTableView[S <: Sys[S], Node, Branch, Data]
   extends Disposable[S#Tx] with Model[TreeTableView.Update] {
 
   /** Opaque view type corresponding with a node in the model. */
-  type NodeView <: TreeTableView.NodeView[S, Node, Data]
+  type NodeView <: TreeTableView.NodeView[S, Node, Branch, Data]
 
   def component: Component
 

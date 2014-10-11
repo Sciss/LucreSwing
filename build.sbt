@@ -1,12 +1,12 @@
 name               := "LucreSwing"
 
-version            := "0.5.0"
+version            := "0.6.0-SNAPSHOT"
 
 organization       := "de.sciss"
 
-scalaVersion       := "2.11.2"
+scalaVersion       := "2.11.3"
 
-crossScalaVersions := Seq("2.11.2", "2.10.4")
+crossScalaVersions := Seq("2.11.3", "2.10.4")
 
 description        := "Swing support for Lucre, and common views"
 
@@ -16,7 +16,7 @@ licenses           := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-
 
 // ---- dependencies ----
 
-lazy val eventVersion     = "2.7.0"
+lazy val eventVersion     = "2.7.1"
 
 lazy val desktopVersion   = "0.6.0"
 
@@ -52,7 +52,7 @@ scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-encoding", "ut
 publishMavenStyle := true
 
 publishTo :=
-  Some(if (version.value endsWith "-SNAPSHOT")
+  Some(if (isSnapshot.value)
     "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
   else
     "Sonatype Releases"  at "https://oss.sonatype.org/service/local/staging/deploy/maven2"

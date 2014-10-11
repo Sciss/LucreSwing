@@ -14,57 +14,63 @@
 package de.sciss.lucre.swing
 package impl
 
-import scala.swing.{ScrollPane, Component}
-import de.sciss.lucre.stm.{Identifiable, Source, Disposable, IdentifierMap}
-import de.sciss.model.impl.ModelImpl
-import javax.swing.{JTable, DropMode}
-import de.sciss.treetable.{j, TreeTableSelectionChanged, TreeTableCellRenderer, TreeColumnModel, AbstractTreeModel, TreeTable}
-import de.sciss.lucre.{event => evt}
-import evt.Sys
-import TreeTableView.Handler
-import javax.swing.table.{TableCellEditor, DefaultTableCellRenderer}
-import de.sciss.lucre.stm
-import collection.breakOut
-import scala.concurrent.stm.TxnLocal
-import scala.annotation.tailrec
-import de.sciss.treetable.j.DefaultTreeTableCellEditor
-import de.sciss.treetable.j.TreeTableCellEditor
-import scala.collection.immutable.{IndexedSeq => Vec}
-import de.sciss.serial.Serializer
+import java.awt
 import java.awt.EventQueue
 import javax.swing.event.CellEditorListener
-import java.awt
-import javax.swing.CellEditor
+import javax.swing.table.{DefaultTableCellRenderer, TableCellEditor}
+import javax.swing.{CellEditor, DropMode, JTable}
+
+import de.sciss.lucre.event.Sys
+import de.sciss.lucre.stm.{Disposable, Identifiable, IdentifierMap}
+import de.sciss.lucre.swing.TreeTableView.Handler
+import de.sciss.lucre.{stm, event => evt}
+import de.sciss.model.impl.ModelImpl
+import de.sciss.serial.Serializer
 import de.sciss.treetable.TreeTable.Path
+import de.sciss.treetable.j.TreeTableCellEditor
+import de.sciss.treetable.{AbstractTreeModel, TreeColumnModel, TreeTable, TreeTableCellRenderer, TreeTableSelectionChanged, j}
+
+import scala.annotation.tailrec
+import scala.collection.breakOut
+import scala.collection.immutable.{IndexedSeq => Vec}
+import scala.concurrent.stm.TxnLocal
+import scala.swing.{Component, ScrollPane}
 
 object TreeTableViewImpl {
   var DEBUG = false
 
   private object NodeViewImpl {
-    sealed trait Base[S <: Sys[S], Node, Data] {
+    sealed trait Base[S <: Sys[S], Node, Branch, Data] {
       def isLeaf: Boolean
       def numChildren: Int
-      def parentOption1: Option[BranchOrRoot[S, Node, Data]]
+      def parentOption1: Option[BranchOrRoot[S, Node, Branch, Data]]
     }
 
-    sealed trait BranchOrRoot[S <: Sys[S], Node, Data] extends Base[S, Node, Data] {
-      var children    = Vec.empty[NodeViewImpl[S, Node, Data]]
-      def isLeaf      = false
-      def numChildren = children.size
+    sealed trait BranchOrRoot[S <: Sys[S], Node, Branch, Data] extends Base[S, Node, Branch, Data] {
+      // ---- abstract ----
+
+      def branchH: stm.Source[S#Tx, Branch]
+
+      // ---- impl ----
+
+      final var children    = Vec.empty[NodeViewImpl[S, Node, Branch, Data]]
+      final def isLeaf      = false
+      final def numChildren = children.size
     }
 
-    class Branch[S <: Sys[S], Node, Data](val parent: BranchOrRoot[S, Node, Data],
+    class BranchImpl[S <: Sys[S], Node, Branch, Data](val parentImpl: BranchOrRoot[S, Node, Branch, Data],
+                                          val branchH: stm.Source[S#Tx, Branch],
                                           val renderData: Data,
                                           val modelData: stm.Source[S#Tx, Node])
-      extends BranchOrRoot[S, Node, Data] with NodeViewImpl[S, Node, Data] {
+      extends BranchOrRoot[S, Node, Branch, Data] with NodeViewImpl[S, Node, Branch, Data] {
 
       override def toString = s"Branch($modelData, $renderData)"
     }
 
-    class Leaf[S <: Sys[S], Node, Data](val parent: BranchOrRoot[S, Node, Data],
+    class Leaf[S <: Sys[S], Node, Branch, Data](val parentImpl: BranchOrRoot[S, Node, Branch, Data],
                                         val renderData: Data,
                                         val modelData: stm.Source[S#Tx, Node])
-      extends NodeViewImpl[S, Node, Data] {
+      extends NodeViewImpl[S, Node, Branch, Data] {
 
       def isLeaf = true
       def numChildren = 0
@@ -72,29 +78,35 @@ object TreeTableViewImpl {
       override def toString = s"Leaf($modelData, $renderData)"
     }
 
-    class Root[S <: Sys[S], Node, Branch, Data](val rootH: stm.Source[S#Tx, Branch])
-      extends BranchOrRoot[S, Node, Data] {
+    class Root[S <: Sys[S], Node, Branch, Data](val branchH: stm.Source[S#Tx, Branch])
+      extends BranchOrRoot[S, Node, Branch, Data] {
 
-      def parentOption1: Option[NodeViewImpl.BranchOrRoot[S, Node, Data]] = None
+      def parentOption1: Option[NodeViewImpl.BranchOrRoot[S, Node, Branch, Data]] = None
 
       override def toString = "Root"
     }
   }
-  private sealed trait NodeViewImpl[S <: Sys[S], Node, Data]
-    extends NodeViewImpl.Base[S, Node, Data] with TreeTableView.NodeView[S, Node, Data] {
+  private sealed trait NodeViewImpl[S <: Sys[S], Node, Branch, Data]
+    extends NodeViewImpl.Base[S, Node, Branch, Data] with TreeTableView.NodeView[S, Node, Branch, Data] {
 
-    def parent: NodeViewImpl.BranchOrRoot[S, Node, Data]
+    // ---- abstract ----
+
+    def parentImpl: NodeViewImpl.BranchOrRoot[S, Node, Branch, Data]
 
     val renderData: Data
 
-    def parentOption1: Option[NodeViewImpl.BranchOrRoot[S, Node, Data]] = Some(parent)
+    def numChildren: Int
 
-    def parentOption: Option[NodeViewImpl.Branch[S, Node, Data]] = parent match {
-      case b: NodeViewImpl.Branch[S, Node, Data] => Some(b)
+    // ---- impl ----
+
+    final def parentOption1: Option[NodeViewImpl.BranchOrRoot[S, Node, Branch, Data]] = Some(parentImpl)
+
+    final def parentView: Option[NodeViewImpl.BranchImpl[S, Node, Branch, Data]] = parentImpl match {
+      case b: NodeViewImpl.BranchImpl[S, Node, Branch, Data] => Some(b)
       case _ => None
     }
 
-    def numChildren: Int
+    final def parent(implicit tx: S#Tx): Branch = parentImpl.branchH()
   }
 
   def apply[S <: Sys[S], Node <: Identifiable[S#ID], Branch <: evt.Publisher[S, U] with Identifiable[S#ID], U, Data](
@@ -124,15 +136,15 @@ object TreeTableViewImpl {
   }
 
   private abstract class Impl[S <: Sys[S], Node <: Identifiable[S#ID], Branch <: evt.Publisher[S, U] with Identifiable[S#ID], U, Data](
-      implicit nodeSerializer: Serializer[S#Tx, S#Acc, Node])
+      implicit nodeSerializer: Serializer[S#Tx, S#Acc, Node], branchSerializer: Serializer[S#Tx, S#Acc, Branch])
     extends ComponentHolder[Component] with TreeTableView[S, Node, Branch, Data] with ModelImpl[TreeTableView.Update] {
     view =>
 
-    type VBranch  = NodeViewImpl.Branch       [S, Node, Data]
-    type VBranchL = NodeViewImpl.BranchOrRoot [S, Node, Data]
-    type VLeaf    = NodeViewImpl.Leaf         [S, Node, Data]
-    type VNode    = NodeViewImpl              [S, Node, Data]
-    type VNodeL   = NodeViewImpl.Base         [S, Node, Data]
+    type VBranch  = NodeViewImpl.BranchImpl   [S, Node, Branch, Data]
+    type VBranchL = NodeViewImpl.BranchOrRoot [S, Node, Branch, Data]
+    type VLeaf    = NodeViewImpl.Leaf         [S, Node, Branch, Data]
+    type VNode    = NodeViewImpl              [S, Node, Branch, Data]
+    type VNodeL   = NodeViewImpl.Base         [S, Node, Branch, Data]
     type VRoot    = NodeViewImpl.Root         [S, Node, Branch, Data]
     type TPath    = TreeTable.Path[VBranch]
 
@@ -146,7 +158,7 @@ object TreeTableViewImpl {
 
     private val didInsert = TxnLocal(false)
 
-    def root: stm.Source[S#Tx, Branch] = rootView.rootH
+    def root: stm.Source[S#Tx, Branch] = rootView.branchH
 
     def nodeView(node: Node)(implicit tx: S#Tx): Option[NodeView] = mapViews.get(node.id)
 
@@ -247,10 +259,10 @@ object TreeTableViewImpl {
         case singleView :: Nil =>
           val single = singleView.modelData()
           handler.branchOption(single).fold[(Branch, Int)] {
-            val parentView    = singleView.parent // Option.getOrElse(rootView)
+            val parentView    = singleView.parentImpl // Option.getOrElse(rootView)
             val parentBranch  = parentView match {
               case b: VBranch => handler.branchOption(b.modelData()).getOrElse(throw new IllegalStateException())
-              case r: VRoot   => r.rootH()
+              case r: VRoot   => r.branchH()
             }
             val idx = handler.children(parentBranch).toIndexedSeq.indexOf(single) + 1
             (parentBranch, idx)
@@ -261,7 +273,7 @@ object TreeTableViewImpl {
           }
 
         case _ =>
-          val parentBranch  = rootView.rootH()
+          val parentBranch  = rootView.branchH()
           val idx           = handler.children(parentBranch).toIndexedSeq.size
           (parentBranch, idx)
       }
@@ -317,7 +329,7 @@ object TreeTableViewImpl {
         addView(id, _v)
         _v
       } { branch =>
-        val _v = new NodeViewImpl.Branch(parent, data, src)
+        val _v = new NodeViewImpl.BranchImpl(parent, tx.newHandle(branch), data, src)
         addView(id, _v)
         mapBranches.put(branch.id, _v)
         val it = handler.children(branch)
@@ -394,7 +406,7 @@ object TreeTableViewImpl {
 
       def withParentView(parent: Branch)(fun: VBranchL => Unit): Unit = {
         val parentID = parent.id // handler.nodeID(parent)
-        mapBranches.get(parentID).fold(warnNoView(parent))(fun(_))
+        mapBranches.get(parentID).fold(warnNoView(parent))(fun.apply)
       }
 
       mUpd0.foreach {
