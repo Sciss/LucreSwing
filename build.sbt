@@ -4,9 +4,9 @@ version            := "0.6.0-SNAPSHOT"
 
 organization       := "de.sciss"
 
-scalaVersion       := "2.11.3"
+scalaVersion       := "2.11.2"
 
-crossScalaVersions := Seq("2.11.3", "2.10.4")
+crossScalaVersions := Seq("2.11.2", "2.10.4")
 
 description        := "Swing support for Lucre, and common views"
 
