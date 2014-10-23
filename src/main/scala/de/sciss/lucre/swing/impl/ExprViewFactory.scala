@@ -55,7 +55,7 @@ trait ExprViewFactory[A] {
   protected def mkExprObserver[S <: Sys[S]](expr: Expr[S, A], view: ExprViewFactory.View[A])
                                            (implicit tx: S#Tx): Disposable[S#Tx] =
     expr.changed.react {
-      implicit tx => upd => view.update(upd.now)
+      implicit tx => upd => deferTx(view.update(upd.now))
     }
 
   protected def mkMapCommitter[S <: Sys[S], K](map: expr.Map[S, K, Expr[S, A], Change[A]], key: K, default: A,
@@ -81,9 +81,9 @@ trait ExprViewFactory[A] {
                                            (implicit tx: S#Tx): Disposable[S#Tx] =
     map.changed.react {
       implicit tx => upd => upd.changes.foreach {
-        case expr.Map.Added  (`key`, expr)                  => view.update(expr.value)
+        case expr.Map.Added  (`key`, expr)                  => deferTx(view.update(expr.value))
         // case expr.Map.Removed(`key`, expr)                  => res.update(ha?)
-        case expr.Map.Element(`key`, expr, Change(_, now))  => view.update(now       )
+        case expr.Map.Element(`key`, expr, Change(_, now))  => deferTx(view.update(now))
         case _ =>
       }
     }
