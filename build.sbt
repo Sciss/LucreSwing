@@ -1,6 +1,6 @@
 name               := "LucreSwing"
 
-version            := "0.6.1-SNAPSHOT"
+version            := "0.6.1"
 
 organization       := "de.sciss"
 
@@ -26,7 +26,7 @@ lazy val treeTableVersion = "1.3.7"
 
 // ---- test-only ----
 
-lazy val stmVersion       = "2.1.0"
+lazy val stmVersion       = "2.1.1"
 
 lazy val fileUtilVersion  = "1.1.1"
 
