@@ -1,12 +1,12 @@
 name               := "LucreSwing"
 
-version            := "0.6.1"
+version            := "0.6.2"
 
 organization       := "de.sciss"
 
-scalaVersion       := "2.11.2"
+scalaVersion       := "2.11.4"
 
-crossScalaVersions := Seq("2.11.2", "2.10.4")
+crossScalaVersions := Seq("2.11.4", "2.10.4")
 
 description        := "Swing support for Lucre, and common views"
 

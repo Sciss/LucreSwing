@@ -81,9 +81,11 @@ trait ExprViewFactory[A] {
                                            (implicit tx: S#Tx): Disposable[S#Tx] =
     map.changed.react {
       implicit tx => upd => upd.changes.foreach {
-        case expr.Map.Added  (`key`, expr)                  => deferTx(view.update(expr.value))
-        // case expr.Map.Removed(`key`, expr)                  => res.update(ha?)
-        case expr.Map.Element(`key`, expr, Change(_, now))  => deferTx(view.update(now))
+        case expr.Map.Added  (`key`, expr) =>
+          val now = expr.value
+          deferTx(view.update(now))
+        case expr.Map.Element(`key`, expr, Change(_, now)) =>
+          deferTx(view.update(now))
         case _ =>
       }
     }
