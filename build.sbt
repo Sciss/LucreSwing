@@ -1,6 +1,6 @@
 name               := "LucreSwing"
 
-version            := "0.7.0"
+version            := "0.8.0"
 
 organization       := "de.sciss"
 
@@ -18,9 +18,9 @@ licenses           := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-
 
 lazy val eventVersion     = "2.7.2"
 
-lazy val desktopVersion   = "0.6.0"
+lazy val desktopVersion   = "0.7.0"
 
-lazy val widgetsVersion   = "1.8.0"
+lazy val widgetsVersion   = "1.9.0"
 
 lazy val treeTableVersion = "1.3.7"
 
