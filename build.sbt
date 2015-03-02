@@ -32,6 +32,7 @@ lazy val fileUtilVersion  = "1.1.1"
 
 lazy val webLaFVersion    = "1.28"
 
+resolvers += "Oracle Repository" at "http://download.oracle.com/maven" // required for lucrestm-bdb
 
 libraryDependencies ++= Seq(
   "de.sciss" %% "lucreevent"         % eventVersion,
