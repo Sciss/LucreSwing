@@ -13,16 +13,16 @@
 
 package de.sciss.lucre.swing
 
-import swing.Component
-import de.sciss.lucre.{stm, expr, event => evt}
-import evt.Sys
-import stm.{Cursor, Disposable}
-import expr.List
-import impl.{ListViewImpl => Impl}
-import de.sciss.serial.Serializer
+import de.sciss.lucre.event.Sys
+import de.sciss.lucre.expr.List
+import de.sciss.lucre.stm.{Cursor, Disposable}
+import de.sciss.lucre.swing.impl.{ListViewImpl => Impl}
 import de.sciss.model.Model
-import scala.collection.immutable.{IndexedSeq => Vec}
+import de.sciss.serial.Serializer
 import de.sciss.swingplus
+
+import scala.collection.immutable.{IndexedSeq => Vec}
+import scala.swing.Component
 
 object ListView {
   object Handler {

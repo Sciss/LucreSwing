@@ -14,17 +14,18 @@
 package de.sciss.lucre.swing
 package impl
 
-import de.sciss.lucre.event.Sys
-import de.sciss.audiowidgets.{DualRangeSlider, DualRangeModel}
-import de.sciss.lucre.stm
-import de.sciss.desktop.UndoManager
-import de.sciss.lucre.expr.Expr
-import scala.concurrent.stm.{TxnLocal, Ref}
-import de.sciss.model.Change
-import de.sciss.lucre
-import scala.swing.Swing
-import de.sciss.lucre.swing.edit.EditVar
 import javax.swing.undo.UndoableEdit
+
+import de.sciss.audiowidgets.{DualRangeModel, DualRangeSlider}
+import de.sciss.desktop.UndoManager
+import de.sciss.lucre
+import de.sciss.lucre.event.Sys
+import de.sciss.lucre.expr.Expr
+import de.sciss.lucre.stm
+import de.sciss.lucre.swing.edit.EditVar
+
+import scala.concurrent.stm.{Ref, TxnLocal}
+import scala.swing.Swing
 
 object IntRangeSliderViewImpl {
   def apply[S <: Sys[S]](model0: DualRangeModel, name: String, width: Int = 160)
@@ -49,7 +50,7 @@ object IntRangeSliderViewImpl {
                                  (implicit cursor: stm.Cursor[S], undo: UndoManager)
     extends IntRangeSliderView[S] with ComponentHolder[DualRangeSlider] {
 
-    import lucre.expr.Int.{serializer, varSerializer}
+    import de.sciss.lucre.expr.Int.{serializer, varSerializer}
 
     type Obs    = Observation[S, Expr[S, Int]]
     type ObsOpt = Option[Obs]

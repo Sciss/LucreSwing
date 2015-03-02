@@ -15,12 +15,12 @@ package de.sciss.lucre
 package swing
 package impl
 
-import de.sciss.lucre.event.Sys
-import de.sciss.lucre.stm.Disposable
-import de.sciss.lucre.expr.Expr
-import de.sciss.desktop.UndoManager
-import de.sciss.lucre.{expr, stm}
 import javax.swing.SpinnerNumberModel
+
+import de.sciss.desktop.UndoManager
+import de.sciss.lucre.event.Sys
+import de.sciss.lucre.expr.Expr
+import de.sciss.lucre.stm.Disposable
 import de.sciss.model.Change
 import de.sciss.serial.Serializer
 

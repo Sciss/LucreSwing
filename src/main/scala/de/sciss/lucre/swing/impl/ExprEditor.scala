@@ -15,11 +15,12 @@ package de.sciss.lucre
 package swing
 package impl
 
-import scala.swing.{TextComponent, Component}
-import de.sciss.lucre.stm.Disposable
 import javax.swing.event.{UndoableEditEvent, UndoableEditListener}
+
 import de.sciss.lucre.event.Sys
-import java.awt.event.{KeyEvent, KeyListener, FocusEvent, FocusListener}
+import de.sciss.lucre.stm.Disposable
+
+import scala.swing.{Component, TextComponent}
 
 trait ExprEditor[S <: Sys[S], A, Comp <: Component]
   extends View[S] with ComponentHolder[Comp] with ExprViewFactory.View[A] {

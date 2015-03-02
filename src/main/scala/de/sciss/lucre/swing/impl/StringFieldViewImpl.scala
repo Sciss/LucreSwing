@@ -15,18 +15,18 @@ package de.sciss.lucre
 package swing
 package impl
 
-import scala.swing.{Action, TextField}
-import de.sciss.lucre.event.Sys
-import de.sciss.lucre.stm.Disposable
-import de.sciss.lucre.stm
+import java.awt.event.KeyEvent
+import javax.swing.KeyStroke
+
 import de.sciss.desktop.UndoManager
-import scala.swing.event.EditDone
-import de.sciss.lucre.expr
-import expr.Expr
+import de.sciss.lucre.event.Sys
+import de.sciss.lucre.expr.Expr
+import de.sciss.lucre.stm.Disposable
 import de.sciss.model.Change
 import de.sciss.serial.Serializer
-import javax.swing.KeyStroke
-import java.awt.event.KeyEvent
+
+import scala.swing.event.EditDone
+import scala.swing.{Action, TextField}
 
 object StringFieldViewImpl extends ExprViewFactory[String] {
   def fromExpr[S <: Sys[S]](_expr: Expr[S, String], name: String, columns: Int)

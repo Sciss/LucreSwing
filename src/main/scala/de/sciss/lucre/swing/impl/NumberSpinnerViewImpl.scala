@@ -14,15 +14,17 @@
 package de.sciss.lucre.swing
 package impl
 
-import de.sciss.lucre.event.Sys
-import de.sciss.lucre.{expr, stm}
-import de.sciss.desktop.UndoManager
-import de.sciss.swingplus.Spinner
-import de.sciss.lucre.stm.Disposable
-import javax.swing.{KeyStroke, JSpinner, SpinnerNumberModel}
-import scala.swing.{Swing, Component, Action, TextField, TextComponent}
-import scala.swing.event.{FocusLost, KeyPressed, KeyTyped, EditDone, ValueChanged}
 import java.awt.event.KeyEvent
+import javax.swing.{JSpinner, KeyStroke, SpinnerNumberModel}
+
+import de.sciss.desktop.UndoManager
+import de.sciss.lucre.event.Sys
+import de.sciss.lucre.stm
+import de.sciss.lucre.stm.Disposable
+import de.sciss.swingplus.Spinner
+
+import scala.swing.event.{FocusLost, KeyTyped, ValueChanged}
+import scala.swing.{Action, Component, Swing, TextComponent}
 
 abstract class NumberSpinnerViewImpl[S <: Sys[S], A](maxWidth: Int)
                                                     (implicit cursor: stm.Cursor[S], undoManager: UndoManager)

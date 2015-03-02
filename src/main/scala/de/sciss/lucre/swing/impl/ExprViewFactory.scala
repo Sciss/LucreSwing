@@ -14,15 +14,17 @@
 package de.sciss.lucre.swing
 package impl
 
+import javax.swing.undo.UndoableEdit
+
 import de.sciss.lucre.event.Sys
 import de.sciss.lucre.expr.{Expr, ExprType}
-import de.sciss.lucre.{expr, stm}
-import javax.swing.undo.UndoableEdit
+import de.sciss.lucre.stm.Disposable
 import de.sciss.lucre.swing.edit.{EditExprMap, EditVar}
+import de.sciss.lucre.{expr, stm}
 import de.sciss.model.Change
 import de.sciss.serial.Serializer
-import language.{existentials, higherKinds}
-import de.sciss.lucre.stm.Disposable
+
+import scala.language.{existentials, higherKinds}
 
 object ExprViewFactory {
   trait View[A] {
@@ -34,12 +36,12 @@ object ExprViewFactory {
   }
 }
 trait ExprViewFactory[A] {
-  import ExprViewFactory.Committer
+  import de.sciss.lucre.swing.impl.ExprViewFactory.Committer
 
   protected def mkExprCommitter[S <: Sys[S]](expr: Expr[S, A], name: String)
                                             (implicit tx: S#Tx, cursor: stm.Cursor[S],
                                              tpe: ExprType[A]): (A, Option[Committer[S, A]]) = {
-    import tpe.{serializer, varSerializer, newConst}
+    import tpe.{newConst, serializer, varSerializer}
     val com = Expr.Var.unapply(expr).map { vr =>
       val exprVarH = tx.newHandle(vr)
       new Committer[S, A] {
@@ -63,7 +65,7 @@ trait ExprViewFactory[A] {
                                             (implicit tx: S#Tx, cursor: stm.Cursor[S],
                                              keySerializer: Serializer[S#Tx, S#Acc, K],
                                              tpe: ExprType[A]): (A, Option[Committer[S, A]]) = {
-    import tpe.{serializer, newConst}
+    import tpe.{newConst, serializer}
     val com = map.modifiableOption.map { mapMod =>
       val mapH = tx.newHandle(mapMod)
       new Committer[S, A] {

@@ -13,17 +13,18 @@
 
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.{event => evt}
-import evt.Sys
-import de.sciss.treetable.{TreeTable, TreeTableCellRenderer}
-import scala.swing.Component
-import de.sciss.model.Model
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Identifiable, Disposable}
-import de.sciss.serial.Serializer
-import impl.{TreeTableViewImpl => Impl}
-import scala.collection.immutable.{IndexedSeq => Vec}
 import javax.swing.CellEditor
+
+import de.sciss.lucre.event.Sys
+import de.sciss.lucre.stm.{Disposable, Identifiable}
+import de.sciss.lucre.swing.impl.{TreeTableViewImpl => Impl}
+import de.sciss.lucre.{event => evt, stm}
+import de.sciss.model.Model
+import de.sciss.serial.Serializer
+import de.sciss.treetable.{TreeTable, TreeTableCellRenderer}
+
+import scala.collection.immutable.{IndexedSeq => Vec}
+import scala.swing.Component
 
 object TreeTableView {
   sealed trait ModelUpdate[/*+ */Node, +Branch]

@@ -15,19 +15,18 @@ package de.sciss.lucre
 package swing
 package impl
 
-import de.sciss.lucre.{event => evt}
-import evt.Sys
-import stm.Cursor
-import expr.List
-import scala.swing.{ScrollPane, Component}
-import concurrent.stm.Ref
-import scala.swing.event.ListSelectionChanged
-import de.sciss.serial.Serializer
+import de.sciss.lucre.event.Sys
+import de.sciss.lucre.expr.List
+import de.sciss.lucre.stm.Cursor
 import de.sciss.lucre.swing.ListView.Handler
 import de.sciss.model.impl.ModelImpl
-import scala.collection.immutable.{IndexedSeq => Vec}
+import de.sciss.serial.Serializer
 import de.sciss.swingplus
-import swingplus.Implicits._
+
+import scala.collection.immutable.{IndexedSeq => Vec}
+import scala.concurrent.stm.Ref
+import scala.swing.event.ListSelectionChanged
+import scala.swing.{Component, ScrollPane}
 
 object ListViewImpl {
   def empty[S <: Sys[S], Elem, U, Data](handler: Handler[S, Elem, U, Data])

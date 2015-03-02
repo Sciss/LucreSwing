@@ -15,10 +15,11 @@ package de.sciss.lucre
 package swing
 package impl
 
+import java.awt.geom.{AffineTransform, GeneralPath, Path2D}
+import java.awt.{Color, Graphics, Graphics2D, RenderingHints, Shape}
 import javax.swing.border.Border
-import java.awt.{Color, Graphics2D, RenderingHints, Shape, Graphics}
+
 import scala.swing.{Component, Insets, Swing}
-import java.awt.geom.{GeneralPath, AffineTransform, Path2D}
 
 object DirtyBorder {
   def apply(component: Component): DirtyBorder = {

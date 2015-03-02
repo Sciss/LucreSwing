@@ -13,16 +13,18 @@
 
 package de.sciss.lucre
 
-import de.sciss.lucre.stm.TxnLike
 import java.awt.EventQueue
-import scala.swing.Swing
-import scala.concurrent.stm.{TxnLocal, Txn}
-import scala.util.control.NonFatal
-import scala.collection.immutable.{IndexedSeq => Vec}
+import java.text.SimpleDateFormat
+import java.util.{Date, Locale}
+
+import de.sciss.lucre.stm.TxnLike
+
 import scala.annotation.elidable
 import scala.annotation.elidable._
-import java.util.{Locale, Date}
-import java.text.SimpleDateFormat
+import scala.collection.immutable.{IndexedSeq => Vec}
+import scala.concurrent.stm.{Txn, TxnLocal}
+import scala.swing.Swing
+import scala.util.control.NonFatal
 
 package object swing {
   private[this] val guiCode = TxnLocal(init = Vec.empty[() => Unit], afterCommit = handleGUI)

@@ -13,12 +13,13 @@
 
 package de.sciss.lucre.swing
 
+import de.sciss.desktop.UndoManager
 import de.sciss.lucre.event.Sys
 import de.sciss.lucre.stm
-import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm.Disposable
-import scala.swing.Component
 import de.sciss.lucre.swing.impl.ComponentHolder
+
+import scala.swing.Component
 
 object View {
   trait Cursor[S <: Sys[S]] extends View[S] {
