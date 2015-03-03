@@ -28,19 +28,12 @@ object BooleanCheckBoxView {
   def apply[S <: Sys[S]](expr: Expr[S, Boolean], name: String)
                         (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): BooleanCheckBoxView[S] = {
     implicit val booleanEx = de.sciss.lucre.expr.Boolean
-    Impl.apply(CellView.expr(expr), name = name)
+    Impl(CellView.expr(expr), name = name)
   }
 
   def cell[S <: Sys[S]](cell: CellView[S#Tx, Boolean], name: String)
                         (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): BooleanCheckBoxView[S] =
-    Impl.apply(cell, name = name)
-
-  /** Creates a new view from a map entry. The check box's label will initially be set to `name`. */
-  def fromMap[S <: Sys[S], A](map: expr.Map[S, A, Expr[S, Boolean], Change[Boolean]], key: A, default: Boolean,
-                              name: String)
-                             (implicit tx: S#Tx, keySerializer: Serializer[S#Tx, S#Acc, A],
-                              cursor: stm.Cursor[S], undoManager: UndoManager): BooleanCheckBoxView[S] =
-    Impl.fromMap(map, key = key, default = default, name = name)
+    Impl(cell, name = name)
 }
 trait BooleanCheckBoxView[S <: Sys[S]] extends View[S] {
   override def component: CheckBox

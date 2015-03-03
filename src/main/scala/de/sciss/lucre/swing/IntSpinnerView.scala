@@ -13,26 +13,23 @@
 
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.event.Sys
-import de.sciss.swingplus.Spinner
-import impl.{IntSpinnerViewImpl => Impl}
-import de.sciss.model.Change
-import de.sciss.serial.Serializer
 import de.sciss.desktop.UndoManager
+import de.sciss.lucre.event.Sys
+import de.sciss.lucre.expr.Expr
 import de.sciss.lucre.stm
-import de.sciss.lucre.expr
-import expr.Expr
+import de.sciss.lucre.swing.impl.{IntSpinnerViewImpl => Impl}
+import de.sciss.swingplus.Spinner
 
 object IntSpinnerView {
   def apply[S <: Sys[S]](expr: Expr[S, Int], name: String, width: Int = 160)
-                        (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): IntSpinnerView[S] =
-    Impl.fromExpr(expr, name = name, width = width)
+                        (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): IntSpinnerView[S] = {
+    implicit val intEx = de.sciss.lucre.expr.Int
+    Impl(CellView.expr(expr), name = name, width = width)
+  }
 
-  def fromMap[S <: Sys[S], A](map: expr.Map[S, A, Expr[S, Int], Change[Int]], key: A, default: Int,
-                              name: String, width: Int = 160)
-                             (implicit tx: S#Tx, keySerializer: Serializer[S#Tx, S#Acc, A],
-                              cursor: stm.Cursor[S], undoManager: UndoManager): IntSpinnerView[S] =
-    Impl.fromMap(map, key = key, default = default, name = name, width = width)
+  def cell[S <: Sys[S]](cell: CellView[S#Tx, Int], name: String, width: Int = 160)
+                        (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): IntSpinnerView[S] =
+    Impl(cell, name = name, width = width)
 }
 trait IntSpinnerView[S <: Sys[S]] extends View[S] {
   override def component: Spinner

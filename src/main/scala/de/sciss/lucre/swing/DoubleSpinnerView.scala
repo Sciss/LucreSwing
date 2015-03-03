@@ -23,12 +23,12 @@ import de.sciss.swingplus.Spinner
 object DoubleSpinnerView {
   def cell[S <: Sys[S]](cell: CellView[S#Tx, Double], name: String, width: Int = 160)
                         (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): DoubleSpinnerView[S] =
-    Impl.apply(cell, name = name, width = width)
+    Impl(cell, name = name, width = width)
 
   def apply[S <: Sys[S]](expr: Expr[S, Double], name: String, width: Int = 160)
                         (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): DoubleSpinnerView[S] = {
     implicit val doubleEx = de.sciss.lucre.expr.Double
-    Impl.apply(CellView.expr(expr), name = name, width = width)
+    Impl(CellView.expr(expr), name = name, width = width)
   }
 }
 trait DoubleSpinnerView[S <: Sys[S]] extends View[S] {

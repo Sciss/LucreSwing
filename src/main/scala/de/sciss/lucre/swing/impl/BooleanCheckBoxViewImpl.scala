@@ -17,10 +17,7 @@ package impl
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.event.Sys
-import de.sciss.lucre.expr.Expr
 import de.sciss.lucre.stm.Disposable
-import de.sciss.model.Change
-import de.sciss.serial.Serializer
 
 import scala.swing.CheckBox
 import scala.swing.event.ButtonClicked
@@ -33,21 +30,6 @@ object BooleanCheckBoxViewImpl extends CellViewFactory[Boolean] {
       impl =>
       protected var (value, committer)          = mkCommitter(cell, name)(tx, cursor)
       protected val observer: Disposable[S#Tx]  = mkObserver (cell, impl)
-    }
-
-    deferTx(res.guiInit())
-    res
-  }
-
-  def fromMap[S <: Sys[S], A](map: expr.Map[S, A, Expr[S, Boolean], Change[Boolean]], key: A, default: Boolean,
-                              name: String)
-                             (implicit tx: S#Tx, keySerializer: Serializer[S#Tx, S#Acc, A],
-                              cursor: stm.Cursor[S], undoManager: UndoManager): BooleanCheckBoxView[S] = {
-    val res = new Impl[S](editName = name) {
-      impl =>
-      protected var (value, committer)          = mkMapCommitter(map, key, default, name)(
-        tx, cursor, keySerializer, expr.Boolean)
-      protected val observer: Disposable[S#Tx]  = mkMapObserver (map, key, impl)
     }
 
     deferTx(res.guiInit())

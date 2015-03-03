@@ -19,35 +19,16 @@ import javax.swing.SpinnerNumberModel
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.event.Sys
-import de.sciss.lucre.expr.Expr
 import de.sciss.lucre.stm.Disposable
-import de.sciss.model.Change
-import de.sciss.serial.Serializer
 
 object IntSpinnerViewImpl extends CellViewFactory[Int] {
-  def fromExpr[S <: Sys[S]](_expr: Expr[S, Int], name: String, width: Int)
-                           (implicit tx: S#Tx, cursor: stm.Cursor[S],
-                            undoManager: UndoManager): IntSpinnerView[S] = {
-    ???
-//    val res = new Impl[S](maxWidth = width) {
-//      impl =>
-//      protected var (value, committer)          = mkCommitter(_expr, name)(tx, cursor, expr.Int)
-//      protected val observer: Disposable[S#Tx]  = mkExprObserver (_expr, impl)
-//    }
-//
-//    deferTx(res.guiInit())
-//    res
-  }
-
-  def fromMap[S <: Sys[S], A](map: expr.Map[S, A, Expr[S, Int], Change[Int]], key: A, default: Int,
-                              name: String, width: Int)
-                             (implicit tx: S#Tx, keySerializer: Serializer[S#Tx, S#Acc, A],
-                              cursor: stm.Cursor[S], undoManager: UndoManager): IntSpinnerView[S] = {
+  def apply[S <: Sys[S]](cell: CellView[S#Tx, Int], name: String, width: Int)
+                        (implicit tx: S#Tx, cursor: stm.Cursor[S],
+                         undoManager: UndoManager): IntSpinnerView[S] = {
     val res = new Impl[S](maxWidth = width) {
       impl =>
-      protected var (value, committer)          = mkMapCommitter(map, key, default, name)(
-        tx, cursor, keySerializer, expr.Int)
-      protected val observer: Disposable[S#Tx]  = mkMapObserver (map, key, impl)
+      protected var (value, committer)          = mkCommitter(cell, name)(tx, cursor)
+      protected val observer: Disposable[S#Tx]  = mkObserver (cell, impl)
     }
 
     deferTx(res.guiInit())

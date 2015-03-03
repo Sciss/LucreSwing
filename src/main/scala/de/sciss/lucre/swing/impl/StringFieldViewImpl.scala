@@ -20,44 +20,25 @@ import javax.swing.KeyStroke
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.event.Sys
-import de.sciss.lucre.expr.Expr
 import de.sciss.lucre.stm.Disposable
-import de.sciss.model.Change
-import de.sciss.serial.Serializer
 
 import scala.swing.event.EditDone
 import scala.swing.{Action, TextField}
 
 object StringFieldViewImpl extends CellViewFactory[String] {
-  def fromExpr[S <: Sys[S]](_expr: Expr[S, String], name: String, columns: Int)
-                           (implicit tx: S#Tx, cursor: stm.Cursor[S],
-                            undoManager: UndoManager): StringFieldView[S] = {
-    ???
-//    val res = new Impl[S](editName = name, columns0 = columns) {
-//      impl =>
-//      protected var (value, committer)          = mkCommitter(_expr, name)(tx, cursor, expr.String)
-//      protected val observer: Disposable[S#Tx]  = mkExprObserver (_expr, impl)
-//    }
-//
-//    deferTx(res.guiInit())
-//    res
-  }
-
-  def fromMap[S <: Sys[S], A](map: expr.Map[S, A, Expr[S, String], Change[String]], key: A, default: String,
-                              name: String, columns: Int)
-                             (implicit tx: S#Tx, keySerializer: Serializer[S#Tx, S#Acc, A],
-                              cursor: stm.Cursor[S], undoManager: UndoManager): StringFieldView[S] = {
+  def apply[S <: Sys[S]](cell: CellView[S#Tx, String], name: String, columns: Int)
+                        (implicit tx: S#Tx, cursor: stm.Cursor[S],
+                         undoManager: UndoManager): StringFieldView[S] = {
     val res = new Impl[S](editName = name, columns0 = columns) {
       impl =>
-      protected var (value, committer)          = mkMapCommitter(map, key, default, name)(
-        tx, cursor, keySerializer, expr.String)
-      protected val observer: Disposable[S#Tx]  = mkMapObserver (map, key, impl)
+      protected var (value, committer)          = mkCommitter(cell, name)(tx, cursor)
+      protected val observer: Disposable[S#Tx]  = mkObserver (cell, impl)
     }
 
     deferTx(res.guiInit())
     res
   }
-
+  
   private abstract class Impl[S <: Sys[S]](editName: String, columns0: Int)
                                        (implicit cursor: stm.Cursor[S], undoManager: UndoManager)
     extends StringFieldView[S] with ExprEditor[S, String, TextField] {
