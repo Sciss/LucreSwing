@@ -16,12 +16,9 @@ package swing
 package impl
 
 import de.sciss.lucre.event.Sys
-import de.sciss.lucre.event.impl.ObservableImpl
 import de.sciss.lucre.expr.ExprType
 import de.sciss.lucre.stm.Disposable
-import de.sciss.serial.{ImmutableSerializer, Serializer}
-
-import scala.concurrent.stm.Ref
+import de.sciss.serial.Serializer
 
 object CellViewImpl {
   trait Basic[Tx, A] extends CellView[Tx, A] {
@@ -47,6 +44,7 @@ object CellViewImpl {
 
     type Repr = expr.Expr[S, A]
 
+    // XXX TODO -- DRY with `Expr`
     def react(fun: S#Tx => A => Unit)(implicit tx: S#Tx): Disposable[S#Tx] =
       h().changed.react { implicit tx => ch => fun(tx)(ch.now) }
 
@@ -90,22 +88,22 @@ object CellViewImpl {
     def apply()(implicit tx: Tx): A = value
   }
 
-  private[swing] final class Var[S <: Sys[S], A](init: A)
-    extends NoVar[S#Tx, A] with CellView.Var[S, A] with ObservableImpl[S, A] {
-
-    private val ref = Ref(init)
-
-    def apply()(implicit tx: S#Tx): A = ref.get(tx.peer)
-
-    def update(v: A)(implicit tx: S#Tx): Unit = {
-      val old = ref.swap(v)(tx.peer)
-      if (v != old) fire(v)
-    }
-
-    def lift(value: A)(implicit tx: S#Tx) = ()
-
-    def repr_=(value: Repr)(implicit tx: S#Tx) = ()
-
-    def serializer: Serializer[S#Tx, S#Acc, Repr] = ImmutableSerializer.Unit
-  }
+  //  private[swing] final class Var[S <: Sys[S], A](init: A)
+  //    extends NoVar[S#Tx, A] with CellView.Var[S, A] with ObservableImpl[S, A] {
+  //
+  //    private val ref = Ref(init)
+  //
+  //    def apply()(implicit tx: S#Tx): A = ref.get(tx.peer)
+  //
+  //    def update(v: A)(implicit tx: S#Tx): Unit = {
+  //      val old = ref.swap(v)(tx.peer)
+  //      if (v != old) fire(v)
+  //    }
+  //
+  //    def lift(value: A)(implicit tx: S#Tx) = ()
+  //
+  //    def repr_=(value: Repr)(implicit tx: S#Tx) = ()
+  //
+  //    def serializer: Serializer[S#Tx, S#Acc, Repr] = ImmutableSerializer.Unit
+  //  }
 }

@@ -19,35 +19,16 @@ import javax.swing.SpinnerNumberModel
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.event.Sys
-import de.sciss.lucre.expr.Expr
 import de.sciss.lucre.stm.Disposable
-import de.sciss.model.Change
-import de.sciss.serial.Serializer
 
 object DoubleSpinnerViewImpl extends CellViewFactory[Double] {
   def apply[S <: Sys[S]](_cell: CellView[S#Tx, Double], name: String, width: Int)
                            (implicit tx: S#Tx, cursor: stm.Cursor[S],
                             undoManager: UndoManager): DoubleSpinnerView[S] = {
-    ???
-//    val res = new Impl[S](maxWidth = width) {
-//      impl =>
-//      protected var (value, committer)          = mkCommitter(_cell, name)(tx, cursor, expr.Double)
-//      protected val observer: Disposable[S#Tx]  = mkExprObserver (_cell, impl)
-//    }
-//
-//    deferTx(res.guiInit())
-//    res
-  }
-
-  def fromMap[S <: Sys[S], A](map: expr.Map[S, A, Expr[S, Double], Change[Double]], key: A, default: Double,
-                             name: String, width: Int)
-                            (implicit tx: S#Tx, keySerializer: Serializer[S#Tx, S#Acc, A],
-                             cursor: stm.Cursor[S], undoManager: UndoManager): DoubleSpinnerView[S] = {
     val res = new Impl[S](maxWidth = width) {
       impl =>
-      protected var (value, committer)          = mkMapCommitter(map, key, default, name)(
-                                                    tx, cursor, keySerializer, expr.Double)
-      protected val observer: Disposable[S#Tx]  = mkMapObserver (map, key, impl)
+      protected var (value, committer)          = mkCommitter(_cell, name)(tx, cursor)
+      protected val observer: Disposable[S#Tx]  = mkObserver (_cell, impl)
     }
 
     deferTx(res.guiInit())

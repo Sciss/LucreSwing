@@ -34,7 +34,6 @@ object CellView {
     }
   }
 
-
   def exprLike[S <: Sys[S], A, Ex <: Expr[S, A]](x: Ex)
                                                 (implicit tx: S#Tx,
                                                  serializer: Serializer[S#Tx, S#Acc, Ex]): CellView[S#Tx, A] { type Repr = Ex } =
@@ -42,8 +41,8 @@ object CellView {
 
   def const[S <: Sys[S], A](value: A): CellView[S#Tx, A] = new Impl.Const(value)
 
-  /** Creates a view with an in-memory variable. */
-  def apply[S <: Sys[S], A](init: A)(implicit tx: S#Tx): Var[S, A] = new Impl.Var(init)
+  //  /** Creates a view with an in-memory variable. */
+  //  def apply[S <: Sys[S], A](init: A)(implicit tx: S#Tx): Var[S, A] = new Impl.Var(init)
 
   object Var {
     def unapply[S <: Sys[S], A](view: CellView[S#Tx, A]): Option[Var[S, A]] = view match {

@@ -50,10 +50,10 @@ trait CellViewFactory[A] {
     (value0, com)
   }
 
-  protected def mkExprObserver[S <: Sys[S]](expr: Expr[S, A], view: CellViewFactory.View[A])
-                                           (implicit tx: S#Tx): Disposable[S#Tx] =
-    expr.changed.react {
-      implicit tx => upd => deferTx(view.update(upd.now))
+  protected def mkObserver[S <: Sys[S]](cell: CellView[S#Tx, A], view: CellViewFactory.View[A])
+                                       (implicit tx: S#Tx): Disposable[S#Tx] =
+    cell.react {
+      implicit tx => upd => deferTx(view.update(upd))
     }
 
   protected def mkMapCommitter[S <: Sys[S], K](map: expr.Map[S, K, Expr[S, A], Change[A]], key: K, default: A,
