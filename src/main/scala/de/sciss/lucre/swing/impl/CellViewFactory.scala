@@ -19,14 +19,14 @@ import javax.swing.undo.UndoableEdit
 import de.sciss.lucre.event.Sys
 import de.sciss.lucre.expr.{Expr, ExprType}
 import de.sciss.lucre.stm.Disposable
-import de.sciss.lucre.swing.edit.{EditExprMap, EditVar}
+import de.sciss.lucre.swing.edit.{EditCellView, EditExprMap}
 import de.sciss.lucre.{expr, stm}
 import de.sciss.model.Change
 import de.sciss.serial.Serializer
 
 import scala.language.{existentials, higherKinds}
 
-object ExprViewFactory {
+object CellViewFactory {
   trait View[A] {
     def update(value: A): Unit
   }
@@ -35,26 +35,22 @@ object ExprViewFactory {
     def commit(newValue: A)(implicit tx: S#Tx): UndoableEdit
   }
 }
-trait ExprViewFactory[A] {
-  import de.sciss.lucre.swing.impl.ExprViewFactory.Committer
+trait CellViewFactory[A] {
+  import de.sciss.lucre.swing.impl.CellViewFactory.Committer
 
-  protected def mkExprCommitter[S <: Sys[S]](expr: Expr[S, A], name: String)
-                                            (implicit tx: S#Tx, cursor: stm.Cursor[S],
-                                             tpe: ExprType[A]): (A, Option[Committer[S, A]]) = {
-    import tpe.{newConst, serializer, varSerializer}
-    val com = Expr.Var.unapply(expr).map { vr =>
-      val exprVarH = tx.newHandle(vr)
+  protected def mkCommitter[S <: Sys[S]](cell: CellView[S#Tx, A], name: String)
+                                        (implicit tx: S#Tx, cursor: stm.Cursor[S]): (A, Option[Committer[S, A]]) = {
+    val com = CellView.Var.unapply(cell).map { vr =>
       new Committer[S, A] {
-        def commit(newValue: A)(implicit tx: S#Tx): UndoableEdit = {
-          EditVar.Expr[S, A](s"Change $name", expr = exprVarH(), value = newConst[S](newValue))
-        }
+        def commit(newValue: A)(implicit tx: S#Tx): UndoableEdit =
+          EditCellView[S, A](s"Change $name", cell = vr, value = newValue)
       }
     }
-    val value0 = expr.value
+    val value0 = cell()
     (value0, com)
   }
 
-  protected def mkExprObserver[S <: Sys[S]](expr: Expr[S, A], view: ExprViewFactory.View[A])
+  protected def mkExprObserver[S <: Sys[S]](expr: Expr[S, A], view: CellViewFactory.View[A])
                                            (implicit tx: S#Tx): Disposable[S#Tx] =
     expr.changed.react {
       implicit tx => upd => deferTx(view.update(upd.now))
@@ -79,7 +75,7 @@ trait ExprViewFactory[A] {
   }
 
   protected def mkMapObserver[S <: Sys[S], K](map: expr.Map[S, K, Expr[S, A], Change[A]], key: K,
-                                              view: ExprViewFactory.View[A])
+                                              view: CellViewFactory.View[A])
                                            (implicit tx: S#Tx): Disposable[S#Tx] =
     map.changed.react {
       implicit tx => upd => upd.changes.foreach {

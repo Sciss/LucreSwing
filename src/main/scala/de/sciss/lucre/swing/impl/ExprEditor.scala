@@ -23,7 +23,7 @@ import de.sciss.lucre.stm.Disposable
 import scala.swing.{Component, TextComponent}
 
 trait ExprEditor[S <: Sys[S], A, Comp <: Component]
-  extends View[S] with ComponentHolder[Comp] with ExprViewFactory.View[A] {
+  extends View[S] with ComponentHolder[Comp] with CellViewFactory.View[A] {
 
   // ---- abstract ----
 
@@ -33,19 +33,6 @@ trait ExprEditor[S <: Sys[S], A, Comp <: Component]
 
   // must be implemented by updating the GUI component with the current `value`
   protected def valueToComponent(): Unit
-
-  //  // if the expression is a variable, Some(var), otherwise None
-  //  protected def exprH: Option[stm.Source[S#Tx, Expr.Var[S, A]]]
-
-  // protected implicit def cursor: stm.Cursor[S]
-
-  // protected def undoManager: UndoManager
-
-  //  // the type name that is used for undoable edits, e.g. `String`
-  //  protected def editName: String
-
-  //  // the expression type system
-  //  protected val tpe: Type[A]
 
   // must be implemented by creating the GUI component
   protected def createComponent(): Comp

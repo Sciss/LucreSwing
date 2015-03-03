@@ -24,19 +24,19 @@ import de.sciss.lucre.stm.Disposable
 import de.sciss.model.Change
 import de.sciss.serial.Serializer
 
-object DoubleSpinnerViewImpl extends ExprViewFactory[Double] {
-  def fromExpr[S <: Sys[S]](_expr: Expr[S, Double], name: String, width: Int)
+object DoubleSpinnerViewImpl extends CellViewFactory[Double] {
+  def apply[S <: Sys[S]](_cell: CellView[S#Tx, Double], name: String, width: Int)
                            (implicit tx: S#Tx, cursor: stm.Cursor[S],
                             undoManager: UndoManager): DoubleSpinnerView[S] = {
-    // implicit val tpe: ExprType[Double] = expr.Double
-    val res = new Impl[S](maxWidth = width) {
-      impl =>
-      protected var (value, committer)          = mkExprCommitter(_expr, name)(tx, cursor, expr.Double)
-      protected val observer: Disposable[S#Tx]  = mkExprObserver (_expr, impl)
-    }
-
-    deferTx(res.guiInit())
-    res
+    ???
+//    val res = new Impl[S](maxWidth = width) {
+//      impl =>
+//      protected var (value, committer)          = mkCommitter(_cell, name)(tx, cursor, expr.Double)
+//      protected val observer: Disposable[S#Tx]  = mkExprObserver (_cell, impl)
+//    }
+//
+//    deferTx(res.guiInit())
+//    res
   }
 
   def fromMap[S <: Sys[S], A](map: expr.Map[S, A, Expr[S, Double], Change[Double]], key: A, default: Double,

@@ -1,12 +1,14 @@
 package de.sciss.lucre.swing
 
+import javax.swing.UIManager
+
+import de.sciss.desktop.Desktop
+import de.sciss.desktop.impl.UndoManagerImpl
+import de.sciss.file.File
 import de.sciss.lucre.event.Durable
 import de.sciss.lucre.stm.store.BerkeleyDB
-import de.sciss.file.File
-import de.sciss.desktop.impl.UndoManagerImpl
-import scala.swing.{Component, Swing, GridPanel, MainFrame, MenuItem, Menu, MenuBar, Frame, SimpleSwingApplication}
-import de.sciss.desktop.Desktop
-import javax.swing.UIManager
+
+import scala.swing.{Component, Frame, MainFrame, Menu, MenuBar, MenuItem, SimpleSwingApplication}
 import scala.util.control.NonFatal
 
 trait AppLike extends SimpleSwingApplication {

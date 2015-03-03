@@ -1,12 +1,12 @@
 name               := "LucreSwing"
 
-version            := "0.8.1-SNAPSHOT"
+version            := "0.9.0-SNAPSHOT"
 
 organization       := "de.sciss"
 
-scalaVersion       := "2.11.5"
+scalaVersion       := "2.11.6"
 
-crossScalaVersions := Seq("2.11.5", "2.10.4")
+crossScalaVersions := Seq("2.11.6", "2.10.4")
 
 description        := "Swing support for Lucre, and common views"
 
@@ -16,7 +16,7 @@ licenses           := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-
 
 // ---- dependencies ----
 
-lazy val eventVersion     = "2.7.2"
+lazy val eventVersion     = "2.7.3"
 
 lazy val desktopVersion   = "0.7.0"
 

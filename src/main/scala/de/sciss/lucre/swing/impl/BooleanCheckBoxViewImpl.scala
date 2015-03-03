@@ -25,19 +25,19 @@ import de.sciss.serial.Serializer
 import scala.swing.CheckBox
 import scala.swing.event.ButtonClicked
 
-object BooleanCheckBoxViewImpl extends ExprViewFactory[Boolean] {
+object BooleanCheckBoxViewImpl extends CellViewFactory[Boolean] {
   def fromExpr[S <: Sys[S]](_expr: Expr[S, Boolean], name: String)
                            (implicit tx: S#Tx, cursor: stm.Cursor[S],
                             undoManager: UndoManager): BooleanCheckBoxView[S] = {
-    // implicit val tpe: ExprType[Int] = expr.Int
-    val res = new Impl[S](editName = name) {
-      impl =>
-      protected var (value, committer)          = mkExprCommitter(_expr, name)(tx, cursor, expr.Boolean)
-      protected val observer: Disposable[S#Tx]  = mkExprObserver (_expr, impl)
-    }
-
-    deferTx(res.guiInit())
-    res
+    ???
+//    val res = new Impl[S](editName = name) {
+//      impl =>
+//      protected var (value, committer)          = mkCommitter(_expr, name)(tx, cursor, expr.Boolean)
+//      protected val observer: Disposable[S#Tx]  = mkExprObserver (_expr, impl)
+//    }
+//
+//    deferTx(res.guiInit())
+//    res
   }
 
   def fromMap[S <: Sys[S], A](map: expr.Map[S, A, Expr[S, Boolean], Change[Boolean]], key: A, default: Boolean,
@@ -61,7 +61,7 @@ object BooleanCheckBoxViewImpl extends ExprViewFactory[Boolean] {
 
     protected def observer: Disposable[S#Tx]
 
-    protected def committer: Option[ExprViewFactory.Committer[S, Boolean]]
+    protected def committer: Option[CellViewFactory.Committer[S, Boolean]]
 
     protected def valueToComponent(): Unit = if (component.selected != value) component.selected = value
 

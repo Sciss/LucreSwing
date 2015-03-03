@@ -24,15 +24,9 @@ import de.sciss.lucre.expr
 import expr.Expr
 
 object DoubleSpinnerView {
-  def apply[S <: Sys[S]](expr: Expr[S, Double], name: String, width: Int = 160)
+  def apply[S <: Sys[S]](cell: CellView[S#Tx, Double], name: String, width: Int = 160)
                         (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): DoubleSpinnerView[S] =
-    Impl.fromExpr(expr, name = name, width = width)
-
-  def fromMap[S <: Sys[S], A](map: expr.Map[S, A, Expr[S, Double], Change[Double]], key: A, default: Double,
-                            name: String, width: Int = 160)
-                           (implicit tx: S#Tx, keySerializer: Serializer[S#Tx, S#Acc, A],
-                            cursor: stm.Cursor[S], undoManager: UndoManager): DoubleSpinnerView[S] =
-    Impl.fromMap(map, key = key, default = default, name = name, width = width)
+    Impl.apply(cell, name = name, width = width)
 }
 trait DoubleSpinnerView[S <: Sys[S]] extends View[S] {
   override def component: Spinner

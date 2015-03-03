@@ -28,19 +28,19 @@ import de.sciss.serial.Serializer
 import scala.swing.event.EditDone
 import scala.swing.{Action, TextField}
 
-object StringFieldViewImpl extends ExprViewFactory[String] {
+object StringFieldViewImpl extends CellViewFactory[String] {
   def fromExpr[S <: Sys[S]](_expr: Expr[S, String], name: String, columns: Int)
                            (implicit tx: S#Tx, cursor: stm.Cursor[S],
                             undoManager: UndoManager): StringFieldView[S] = {
-    // implicit val tpe: ExprType[Int] = expr.Int
-    val res = new Impl[S](editName = name, columns0 = columns) {
-      impl =>
-      protected var (value, committer)          = mkExprCommitter(_expr, name)(tx, cursor, expr.String)
-      protected val observer: Disposable[S#Tx]  = mkExprObserver (_expr, impl)
-    }
-
-    deferTx(res.guiInit())
-    res
+    ???
+//    val res = new Impl[S](editName = name, columns0 = columns) {
+//      impl =>
+//      protected var (value, committer)          = mkCommitter(_expr, name)(tx, cursor, expr.String)
+//      protected val observer: Disposable[S#Tx]  = mkExprObserver (_expr, impl)
+//    }
+//
+//    deferTx(res.guiInit())
+//    res
   }
 
   def fromMap[S <: Sys[S], A](map: expr.Map[S, A, Expr[S, String], Change[String]], key: A, default: String,
@@ -64,7 +64,7 @@ object StringFieldViewImpl extends ExprViewFactory[String] {
 
     protected def observer: Disposable[S#Tx]
 
-    protected def committer: Option[ExprViewFactory.Committer[S, String]]
+    protected def committer: Option[CellViewFactory.Committer[S, String]]
 
     protected def valueToComponent(): Unit = if (component.text != value) component.text = value
 

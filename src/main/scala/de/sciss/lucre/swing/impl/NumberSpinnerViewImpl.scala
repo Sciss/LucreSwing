@@ -38,7 +38,7 @@ abstract class NumberSpinnerViewImpl[S <: Sys[S], A](maxWidth: Int)
 
   // final protected val tpe = expr.Int
 
-  protected def committer: Option[ExprViewFactory.Committer[S, A]]
+  protected def committer: Option[CellViewFactory.Committer[S, A]]
 
   final protected def valueToComponent(): Unit =
     if (sp.value != value) {
