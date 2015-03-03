@@ -12,14 +12,16 @@ object TestExprApp extends AppLike {
   private val rows = 5
 
   private lazy val views: Vec[View[S]] = system.step { implicit tx =>
-    implicit val doubleEx = de.sciss.lucre.expr.Double
+    implicit val doubleEx  = de.sciss.lucre.expr.Double
+    implicit val booleanEx = de.sciss.lucre.expr.Boolean
+
     val exprD1  = expr.Double .newVar[S](expr.Double .newConst( 0.0 ))
     val exprI1  = expr.Int    .newVar[S](expr.Int    .newConst( 0   ))
     val exprI2  = expr.Int    .newVar[S](expr.Int    .newConst(10   ))
     val exprS1  = expr.String .newVar[S](expr.String .newConst("Foo"))
     val exprB1  = expr.Boolean.newVar[S](expr.Boolean.newConst(true ))
-    val vD1     = DoubleSpinnerView  (CellView.expr(exprD1), "d1")
-    val vD2     = DoubleSpinnerView  (CellView.expr(exprD1), "d2")
+    val vD1     = DoubleSpinnerView  (exprD1, "d1")
+    val vD2     = DoubleSpinnerView  (exprD1, "d2")
     val vI1     = IntSpinnerView     (exprI1, "i1")
     val vI2     = IntSpinnerView     (exprI2, "i2")
     val vS1     = StringFieldView    (exprS1, "s1")

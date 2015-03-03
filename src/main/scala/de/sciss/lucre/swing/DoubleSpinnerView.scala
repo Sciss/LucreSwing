@@ -13,20 +13,23 @@
 
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.event.Sys
-import de.sciss.swingplus.Spinner
-import impl.{DoubleSpinnerViewImpl => Impl}
-import de.sciss.model.Change
-import de.sciss.serial.Serializer
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.stm
-import de.sciss.lucre.expr
-import expr.Expr
+import de.sciss.lucre.event.Sys
+import de.sciss.lucre.expr.Expr
+import de.sciss.lucre.{expr, stm}
+import de.sciss.lucre.swing.impl.{DoubleSpinnerViewImpl => Impl}
+import de.sciss.swingplus.Spinner
 
 object DoubleSpinnerView {
-  def apply[S <: Sys[S]](cell: CellView[S#Tx, Double], name: String, width: Int = 160)
+  def cell[S <: Sys[S]](cell: CellView[S#Tx, Double], name: String, width: Int = 160)
                         (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): DoubleSpinnerView[S] =
     Impl.apply(cell, name = name, width = width)
+
+  def apply[S <: Sys[S]](expr: Expr[S, Double], name: String, width: Int = 160)
+                        (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): DoubleSpinnerView[S] = {
+    implicit val doubleEx = de.sciss.lucre.expr.Double
+    Impl.apply(CellView.expr(expr), name = name, width = width)
+  }
 }
 trait DoubleSpinnerView[S <: Sys[S]] extends View[S] {
   override def component: Spinner

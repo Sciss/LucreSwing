@@ -26,18 +26,17 @@ import scala.swing.CheckBox
 import scala.swing.event.ButtonClicked
 
 object BooleanCheckBoxViewImpl extends CellViewFactory[Boolean] {
-  def fromExpr[S <: Sys[S]](_expr: Expr[S, Boolean], name: String)
+  def apply[S <: Sys[S]](cell: CellView[S#Tx, Boolean], name: String)
                            (implicit tx: S#Tx, cursor: stm.Cursor[S],
                             undoManager: UndoManager): BooleanCheckBoxView[S] = {
-    ???
-//    val res = new Impl[S](editName = name) {
-//      impl =>
-//      protected var (value, committer)          = mkCommitter(_expr, name)(tx, cursor, expr.Boolean)
-//      protected val observer: Disposable[S#Tx]  = mkExprObserver (_expr, impl)
-//    }
-//
-//    deferTx(res.guiInit())
-//    res
+    val res = new Impl[S](editName = name) {
+      impl =>
+      protected var (value, committer)          = mkCommitter(cell, name)(tx, cursor)
+      protected val observer: Disposable[S#Tx]  = mkObserver (cell, impl)
+    }
+
+    deferTx(res.guiInit())
+    res
   }
 
   def fromMap[S <: Sys[S], A](map: expr.Map[S, A, Expr[S, Boolean], Change[Boolean]], key: A, default: Boolean,
