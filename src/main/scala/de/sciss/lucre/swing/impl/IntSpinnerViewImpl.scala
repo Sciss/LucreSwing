@@ -27,8 +27,8 @@ object IntSpinnerViewImpl extends CellViewFactory[Int] {
                          undoManager: UndoManager): IntSpinnerView[S] = {
     val res = new Impl[S](maxWidth = width) {
       impl =>
-      protected var (value, committer)          = mkCommitter(cell, name)(tx, cursor)
-      protected val observer: Disposable[S#Tx]  = mkObserver (cell, impl)
+      protected var (value, committer)          = CellViewFactory.mkCommitter(cell, name)(tx, cursor)
+      protected val observer: Disposable[S#Tx]  = CellViewFactory.mkObserver (cell, impl)
     }
 
     deferTx(res.guiInit())
@@ -37,7 +37,7 @@ object IntSpinnerViewImpl extends CellViewFactory[Int] {
 
   private abstract class Impl[S <: Sys[S]](maxWidth: Int)
                                           (implicit cursor: stm.Cursor[S], undoManager: UndoManager)
-    extends NumberSpinnerViewImpl[S, Int](maxWidth) with IntSpinnerView[S] {
+    extends DefinedNumberSpinnerViewImpl[S, Int](maxWidth) with IntSpinnerView[S] {
 
     final protected val tpe = expr.Int
 

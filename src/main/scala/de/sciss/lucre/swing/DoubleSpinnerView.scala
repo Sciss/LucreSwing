@@ -30,6 +30,15 @@ object DoubleSpinnerView {
     implicit val doubleEx = de.sciss.lucre.expr.Double
     Impl(CellView.expr(expr), name = name, width = width)
   }
+
+  def optional[S <: Sys[S]](cell: CellView[S#Tx, Option[Double]], name: String, width: Int = 160)
+                         (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): Optional[S] =
+    Impl.optional(cell, name = name, width = width)
+
+  trait Optional[S <: Sys[S]] extends DoubleSpinnerView[S] {
+    def default(implicit tx: S#Tx): Option[S#Tx => Double]
+    def default_=(option: Option[S#Tx => Double])(implicit tx: S#Tx): Unit
+  }
 }
 trait DoubleSpinnerView[S <: Sys[S]] extends View[S] {
   override def component: Spinner

@@ -1,5 +1,5 @@
 /*
- *  ExprEditor.scala
+ *  CellViewEditor.scala
  *  (LucreSwing)
  *
  *  Copyright (c) 2014-2015 Hanns Holger Rutz. All rights reserved.
@@ -22,7 +22,7 @@ import de.sciss.lucre.stm.Disposable
 
 import scala.swing.{Component, TextComponent}
 
-trait ExprEditor[S <: Sys[S], A, Comp <: Component]
+trait CellViewEditor[S <: Sys[S], A, Comp <: Component]
   extends View[S] with ComponentHolder[Comp] with CellViewFactory.View[A] {
 
   // ---- abstract ----

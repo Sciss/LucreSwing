@@ -34,12 +34,9 @@ object CellViewFactory {
   trait Committer[S <: Sys[S], A] {
     def commit(newValue: A)(implicit tx: S#Tx): UndoableEdit
   }
-}
-trait CellViewFactory[A] {
-  import de.sciss.lucre.swing.impl.CellViewFactory.Committer
 
-  protected def mkCommitter[S <: Sys[S]](cell: CellView[S#Tx, A], name: String)
-                                        (implicit tx: S#Tx, cursor: stm.Cursor[S]): (A, Option[Committer[S, A]]) = {
+  def mkCommitter[S <: Sys[S], A](cell: CellView[S#Tx, A], name: String)
+                                 (implicit tx: S#Tx, cursor: stm.Cursor[S]): (A, Option[Committer[S, A]]) = {
     val com = CellView.Var.unapply(cell).map { vr =>
       new Committer[S, A] {
         def commit(newValue: A)(implicit tx: S#Tx): UndoableEdit =
@@ -50,11 +47,14 @@ trait CellViewFactory[A] {
     (value0, com)
   }
 
-  protected def mkObserver[S <: Sys[S]](cell: CellView[S#Tx, A], view: CellViewFactory.View[A])
-                                       (implicit tx: S#Tx): Disposable[S#Tx] =
+  def mkObserver[S <: Sys[S], A](cell: CellView[S#Tx, A], view: CellViewFactory.View[A])
+                                (implicit tx: S#Tx): Disposable[S#Tx] =
     cell.react {
       implicit tx => upd => deferTx(view.update(upd))
     }
+}
+trait CellViewFactory[A] {
+  import CellViewFactory.Committer
 
   protected def mkMapCommitter[S <: Sys[S], K](map: expr.Map[S, K, Expr[S, A], Change[A]], key: K, default: A,
                                                name: String)

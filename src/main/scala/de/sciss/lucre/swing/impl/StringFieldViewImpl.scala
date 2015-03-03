@@ -31,8 +31,8 @@ object StringFieldViewImpl extends CellViewFactory[String] {
                          undoManager: UndoManager): StringFieldView[S] = {
     val res = new Impl[S](editName = name, columns0 = columns) {
       impl =>
-      protected var (value, committer)          = mkCommitter(cell, name)(tx, cursor)
-      protected val observer: Disposable[S#Tx]  = mkObserver (cell, impl)
+      protected var (value, committer)          = CellViewFactory.mkCommitter(cell, name)(tx, cursor)
+      protected val observer: Disposable[S#Tx]  = CellViewFactory.mkObserver (cell, impl)
     }
 
     deferTx(res.guiInit())
@@ -41,7 +41,7 @@ object StringFieldViewImpl extends CellViewFactory[String] {
   
   private abstract class Impl[S <: Sys[S]](editName: String, columns0: Int)
                                        (implicit cursor: stm.Cursor[S], undoManager: UndoManager)
-    extends StringFieldView[S] with ExprEditor[S, String, TextField] {
+    extends StringFieldView[S] with CellViewEditor[S, String, TextField] {
 
     protected def observer: Disposable[S#Tx]
 

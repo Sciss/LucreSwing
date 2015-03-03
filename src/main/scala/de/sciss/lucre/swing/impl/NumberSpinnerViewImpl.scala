@@ -26,9 +26,13 @@ import de.sciss.swingplus.Spinner
 import scala.swing.event.{FocusLost, KeyTyped, ValueChanged}
 import scala.swing.{Action, Component, Swing, TextComponent}
 
-abstract class NumberSpinnerViewImpl[S <: Sys[S], A](maxWidth: Int)
-                                                    (implicit cursor: stm.Cursor[S], undoManager: UndoManager)
-  extends ExprEditor[S, A, Spinner] {
+trait NumberSpinnerViewImpl[S <: Sys[S], A] // (implicit cursor: stm.Cursor[S], undoManager: UndoManager)
+  extends CellViewEditor[S, A, Spinner] {
+
+  protected def maxWidth: Int
+
+  protected def cursor: stm.Cursor[S]
+  protected def undoManager: UndoManager
 
   // current display value (GUI threaded)
   protected var value: A
@@ -40,19 +44,11 @@ abstract class NumberSpinnerViewImpl[S <: Sys[S], A](maxWidth: Int)
 
   protected def committer: Option[CellViewFactory.Committer[S, A]]
 
-  final protected def valueToComponent(): Unit =
-    if (sp.value != value) {
-      // println("valueToComponent()")
-      sp.value = value
-    }
-
   private var sp: Spinner = _
 
   protected def model: SpinnerNumberModel
 
   protected def parseModelValue(v: Any): Option[A]
-
-  // private var textValue: String = _
 
   private class TextObserver(sp: Component, peer: TextComponent) {
     private var textCommitted = peer.text
@@ -100,7 +96,6 @@ abstract class NumberSpinnerViewImpl[S <: Sys[S], A](maxWidth: Int)
   }
 
   final protected def createComponent(): Spinner = {
-    // val spm   = new SpinnerNumberModel(value, Int.MinValue, Int.MaxValue, 1)
     sp        = new Spinner(model)
     val d1    = sp.preferredSize
     d1.width  = math.min(d1.width, maxWidth) // XXX TODO WTF
@@ -135,7 +130,6 @@ abstract class NumberSpinnerViewImpl[S <: Sys[S], A](maxWidth: Int)
     //      case _ =>
     //    }
 
-
     committer.foreach { com =>
       sp.listenTo(sp)
       sp.reactions += {
@@ -156,4 +150,22 @@ abstract class NumberSpinnerViewImpl[S <: Sys[S], A](maxWidth: Int)
 
     sp
   }
+}
+
+abstract class DefinedNumberSpinnerViewImpl[S <: Sys[S], A](protected val maxWidth: Int)
+                                                           (implicit protected val cursor: stm.Cursor[S],
+                                                            protected val undoManager: UndoManager)
+  extends NumberSpinnerViewImpl[S, A] {
+
+  final protected def valueToComponent(): Unit =
+    if (component.value != value) {
+      // println("valueToComponent()")
+      component.value = value
+    }
+}
+
+abstract class OptionalNumberSpinnerViewImpl[S <: Sys[S], A](protected val maxWidth: Int)
+                                                            (implicit protected val cursor: stm.Cursor[S],
+                                                             protected val undoManager: UndoManager)
+  extends NumberSpinnerViewImpl[S, Option[A]] {
 }
