@@ -15,8 +15,9 @@ package de.sciss.lucre.swing
 
 import de.sciss.lucre.event.{Observable, Sys}
 import de.sciss.lucre.expr.{ExprType, Expr}
-import de.sciss.lucre.stm
+import de.sciss.lucre.{expr => _expr, stm}
 import de.sciss.lucre.swing.impl.{CellViewImpl => Impl}
+import de.sciss.model.Change
 import de.sciss.serial.Serializer
 
 import scala.language.higherKinds
@@ -34,15 +35,24 @@ object CellView {
     }
   }
 
+  def exprMap[S <: Sys[S], K, A](map: _expr.Map[S, K, Expr[S, A], Change[A]], key: K)
+                                (implicit tx: S#Tx, tpe: ExprType[A], keySerializer: Serializer[S#Tx, S#Acc, K])
+  : CellView[S#Tx, Option[A]] { type Repr = Option[Expr[S, A]] } = {
+    import tpe.serializer
+    map.modifiableOption.fold[CellView[S#Tx, Option[A]] { type Repr = Option[Expr[S, A]] }] {
+      new Impl.ExprMap[S, K, A, Expr[S, A], Change[A]](tx.newHandle(map), key, ch =>
+        if (ch.isSignificant) Some(ch.now) else None)
+    } { mv =>
+      new Impl.ExprModMap[S, K, A](tx.newHandle(mv), key)
+    }
+  }
+
   def exprLike[S <: Sys[S], A, Ex <: Expr[S, A]](x: Ex)
                                                 (implicit tx: S#Tx,
                                                  serializer: Serializer[S#Tx, S#Acc, Ex]): CellView[S#Tx, A] { type Repr = Ex } =
     new Impl.Expr[S, A, Ex](tx.newHandle(x))
 
   def const[S <: Sys[S], A](value: A): CellView[S#Tx, A] = new Impl.Const(value)
-
-  //  /** Creates a view with an in-memory variable. */
-  //  def apply[S <: Sys[S], A](init: A)(implicit tx: S#Tx): Var[S, A] = new Impl.Var(init)
 
   object Var {
     def unapply[S <: Sys[S], A](view: CellView[S#Tx, A]): Option[Var[S, A]] = view match {
