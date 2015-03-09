@@ -15,7 +15,7 @@ package de.sciss.lucre
 package swing
 package impl
 
-import javax.swing.{SpinnerModel, SpinnerNumberModel}
+import javax.swing.SpinnerNumberModel
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.event.Sys
@@ -88,7 +88,7 @@ object DoubleSpinnerViewImpl {
         // component.foreground  = if (value.isDefined) null else Color.gray
       }
 
-    protected lazy val model: SpinnerModel = new NumericOptionSpinnerModel[Double](value0 = value,
+    protected lazy val model = new NumericOptionSpinnerModel[Double](value0 = value,
       minimum0 = None, maximum0 = None, stepSize0 = 0.1)
   }
 }

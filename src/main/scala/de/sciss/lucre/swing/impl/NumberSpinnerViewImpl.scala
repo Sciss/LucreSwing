@@ -15,7 +15,11 @@ package de.sciss.lucre.swing
 package impl
 
 import java.awt.event.KeyEvent
-import javax.swing.{JSpinner, KeyStroke, SpinnerModel}
+import java.text.NumberFormat
+import java.util.Locale
+import javax.swing.JFormattedTextField.AbstractFormatter
+import javax.swing.text.DefaultFormatterFactory
+import javax.swing.{JSpinner, KeyStroke, SpinnerModel, SwingConstants}
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.event.Sys
@@ -94,9 +98,24 @@ trait NumberSpinnerViewImpl[S <: Sys[S], A] // (implicit cursor: stm.Cursor[S], 
       committed()
     }
   }
+  
+  protected def mkSpinner: Spinner = new Spinner(model) {
+    override lazy val peer: javax.swing.JSpinner = new javax.swing.JSpinner(model) with SuperMixin {
+      override def getLocale: Locale = Locale.US  // this is used for the decimal format!
+
+      // bug with aqua look and feel. JSpinner relies on getComponent(0),
+      // which might not have a baseline. Fall back to editor's baseline then.
+      override def getBaseline(width: Int, height: Int): Int = {
+        val res = super.getBaseline(width, height)
+        if (res >= 0) res else {
+          getEditor.getBaseline(width, height)
+        }
+      }
+    }
+  }
 
   final protected def createComponent(): Spinner = {
-    sp        = new Spinner(model)
+    sp        = mkSpinner
     val d1    = sp.preferredSize
     d1.width  = math.min(d1.width, maxWidth) // XXX TODO WTF
     sp.preferredSize = d1
@@ -168,4 +187,29 @@ abstract class OptionalNumberSpinnerViewImpl[S <: Sys[S], A](protected val maxWi
                                                             (implicit protected val cursor: stm.Cursor[S],
                                                              protected val undoManager: UndoManager)
   extends NumberSpinnerViewImpl[S, Option[A]] {
+
+  override protected def model: NumericOptionSpinnerModel[A]
+
+  override protected def mkSpinner: Spinner = {
+    val res = super.mkSpinner
+    val ftf = res.peer.getEditor.asInstanceOf[JSpinner.DefaultEditor].getTextField
+    val fmt: AbstractFormatter = new AbstractFormatter {
+      private val dec = NumberFormat.getNumberInstance(Locale.US)
+
+      def valueToString(value: Any): String = value match {
+        case Some(d: Double) => dec.format(d)
+        case _ => ""
+      }
+
+      def stringToValue(text: String): AnyRef = {
+        val t = text.trim
+        if (t.isEmpty) None else Some(dec.parse(t))
+      }
+    }
+    val factory = new DefaultFormatterFactory(fmt)
+    ftf.setEditable(true)
+    ftf.setFormatterFactory(factory)
+    ftf.setHorizontalAlignment(SwingConstants.RIGHT)
+    res
+  }
 }

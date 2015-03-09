@@ -6,7 +6,7 @@ organization       := "de.sciss"
 
 scalaVersion       := "2.11.6"
 
-crossScalaVersions := Seq("2.11.6", "2.10.4")
+crossScalaVersions := Seq("2.11.6", "2.10.5")
 
 description        := "Swing support for Lucre, and common views"
 
