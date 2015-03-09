@@ -15,13 +15,11 @@ package de.sciss.lucre
 package swing
 package impl
 
-import javax.swing.SpinnerNumberModel
+import javax.swing.{JSpinner, SpinnerNumberModel}
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.event.Sys
 import de.sciss.lucre.stm.Disposable
-
-import scala.concurrent.stm.Ref
 
 object DoubleSpinnerViewImpl {
   def apply[S <: Sys[S]](_cell: CellView[S#Tx, Double], name: String, width: Int)
@@ -37,7 +35,7 @@ object DoubleSpinnerViewImpl {
     res
   }
 
-  def optional[S <: Sys[S]](_cell: CellView[S#Tx, Option[Double]], name: String, width: Int)
+  def optional[S <: Sys[S]](_cell: CellView[S#Tx, Option[Double]], name: String, width: Int, default0: Option[Double])
                         (implicit tx: S#Tx, cursor: stm.Cursor[S],
                          undoManager: UndoManager): DoubleSpinnerView.Optional[S] = {
     val res = new OptionalImpl[S](maxWidth = width) {
@@ -46,12 +44,28 @@ object DoubleSpinnerViewImpl {
       protected var (value, committer)          = CellViewFactory.mkCommitter(_cell, name)(tx, cursor)
       protected val observer: Disposable[S#Tx]  = CellViewFactory.mkObserver (_cell, impl)
 
-      private val defaultRef = Ref(Option.empty[S#Tx => Double])
+      // private val defaultRef = Ref(Option.empty[S#Tx => Double])
+      private var _default = default0
 
-      def default(implicit tx: S#Tx): Option[S#Tx => Double] = defaultRef.get(tx.peer)
+      // def default(implicit tx: S#Tx): Option[S#Tx => Double] = defaultRef.get(tx.peer)
+      def default: Option[Double] = {
+        requireEDT()
+        _default
+      }
 
-      def default_=(option: Option[S#Tx => Double])(implicit tx: S#Tx): Unit =
-        defaultRef.set(option)(tx.peer)
+      //      def default_=(option: Option[S#Tx => Double])(implicit tx: S#Tx): Unit =
+      //        defaultRef.set(option)(tx.peer)
+
+      def default_=(value: Option[Double]): Unit = {
+        requireEDT()
+        _default = value
+        if (this.value.isEmpty) {
+          val editor = component.peer.getEditor.asInstanceOf[JSpinner.DefaultEditor]
+          editor.getTextField.setValue(editor.getSpinner.getValue)
+        }
+      }
+
+      // protected def defaultValue: Option[Double] = defaultRef.single.get.fol
     }
 
     deferTx(res.guiInit())
@@ -89,6 +103,6 @@ object DoubleSpinnerViewImpl {
       }
 
     protected lazy val model = new NumericOptionSpinnerModel[Double](value0 = value,
-      minimum0 = None, maximum0 = None, stepSize0 = 0.1)
+      minimum0 = Some(Double.MinValue), maximum0 = Some(Double.MaxValue), stepSize0 = 0.1)
   }
 }

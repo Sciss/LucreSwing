@@ -31,13 +31,19 @@ object DoubleSpinnerView {
     Impl(CellView.expr(expr), name = name, width = width)
   }
 
-  def optional[S <: Sys[S]](cell: CellView[S#Tx, Option[Double]], name: String, width: Int = 160)
+  def optional[S <: Sys[S]](cell: CellView[S#Tx, Option[Double]], name: String, width: Int = 160,
+                            default: Option[Double] = None)
                          (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): Optional[S] =
-    Impl.optional(cell, name = name, width = width)
+    Impl.optional(cell, name = name, width = width, default0 = default)
 
   trait Optional[S <: Sys[S]] extends DoubleSpinnerView[S] {
-    def default(implicit tx: S#Tx): Option[S#Tx => Double]
-    def default_=(option: Option[S#Tx => Double])(implicit tx: S#Tx): Unit
+    // def default(implicit tx: S#Tx): Option[S#Tx => Double]
+    // def default_=(option: Option[S#Tx => Double])(implicit tx: S#Tx): Unit
+
+    /** Sets a default value to be displayed when the model value is absent.
+      * This must be called on the EDT.
+      */
+    var default: Option[Double]
   }
 }
 trait DoubleSpinnerView[S <: Sys[S]] extends View[S] {

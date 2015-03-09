@@ -5,7 +5,8 @@ import de.sciss.lucre.expr.Expr
 import de.sciss.model.Change
 
 import scala.collection.immutable.{IndexedSeq => Vec}
-import scala.swing.{Button, Alignment, Component, GridPanel, Label, Swing}
+import scala.swing.event.ButtonClicked
+import scala.swing.{FlowPanel, ToggleButton, Button, Alignment, Component, GridPanel, Label, Swing}
 
 object OptionalApp extends AppLike {
   // de.sciss.lucre.event.showLog = true
@@ -24,6 +25,7 @@ object OptionalApp extends AppLike {
     val mapView = CellView.exprMap[S, String, Double](map, key)
     val vD1     = DoubleSpinnerView(exprD1, "d1")
     val vD2     = DoubleSpinnerView.optional[S](mapView, "d2")
+    // vD2.default = Some(1234.0)
 
     def label(text: String) = View.wrap[S](new Label(s"$text:", null, Alignment.Trailing))
 
@@ -35,15 +37,17 @@ object OptionalApp extends AppLike {
     val butPut    = button("Put"   )(system.step { implicit tx => mapH().put   (key, exprD1H()) })
     val butRemove = button("Remove")(system.step { implicit tx => mapH().remove(key           ) })
 
+    val togDefault = new ToggleButton("Default: 0") {
+      listenTo(this)
+      reactions += {
+        case ButtonClicked(_) => vD2.default = if (selected) Some(0.0) else None
+      }
+    }
+
     Vec(
-      label("Double"), vD1, vD2, butPut, butRemove
+      label("Double"), vD1, vD2, butPut, butRemove, View.wrap[S](togDefault)
     )
   }
 
-  def mkView(): Component = new GridPanel(rows0 = rows, cols0 = views.size/rows) {
-    vGap = 2
-    hGap = 2
-    border = Swing.EmptyBorder(4)
-    contents ++= views.map(_.component)
-  }
+  def mkView(): Component = new FlowPanel(views.map(_.component): _*)
 }

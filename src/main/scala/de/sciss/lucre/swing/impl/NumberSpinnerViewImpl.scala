@@ -14,6 +14,7 @@
 package de.sciss.lucre.swing
 package impl
 
+import java.awt.Color
 import java.awt.event.KeyEvent
 import java.text.NumberFormat
 import java.util.Locale
@@ -188,28 +189,38 @@ abstract class OptionalNumberSpinnerViewImpl[S <: Sys[S], A](protected val maxWi
                                                              protected val undoManager: UndoManager)
   extends NumberSpinnerViewImpl[S, Option[A]] {
 
+  protected def default: Option[A]
+
   override protected def model: NumericOptionSpinnerModel[A]
 
   override protected def mkSpinner: Spinner = {
     val res = super.mkSpinner
     val ftf = res.peer.getEditor.asInstanceOf[JSpinner.DefaultEditor].getTextField
+    val fgNorm = ftf.getForeground
     val fmt: AbstractFormatter = new AbstractFormatter {
       private val dec = NumberFormat.getNumberInstance(Locale.US)
 
       def valueToString(value: Any): String = value match {
-        case Some(d: Double) => dec.format(d)
-        case _ => ""
+        case Some(d: Double) =>
+          ftf.setForeground(fgNorm)
+          dec.format(d)
+        case _ =>
+          ftf.setForeground(Color.blue)
+          default.fold("")(dec.format)
       }
 
       def stringToValue(text: String): AnyRef = {
         val t = text.trim
-        if (t.isEmpty) None else Some(dec.parse(t))
+        if (t.isEmpty) None else Some(dec.parse(t).doubleValue())
       }
     }
     val factory = new DefaultFormatterFactory(fmt)
     ftf.setEditable(true)
     ftf.setFormatterFactory(factory)
     ftf.setHorizontalAlignment(SwingConstants.RIGHT)
+    val maxString = fmt.valueToString(model.maximum)
+    val minString = fmt.valueToString(model.minimum)
+    ftf.setColumns(math.max(maxString.length, minString.length))
     res
   }
 }
