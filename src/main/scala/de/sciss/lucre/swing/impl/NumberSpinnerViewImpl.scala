@@ -15,7 +15,7 @@ package de.sciss.lucre.swing
 package impl
 
 import java.awt.event.KeyEvent
-import javax.swing.{JSpinner, KeyStroke, SpinnerNumberModel}
+import javax.swing.{JSpinner, KeyStroke, SpinnerModel}
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.event.Sys
@@ -46,7 +46,7 @@ trait NumberSpinnerViewImpl[S <: Sys[S], A] // (implicit cursor: stm.Cursor[S], 
 
   private var sp: Spinner = _
 
-  protected def model: SpinnerNumberModel
+  protected def model: SpinnerModel // SpinnerNumberModel
 
   protected def parseModelValue(v: Any): Option[A]
 

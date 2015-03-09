@@ -32,8 +32,8 @@ object OptionalApp extends AppLike {
     val mapH    = tx.newHandle(map)
     val exprD1H = tx.newHandle(exprD1)
 
-    val butPut    = button("Put"   )(mapH().put(key, exprD1H()))
-    val butRemove = button("Remove")(mapH().remove(key))
+    val butPut    = button("Put"   )(system.step { implicit tx => mapH().put   (key, exprD1H()) })
+    val butRemove = button("Remove")(system.step { implicit tx => mapH().remove(key           ) })
 
     Vec(
       label("Double"), vD1, vD2, butPut, butRemove

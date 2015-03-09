@@ -15,7 +15,7 @@ package de.sciss.lucre
 package swing
 package impl
 
-import javax.swing.SpinnerNumberModel
+import javax.swing.{SpinnerModel, SpinnerNumberModel}
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.event.Sys
@@ -77,17 +77,18 @@ object DoubleSpinnerViewImpl {
     extends OptionalNumberSpinnerViewImpl[S, Double](maxWidth) with DoubleSpinnerView.Optional[S] {
 
     final protected def parseModelValue(v: Any): Option[Option[Double]] = v match {
-      case i: Double  => Some(if (i.isNaN) None else Some(i))
-      case _          => None
+      case Some(d: Double)  => Some(Some(d))
+      case None             => Some(None)
+      case _                => None
     }
 
     final protected def valueToComponent(): Unit =
       if (parseModelValue(component.value) != Some(value)) {
-        component.value       = value.getOrElse(Double.NaN)
+        component.value = value // .getOrElse(Double.NaN)
         // component.foreground  = if (value.isDefined) null else Color.gray
       }
 
-    protected lazy val model: SpinnerNumberModel = new SpinnerNumberModel(value.getOrElse(Double.NaN),
-      Double.MinValue, Double.MaxValue, 0.1)
+    protected lazy val model: SpinnerModel = new NumericOptionSpinnerModel[Double](value0 = value,
+      minimum0 = None, maximum0 = None, stepSize0 = 0.1)
   }
 }

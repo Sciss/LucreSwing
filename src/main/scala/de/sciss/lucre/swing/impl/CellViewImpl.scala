@@ -65,7 +65,10 @@ object CellViewImpl {
                                                           (implicit tpe: ExprType[A])
     extends ExprMapLike[S, K, A, expr.Expr[S, A], Change[A]] with CellView.Var[S, Option[A]] {
 
-    implicit def serializer: Serializer[S#Tx, S#Acc, Repr] = implicitly[Serializer[S#Tx, S#Acc, Repr]]
+    def serializer: Serializer[S#Tx, S#Acc, Repr] = {
+      implicit val exSer = tpe.serializer[S]
+      Serializer.option[S#Tx, S#Acc, expr.Expr[S, A]]
+    }
 
     protected def mapUpdate(ch: Change[A]): Option[A] = if (ch.isSignificant) Some(ch.now) else None
 
@@ -106,7 +109,7 @@ object CellViewImpl {
                                                     (implicit tpe: ExprType[A])
     extends ExprLike[S, A, expr.Expr[S, A]] with CellView.Var[S, A] {
 
-    def repr_=(value: Repr)(implicit tx: S#Tx): Unit = h().update(value)
+    def repr_=(value: expr.Expr[S, A])(implicit tx: S#Tx): Unit = h().update(value)
 
     def lift(value: A)(implicit tx: S#Tx): Repr = tpe.newConst(value)
 
