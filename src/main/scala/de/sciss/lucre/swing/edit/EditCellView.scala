@@ -19,7 +19,6 @@ import de.sciss.lucre
 import lucre.event.Sys
 import lucre.stm
 import javax.swing.undo.{UndoableEdit, AbstractUndoableEdit}
-import de.sciss.serial
 
 object EditCellView {
   def apply[S <: Sys[S], A](name: String, cell: CellView.Var[S, A], value: A)

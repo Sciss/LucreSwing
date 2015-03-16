@@ -36,36 +36,65 @@ object BooleanCheckBoxViewImpl extends CellViewFactory[Boolean] {
     res
   }
 
-  private abstract class Impl[S <: Sys[S]](editName: String)
-                                          (implicit cursor: stm.Cursor[S], undoManager: UndoManager)
-    extends BooleanCheckBoxView[S] with CellViewEditor[S, Boolean, CheckBox] {
+  def optional[S <: Sys[S]](cell: CellView[S#Tx, Option[Boolean]], name: String, default: Boolean)
+                           (implicit tx: S#Tx, cursor: stm.Cursor[S],
+                            undoManager: UndoManager): BooleanCheckBoxView[S] = {
+    val res = new OptionalImpl[S](editName = name, default = default) {
+      impl =>
+      protected var (value, committer)          = CellViewFactory.mkCommitter(cell, name)(tx, cursor)
+      protected val observer: Disposable[S#Tx]  = CellViewFactory.mkObserver (cell, impl)
+    }
 
-    protected def observer: Disposable[S#Tx]
+    deferTx(res.guiInit())
+    res
+  }
 
-    protected def committer: Option[CellViewFactory.Committer[S, Boolean]]
+  private abstract class BasicImpl[S <: Sys[S], B]
+    extends BooleanCheckBoxView[S] with CellViewEditor[S, B, CheckBox] with View.Editable[S] {
 
-    protected def valueToComponent(): Unit = if (component.selected != value) component.selected = value
+    protected def editName: String
+
+    protected def committer: Option[CellViewFactory.Committer[S, B]]
+
+    protected var definedValue: Boolean
+
+    protected def valueToComponent(): Unit = if (component.selected != definedValue) component.selected = definedValue
 
     protected def createComponent(): CheckBox = {
       val cb        = new CheckBox(editName)
-      cb.selected   = value
+      cb.selected   = definedValue
       committer.foreach { com =>
         cb.listenTo(cb)
         cb.reactions += {
           case ButtonClicked(_) =>
             val newValue = cb.selected
-            if (value != newValue) {
+            if (definedValue != newValue) {
+              definedValue = newValue
               val edit = cursor.step { implicit tx =>
-                com.commit(newValue)
+                com.commit(value)
               }
               undoManager.add(edit)
-              value = newValue
             }
-            // clearDirty()
         }
-        // observeDirty(cb)
       }
       cb
     }
+  }
+
+  private abstract class Impl[S <: Sys[S]](protected val editName: String)
+                                          (implicit val cursor: stm.Cursor[S],
+                                           val undoManager: UndoManager)
+    extends BasicImpl[S, Boolean] {
+
+    protected final def definedValue = value
+    protected final def definedValue_=(b: Boolean): Unit = value = b
+  }
+
+  private abstract class OptionalImpl[S <: Sys[S]](protected val editName: String, default: Boolean)
+                                          (implicit val cursor: stm.Cursor[S], val undoManager: UndoManager)
+    extends BasicImpl[S, Option[Boolean]] {
+
+    protected final def definedValue = value.getOrElse(default)
+    protected final def definedValue_=(b: Boolean): Unit = value = Some(b)
   }
 }

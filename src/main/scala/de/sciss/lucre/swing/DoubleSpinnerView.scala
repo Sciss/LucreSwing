@@ -16,7 +16,7 @@ package de.sciss.lucre.swing
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.event.Sys
 import de.sciss.lucre.expr.Expr
-import de.sciss.lucre.{expr, stm}
+import de.sciss.lucre.stm
 import de.sciss.lucre.swing.impl.{DoubleSpinnerViewImpl => Impl}
 import de.sciss.swingplus.Spinner
 
@@ -37,9 +37,6 @@ object DoubleSpinnerView {
     Impl.optional(cell, name = name, width = width, default0 = default)
 
   trait Optional[S <: Sys[S]] extends DoubleSpinnerView[S] {
-    // def default(implicit tx: S#Tx): Option[S#Tx => Double]
-    // def default_=(option: Option[S#Tx => Double])(implicit tx: S#Tx): Unit
-
     /** Sets a default value to be displayed when the model value is absent.
       * This must be called on the EDT.
       */

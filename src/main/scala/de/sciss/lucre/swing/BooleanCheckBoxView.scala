@@ -16,10 +16,8 @@ package de.sciss.lucre.swing
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.event.Sys
 import de.sciss.lucre.expr.Expr
+import de.sciss.lucre.stm
 import de.sciss.lucre.swing.impl.{BooleanCheckBoxViewImpl => Impl}
-import de.sciss.lucre.{expr, stm}
-import de.sciss.model.Change
-import de.sciss.serial.Serializer
 
 import scala.swing.CheckBox
 
@@ -34,6 +32,10 @@ object BooleanCheckBoxView {
   def cell[S <: Sys[S]](cell: CellView[S#Tx, Boolean], name: String)
                         (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): BooleanCheckBoxView[S] =
     Impl(cell, name = name)
+
+  def optional[S <: Sys[S]](cell: CellView[S#Tx, Option[Boolean]], name: String, default: Boolean)
+                           (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): BooleanCheckBoxView[S] =
+    Impl.optional(cell, name = name, default = default)
 }
 trait BooleanCheckBoxView[S <: Sys[S]] extends View[S] {
   override def component: CheckBox

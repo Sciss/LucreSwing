@@ -16,7 +16,7 @@ package swing
 package impl
 
 import de.sciss.lucre.event.Sys
-import de.sciss.lucre.expr.ExprType
+import de.sciss.lucre.expr.{Expr, ExprType}
 import de.sciss.lucre.stm.Disposable
 import de.sciss.model.Change
 import de.sciss.serial.Serializer
@@ -47,7 +47,8 @@ object CellViewImpl {
         }
       }
 
-    def repr(implicit tx: S#Tx): Repr = h().get(key)
+    // XXX TODO -- remove in next major version
+    def repr(implicit tx: S#Tx): Repr = throw new Exception("Subclass responsibility")
 
     def apply()(implicit tx: S#Tx): Option[A] = repr.map(_.value)
   }
@@ -56,6 +57,8 @@ object CellViewImpl {
                                                                                   protected val key: K,
                                                                                   val updFun: U => Option[A])
     extends ExprMapLike[S, K, A, Ex, U] {
+
+    override def repr(implicit tx: S#Tx): Repr = h().get(key)
 
     protected def mapUpdate(u: U): Option[A] = updFun(u)
   }
@@ -71,6 +74,15 @@ object CellViewImpl {
     }
 
     protected def mapUpdate(ch: Change[A]): Option[A] = if (ch.isSignificant) Some(ch.now) else None
+
+    override def repr(implicit tx: S#Tx): Repr = {
+      val opt = h().get(key)
+      // ! important to unwrap, otherwise we get infinite recursion with `repr = repr` !
+      opt.map {
+        case expr.Expr.Var(vr) => vr()
+        case other => other
+      }
+    }
 
     def repr_=(value: Repr)(implicit tx: S#Tx): Unit = value.fold[Unit] {
       h().remove(key)
@@ -99,15 +111,22 @@ object CellViewImpl {
 
     def apply()(implicit tx: S#Tx): A = h().value
 
-    def repr(implicit tx: S#Tx): Repr = h()
+    // XXX TODO -- remove in next major version
+    def repr(implicit tx: S#Tx): Repr = throw new Exception("Subclass responsibility")
   }
 
   private[swing] final class Expr[S <: Sys[S], A, Ex <: expr.Expr[S, A]](protected val h: stm.Source[S#Tx, Ex])
-    extends ExprLike[S, A, Ex]
+    extends ExprLike[S, A, Ex] {
+
+    override def repr(implicit tx: S#Tx): Repr = h()
+  }
 
   private[swing] final class ExprVar[S <: Sys[S], A](protected val h: stm.Source[S#Tx, expr.Expr.Var[S, A]])
                                                     (implicit tpe: ExprType[A])
     extends ExprLike[S, A, expr.Expr[S, A]] with CellView.Var[S, A] {
+
+    // ! important to unwrap, otherwise we get infinite recursion with `repr = repr` !
+    override def repr(implicit tx: S#Tx): Repr = h().apply()
 
     def repr_=(value: expr.Expr[S, A])(implicit tx: S#Tx): Unit = h().update(value)
 
@@ -144,23 +163,4 @@ object CellViewImpl {
 
     def apply()(implicit tx: Tx): A = value
   }
-
-  //  private[swing] final class Var[S <: Sys[S], A](init: A)
-  //    extends NoVar[S#Tx, A] with CellView.Var[S, A] with ObservableImpl[S, A] {
-  //
-  //    private val ref = Ref(init)
-  //
-  //    def apply()(implicit tx: S#Tx): A = ref.get(tx.peer)
-  //
-  //    def update(v: A)(implicit tx: S#Tx): Unit = {
-  //      val old = ref.swap(v)(tx.peer)
-  //      if (v != old) fire(v)
-  //    }
-  //
-  //    def lift(value: A)(implicit tx: S#Tx) = ()
-  //
-  //    def repr_=(value: Repr)(implicit tx: S#Tx) = ()
-  //
-  //    def serializer: Serializer[S#Tx, S#Acc, Repr] = ImmutableSerializer.Unit
-  //  }
 }
