@@ -17,7 +17,7 @@ licenses           := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-
 
 lazy val eventVersion     = "2.8.0-SNAPSHOT"
 lazy val desktopVersion   = "0.7.0"
-lazy val widgetsVersion   = "1.9.0"
+lazy val widgetsVersion   = "1.10.0-SNAPSHOT"
 lazy val treeTableVersion = "1.3.7"
 
 // ---- test-only ----
