@@ -31,7 +31,7 @@ import scala.swing.{Component, ScrollPane}
 object ListViewImpl {
   def empty[S <: Sys[S], Elem, U, Data](handler: Handler[S, Elem, U, Data])
                                        (implicit tx: S#Tx, cursor: Cursor[S],
-                                        serializer: Serializer[S#Tx, S#Acc, List[S, Elem, U]]): ListView[S, Elem, U] = {
+                                        serializer: Serializer[S#Tx, S#Acc, List[S, Elem]]): ListView[S, Elem, U] = {
     val view = new Impl[S, Elem, U, Data](handler)
     deferTx {
       view.guiInit()
@@ -39,9 +39,9 @@ object ListViewImpl {
     view
   }
 
-  def apply[S <: Sys[S], Elem, U, Data](list: List[S, Elem, U], handler: Handler[S, Elem, U, Data])
+  def apply[S <: Sys[S], Elem, U, Data](list: List[S, Elem], handler: Handler[S, Elem, U, Data])
                                        (implicit tx: S#Tx, cursor: Cursor[S],
-                                        serializer: Serializer[S#Tx, S#Acc, List[S, Elem, U]]): ListView[S, Elem, U] = {
+                                        serializer: Serializer[S#Tx, S#Acc, List[S, Elem]]): ListView[S, Elem, U] = {
     val view = empty[S, Elem, U, Data](handler)
     view.list_=(Some(list))
     view
@@ -49,19 +49,19 @@ object ListViewImpl {
 
   private final class Impl[S <: Sys[S], Elem, U, Data](handler: Handler[S, Elem, U, Data])
                                                       (implicit cursor: Cursor[S],
-                                                       listSer: Serializer[S#Tx, S#Acc, List[S, Elem, U]])
+                                                       listSer: Serializer[S#Tx, S#Acc, List[S, Elem]])
     extends ListView[S, Elem, U] with ComponentHolder[Component] with ModelImpl[ListView.Update] {
     impl =>
 
     private var ggList: swingplus.ListView[Data] = _
     private val mList   = swingplus.ListView.Model.empty[Data]
-    private val current = Ref(Option.empty[Observation[S, List[S, Elem, U]]])
+    private val current = Ref(Option.empty[Observation[S, List[S, Elem]]])
 
     def view = ggList
 
-    def list(implicit tx: S#Tx): Option[List[S, Elem, U]] = current.get(tx.peer).map(_.value())
+    def list(implicit tx: S#Tx): Option[List[S, Elem]] = current.get(tx.peer).map(_.value())
 
-    def list_=(newOption: Option[List[S, Elem, U]])(implicit tx: S#Tx): Unit = {
+    def list_=(newOption: Option[List[S, Elem]])(implicit tx: S#Tx): Unit = {
       disposeList()
       val newObsOpt = newOption.map(Observation(_) { implicit tx => upd =>
         log(s"ListView ${impl.hashCode.toHexString} react")

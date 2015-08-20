@@ -56,14 +56,14 @@ object ListView {
                  /* state: TreeTableCellRenderer.State */): Component
   }
 
-  def apply[S <: Sys[S], Elem, U, Data](list: List[S, Elem, U], handler: Handler[S, Elem, U, Data])
+  def apply[S <: Sys[S], Elem, U, Data](list: List[S, Elem], handler: Handler[S, Elem, U, Data])
                                        (implicit tx: S#Tx, cursor: Cursor[S],
-                                        serializer: Serializer[S#Tx, S#Acc, List[S, Elem, U]])
+                                        serializer: Serializer[S#Tx, S#Acc, List[S, Elem]])
   : ListView[S, Elem, U] = Impl(list, handler)
 
   def empty[S <: Sys[S], Elem, U, Data](handler: Handler[S, Elem, U, Data])
                                        (implicit tx: S#Tx, cursor: Cursor[S],
-                                        serializer: Serializer[S#Tx, S#Acc, List[S, Elem, U]])
+                                        serializer: Serializer[S#Tx, S#Acc, List[S, Elem]])
   : ListView[S, Elem, U] = Impl.empty(handler)
 
   sealed trait Update
@@ -75,6 +75,6 @@ trait ListView[S <: Sys[S], Elem, U] extends Disposable[S#Tx] with Model[ListVie
 
   def guiSelection: Vec[Int]
 
-  def list                                  (implicit tx: S#Tx): Option[List[S, Elem, U]]
-  def list_=(list: Option[List[S, Elem, U]])(implicit tx: S#Tx): Unit
+  def list                               (implicit tx: S#Tx): Option[List[S, Elem]]
+  def list_=(list: Option[List[S, Elem]])(implicit tx: S#Tx): Unit
 }
