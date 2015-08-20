@@ -2,25 +2,25 @@ package de.sciss.lucre.swing
 
 import de.sciss.lucre.expr
 import de.sciss.lucre.expr.Expr
-import de.sciss.model.Change
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.event.ButtonClicked
-import scala.swing.{FlowPanel, ToggleButton, Button, Alignment, Component, GridPanel, Label, Swing}
+import scala.swing.{Alignment, Button, Component, FlowPanel, Label, ToggleButton}
 
 object OptionalApp extends AppLike {
   // de.sciss.lucre.event.showLog = true
 
-  private val rows = 1
+  // private val rows = 1
 
   private lazy val views: Vec[View[S]] = system.step { implicit tx =>
     implicit val doubleEx  = de.sciss.lucre.expr.Double
     implicit val booleanEx = de.sciss.lucre.expr.Boolean
+    implicit val stringEx  = de.sciss.lucre.expr.String
 
     import doubleEx.{serializer => doubleSer, varSerializer => doubleVarSer}
 
     val exprD1  = doubleEx.newVar[S](doubleEx.newConst(0.0))
-    val map     = expr.Map.Modifiable[S, String, Expr[S, Double], Change[Double]]
+    val map     = expr.Map.Modifiable[S, String, Expr[S, Double]]
     val key     = "foo"
     val mapView = CellView.exprMap[S, String, Double](map, key)
     val vD1     = DoubleSpinnerView(exprD1, "d1")

@@ -15,18 +15,18 @@ package de.sciss.lucre
 package swing
 package edit
 
-import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.{event => evt}
-import evt.Publisher
-import javax.swing.undo.{UndoableEdit, AbstractUndoableEdit}
-import de.sciss.serial
+import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
+
+import de.sciss.lucre.expr.Type
+import de.sciss.lucre.stm.{Obj, Sys}
+import de.sciss.serial.Serializer
 
 object EditMutableMap {
-  def apply[S <: Sys[S], A, B <: Publisher[S, U], U](name: String, map: expr.Map.Modifiable[S, A, B, U],
-                                                     key: A, value: Option[B])
-                                                    (implicit tx: S#Tx, cursor: stm.Cursor[S],
-                                                     keySerializer  : serial.Serializer[S#Tx, S#Acc, A],
-                                                     valueSerializer: evt.Serializer[S, B]): UndoableEdit = {
+  def apply[S <: Sys[S], A, B <: Obj[S]](name: String, map: expr.Map.Modifiable[S, A, B],
+                                         key: A, value: Option[B])
+                                        (implicit tx: S#Tx, cursor: stm.Cursor[S],
+                                         keyType: Type.Expr[A],
+                                         valueSerializer: Serializer[S#Tx, S#Acc, B]): UndoableEdit = {
     val before = map.get(key)
 
     val mapH      = tx.newHandle(map) // (expr.Map.Modifiable.serializer[S, A, B, U])
@@ -38,7 +38,7 @@ object EditMutableMap {
   }
 
   private[edit] final class Impl[S <: Sys[S], A, B, U](name: String, key: A,
-                                                       mapH   : stm.Source[S#Tx, expr.Map.Modifiable[S, A, B, U]],
+                                                       mapH   : stm.Source[S#Tx, expr.Map.Modifiable[S, A, B]],
                                                        beforeH: stm.Source[S#Tx, Option[B]],
                                                        nowH   : stm.Source[S#Tx, Option[B]])(implicit cursor: stm.Cursor[S])
     extends AbstractUndoableEdit {

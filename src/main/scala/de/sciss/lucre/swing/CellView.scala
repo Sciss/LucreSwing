@@ -36,10 +36,10 @@ object CellView {
     }
   }
 
-  def exprMap[S <: Sys[S], K, A](map: _expr.Map[S, K, Expr[S, A], Change[A]], key: K)
-                                (implicit tx: S#Tx, tpe: Type.Expr[A], keySerializer: Serializer[S#Tx, S#Acc, K])
+  def exprMap[S <: Sys[S], K, A](map: _expr.Map[S, K, Expr[S, A]], key: K)
+                                (implicit tx: S#Tx, tpe: Type.Expr[A], keyType: Type.Expr[K])
   : CellView[S#Tx, Option[A]] { type Repr = Option[Expr[S, A]] } = {
-    import tpe.serializer
+    // import tpe.serializer
     map.modifiableOption.fold[CellView[S#Tx, Option[A]] { type Repr = Option[Expr[S, A]] }] {
       new Impl.ExprMap[S, K, A, Expr[S, A], Change[A]](tx.newHandle(map), key, ch =>
         if (ch.isSignificant) Some(ch.now) else None)

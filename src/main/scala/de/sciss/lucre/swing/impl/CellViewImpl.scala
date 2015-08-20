@@ -15,9 +15,8 @@ package de.sciss.lucre
 package swing
 package impl
 
-import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.expr.{Type, Expr}
-import de.sciss.lucre.stm.Disposable
+import de.sciss.lucre.expr.Type
+import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.model.Change
 import de.sciss.serial.Serializer
 
@@ -29,7 +28,7 @@ object CellViewImpl {
   private[swing] trait ExprMapLike[S <: Sys[S], K, A, Ex <: expr.Expr[S, A], U]
     extends Basic[S#Tx, Option[A]] {
 
-    protected def h: stm.Source[S#Tx, expr.Map[S, K, Ex, U]]
+    protected def h: stm.Source[S#Tx, expr.Map[S, K, Ex]]
     protected val key: K
     protected def mapUpdate(u: U): Option[A]
 
@@ -40,9 +39,10 @@ object CellViewImpl {
         u.changes.foreach {
           case expr.Map.Added  (`key`, ex   ) => fun(tx)(Some(ex.value))
           case expr.Map.Removed(`key`, _    ) => fun(tx)(None)
-          case expr.Map.Element(`key`, _, ch) =>
-            val opt = mapUpdate(ch)
-            if (opt.isDefined) fun(tx)(opt)
+// ELEM
+//          case expr.Map.Element(`key`, _, ch) =>
+//            val opt = mapUpdate(ch)
+//            if (opt.isDefined) fun(tx)(opt)
           case _ =>
         }
       }
@@ -53,7 +53,7 @@ object CellViewImpl {
     def apply()(implicit tx: S#Tx): Option[A] = repr.map(_.value)
   }
 
-  private[swing] final class ExprMap[S <: Sys[S], K, A, Ex <: expr.Expr[S, A], U](protected val h: stm.Source[S#Tx, expr.Map[S, K, Ex, U]],
+  private[swing] final class ExprMap[S <: Sys[S], K, A, Ex <: expr.Expr[S, A], U](protected val h: stm.Source[S#Tx, expr.Map[S, K, Ex]],
                                                                                   protected val key: K,
                                                                                   val updFun: U => Option[A])
     extends ExprMapLike[S, K, A, Ex, U] {
@@ -63,7 +63,7 @@ object CellViewImpl {
     protected def mapUpdate(u: U): Option[A] = updFun(u)
   }
 
-  private[swing] final class ExprModMap[S <: Sys[S], K, A](protected val h: stm.Source[S#Tx, expr.Map.Modifiable[S, K, expr.Expr[S, A], Change[A]]],
+  private[swing] final class ExprModMap[S <: Sys[S], K, A](protected val h: stm.Source[S#Tx, expr.Map.Modifiable[S, K, expr.Expr[S, A]]],
                                                            protected val key: K)
                                                           (implicit tpe: Type.Expr[A])
     extends ExprMapLike[S, K, A, expr.Expr[S, A], Change[A]] with CellView.Var[S, Option[A]] {
@@ -96,7 +96,7 @@ object CellViewImpl {
       }
     }
 
-    def lift(value: Option[A])(implicit tx: S#Tx): Repr = value.map(tpe.newConst)
+    def lift(value: Option[A])(implicit tx: S#Tx): Repr = value.map(tpe.newConst[S](_))
 
     def update(v: Option[A])(implicit tx: S#Tx): Unit = repr_=(lift(v))
   }

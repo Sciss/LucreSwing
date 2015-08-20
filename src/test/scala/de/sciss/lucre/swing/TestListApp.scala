@@ -1,16 +1,16 @@
 package de.sciss.lucre.swing
 
-import scala.swing.{Button, FlowPanel, BorderPanel, Component}
-import de.sciss.model.Change
-import de.sciss.lucre.expr.Expr
 import de.sciss.lucre
 import de.sciss.lucre.expr
+import de.sciss.lucre.expr.Expr
+import de.sciss.model.Change
+
 import scala.concurrent.stm.{Ref, Txn}
+import scala.swing.{BorderPanel, Button, Component, FlowPanel}
 
 object TestListApp extends AppLike {
-  import lucre.expr.String.serializer
-  implicit private val listModSer = expr.List.Modifiable.serializer[S, Expr[S, String], Change[String]]
-  implicit private val listSer    = expr.List.serializer[S, Expr[S, String], Change[String]]
+  implicit private val listModSer = expr.List.Modifiable.serializer[S, Expr[S, String]]
+  implicit private val listSer    = expr.List.serializer[S, Expr[S, String]]
 
   private val h     = ListView.Handler[S, Expr[S, String], Change[String]] {
     implicit tx => _.value
@@ -19,7 +19,7 @@ object TestListApp extends AppLike {
   }
 
   private lazy val (listH, view) = system.step { implicit tx =>
-    val li = expr.List.Modifiable[S, Expr[S, String], Change[String]]
+    val li = expr.List.Modifiable[S, Expr[S, String]]
     tx.newHandle(li) -> ListView(li, h)
   }
 
@@ -40,7 +40,9 @@ object TestListApp extends AppLike {
     val retries = Ref(3)
     system.step { implicit tx =>
       implicit val itx = tx.peer
-      listH().addLast(lucre.expr.String.newConst(text))
+      val s     = lucre.expr.String.newConst[S](text)
+      val list  = listH()
+      list.addLast(s)
       if (retries() > 0) {
         new Thread {
           override def run(): Unit = {

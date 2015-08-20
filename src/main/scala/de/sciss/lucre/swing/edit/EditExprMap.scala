@@ -15,18 +15,16 @@ package de.sciss.lucre
 package swing
 package edit
 
+import javax.swing.undo.UndoableEdit
+
+import de.sciss.lucre.expr.{Expr, Type}
 import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.{expr, stm, event => evt}
-import de.sciss.lucre.expr.{Type, Expr}
-import javax.swing.undo.{UndoableEdit, AbstractUndoableEdit}
-import de.sciss.serial
-import de.sciss.model.Change
 
 object EditExprMap {
-  def apply[S <: Sys[S], A, B](name: String, map: expr.Map.Modifiable[S, A, Expr[S, B], Change[B]],
+  def apply[S <: Sys[S], A, B](name: String, map: expr.Map.Modifiable[S, A, Expr[S, B]],
                                key: A, value: Option[Expr[S, B]])
                               (implicit tx: S#Tx, cursor: stm.Cursor[S],
-                               keySerializer  : serial.Serializer[S#Tx, S#Acc, A],
+                               keyType  : Type.Expr[A],
                                valueType: Type.Expr[B]): UndoableEdit = {
     import valueType.{serializer, varSerializer}
     val before = map.get(key)

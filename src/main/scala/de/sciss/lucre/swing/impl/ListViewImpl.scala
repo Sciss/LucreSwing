@@ -68,13 +68,14 @@ object ListViewImpl {
         upd.changes.foreach {
           case List.Added(  idx, elem)  => val item = handler.data(elem); deferTx(impl.insertItem(idx, item))
           case List.Removed(idx, elem)  => deferTx(impl.removeItemAt(idx))
-          case List.Element(elem, eu )  =>
-            val idx = upd.list.indexOf(elem)
-            if (idx >= 0) {
-              handler.dataUpdate(elem, eu).foreach { item =>
-                deferTx(impl.updateItemAt(idx, item))
-              }
-            }
+// ELEM
+//          case List.Element(elem, eu )  =>
+//            val idx = upd.list.indexOf(elem)
+//            if (idx >= 0) {
+//              handler.dataUpdate(elem, eu).foreach { item =>
+//                deferTx(impl.updateItemAt(idx, item))
+//              }
+//            }
         }
       })
       current.set(newObsOpt)(tx.peer)
