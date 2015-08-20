@@ -5,7 +5,7 @@ import javax.swing.UIManager
 import de.sciss.desktop.Desktop
 import de.sciss.desktop.impl.UndoManagerImpl
 import de.sciss.file.File
-import de.sciss.lucre.event.Durable
+import de.sciss.lucre.stm.Durable
 import de.sciss.lucre.stm.store.BerkeleyDB
 
 import scala.swing.{Component, Frame, MainFrame, Menu, MenuBar, MenuItem, SimpleSwingApplication}

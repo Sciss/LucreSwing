@@ -13,8 +13,9 @@
 
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.event.{Observable, Sys}
-import de.sciss.lucre.expr.{ExprType, Expr}
+import de.sciss.lucre.event.Observable
+import de.sciss.lucre.expr.{Type, Expr}
+import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.{expr => _expr, stm}
 import de.sciss.lucre.swing.impl.{CellViewImpl => Impl}
 import de.sciss.model.Change
@@ -24,7 +25,7 @@ import scala.language.higherKinds
 
 object CellView {
   def expr[S <: Sys[S], A](x: Expr[S, A])(implicit tx: S#Tx,
-                                          tpe: ExprType[A]): CellView[S#Tx, A] { type Repr = Expr[S, A] } = {
+                                          tpe: Type.Expr[A]): CellView[S#Tx, A] { type Repr = Expr[S, A] } = {
     import tpe.{serializer, varSerializer}
     x match {
       case Expr.Var(vr) =>
@@ -36,7 +37,7 @@ object CellView {
   }
 
   def exprMap[S <: Sys[S], K, A](map: _expr.Map[S, K, Expr[S, A], Change[A]], key: K)
-                                (implicit tx: S#Tx, tpe: ExprType[A], keySerializer: Serializer[S#Tx, S#Acc, K])
+                                (implicit tx: S#Tx, tpe: Type.Expr[A], keySerializer: Serializer[S#Tx, S#Acc, K])
   : CellView[S#Tx, Option[A]] { type Repr = Option[Expr[S, A]] } = {
     import tpe.serializer
     map.modifiableOption.fold[CellView[S#Tx, Option[A]] { type Repr = Option[Expr[S, A]] }] {

@@ -16,7 +16,7 @@ package swing
 package edit
 
 import de.sciss.lucre
-import lucre.event.Sys
+import lucre.stm.Sys
 import lucre.stm
 import javax.swing.undo.{UndoableEdit, AbstractUndoableEdit}
 

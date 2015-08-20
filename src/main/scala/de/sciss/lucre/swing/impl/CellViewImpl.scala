@@ -15,8 +15,8 @@ package de.sciss.lucre
 package swing
 package impl
 
-import de.sciss.lucre.event.Sys
-import de.sciss.lucre.expr.{Expr, ExprType}
+import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.expr.{Type, Expr}
 import de.sciss.lucre.stm.Disposable
 import de.sciss.model.Change
 import de.sciss.serial.Serializer
@@ -65,7 +65,7 @@ object CellViewImpl {
 
   private[swing] final class ExprModMap[S <: Sys[S], K, A](protected val h: stm.Source[S#Tx, expr.Map.Modifiable[S, K, expr.Expr[S, A], Change[A]]],
                                                            protected val key: K)
-                                                          (implicit tpe: ExprType[A])
+                                                          (implicit tpe: Type.Expr[A])
     extends ExprMapLike[S, K, A, expr.Expr[S, A], Change[A]] with CellView.Var[S, Option[A]] {
 
     def serializer: Serializer[S#Tx, S#Acc, Repr] = {
@@ -122,7 +122,7 @@ object CellViewImpl {
   }
 
   private[swing] final class ExprVar[S <: Sys[S], A](protected val h: stm.Source[S#Tx, expr.Expr.Var[S, A]])
-                                                    (implicit tpe: ExprType[A])
+                                                    (implicit tpe: Type.Expr[A])
     extends ExprLike[S, A, expr.Expr[S, A]] with CellView.Var[S, A] {
 
     // ! important to unwrap, otherwise we get infinite recursion with `repr = repr` !

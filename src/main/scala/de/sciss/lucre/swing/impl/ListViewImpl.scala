@@ -15,7 +15,7 @@ package de.sciss.lucre
 package swing
 package impl
 
-import de.sciss.lucre.event.Sys
+import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.expr.List
 import de.sciss.lucre.stm.Cursor
 import de.sciss.lucre.swing.ListView.Handler

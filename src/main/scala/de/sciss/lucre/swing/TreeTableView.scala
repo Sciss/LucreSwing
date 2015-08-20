@@ -15,7 +15,7 @@ package de.sciss.lucre.swing
 
 import javax.swing.CellEditor
 
-import de.sciss.lucre.event.Sys
+import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm.{Disposable, Identifiable}
 import de.sciss.lucre.swing.impl.{TreeTableViewImpl => Impl}
 import de.sciss.lucre.{event => evt, stm}

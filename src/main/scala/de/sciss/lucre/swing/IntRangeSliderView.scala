@@ -13,7 +13,7 @@
 
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.event.Sys
+import de.sciss.lucre.stm.Sys
 import de.sciss.audiowidgets.{DualRangeModel, DualRangeSlider}
 import de.sciss.lucre.expr.Expr
 import de.sciss.lucre.stm

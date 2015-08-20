@@ -16,8 +16,8 @@ package impl
 
 import javax.swing.undo.UndoableEdit
 
-import de.sciss.lucre.event.Sys
-import de.sciss.lucre.expr.{Expr, ExprType}
+import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.expr.{Type, Expr}
 import de.sciss.lucre.stm.Disposable
 import de.sciss.lucre.swing.edit.{EditCellView, EditExprMap}
 import de.sciss.lucre.{expr, stm}
@@ -60,7 +60,7 @@ trait CellViewFactory[A] {
                                                name: String)
                                             (implicit tx: S#Tx, cursor: stm.Cursor[S],
                                              keySerializer: Serializer[S#Tx, S#Acc, K],
-                                             tpe: ExprType[A]): (A, Option[Committer[S, A]]) = {
+                                             tpe: Type.Expr[A]): (A, Option[Committer[S, A]]) = {
     import tpe.{newConst, serializer}
     val com = map.modifiableOption.map { mapMod =>
       val mapH = tx.newHandle(mapMod)

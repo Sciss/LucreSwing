@@ -13,7 +13,7 @@
 
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.event.Sys
+import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.expr.List
 import de.sciss.lucre.stm.{Cursor, Disposable}
 import de.sciss.lucre.swing.impl.{ListViewImpl => Impl}

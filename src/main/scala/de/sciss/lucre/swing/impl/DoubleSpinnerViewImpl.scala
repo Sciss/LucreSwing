@@ -18,7 +18,7 @@ package impl
 import javax.swing.{JSpinner, SpinnerNumberModel}
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.event.Sys
+import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm.Disposable
 
 object DoubleSpinnerViewImpl {
@@ -97,7 +97,7 @@ object DoubleSpinnerViewImpl {
     }
 
     final protected def valueToComponent(): Unit =
-      if (parseModelValue(component.value) != Some(value)) {
+      if (!parseModelValue(component.value).contains(value)) {
         component.value = value // .getOrElse(Double.NaN)
         // component.foreground  = if (value.isDefined) null else Color.gray
       }

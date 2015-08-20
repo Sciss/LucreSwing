@@ -23,9 +23,8 @@ import javax.swing.text.DefaultFormatterFactory
 import javax.swing.{JSpinner, KeyStroke, SpinnerModel, SwingConstants}
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.event.Sys
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Disposable
+import de.sciss.lucre.stm.{Sys, Disposable}
 import de.sciss.swingplus.Spinner
 
 import scala.swing.event.{FocusLost, KeyTyped, ValueChanged}

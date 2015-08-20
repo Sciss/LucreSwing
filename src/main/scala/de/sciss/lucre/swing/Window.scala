@@ -14,7 +14,7 @@
 package de.sciss.lucre.swing
 
 import de.sciss.desktop
-import de.sciss.lucre.event.Sys
+import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm.Disposable
 
 trait Window[S <: Sys[S]] extends Disposable[S#Tx] {

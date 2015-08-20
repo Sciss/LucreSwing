@@ -18,7 +18,7 @@ package impl
 import javax.swing.SpinnerNumberModel
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.event.Sys
+import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm.Disposable
 
 object IntSpinnerViewImpl extends CellViewFactory[Int] {

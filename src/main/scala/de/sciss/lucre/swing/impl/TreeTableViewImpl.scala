@@ -20,7 +20,7 @@ import javax.swing.event.CellEditorListener
 import javax.swing.table.{DefaultTableCellRenderer, TableCellEditor}
 import javax.swing.{CellEditor, DropMode, JTable}
 
-import de.sciss.lucre.event.Sys
+import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm.{Disposable, Identifiable, IdentifierMap}
 import de.sciss.lucre.swing.TreeTableView.Handler
 import de.sciss.lucre.{stm, event => evt}
@@ -591,7 +591,7 @@ object TreeTableViewImpl {
       }
 
       val cm = t.peer.getColumnModel
-      for (col <- 0 until handler.columnNames.size) {
+      for (col <- handler.columnNames.indices) {
         // assert(r.isInstanceOf[TreeTableCellRenderer])
         val c = cm.getColumn(col)
         c.setCellRenderer(rj)

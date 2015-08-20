@@ -17,7 +17,7 @@ package impl
 
 import javax.swing.event.{UndoableEditEvent, UndoableEditListener}
 
-import de.sciss.lucre.event.Sys
+import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm.Disposable
 
 import scala.swing.{Component, TextComponent}

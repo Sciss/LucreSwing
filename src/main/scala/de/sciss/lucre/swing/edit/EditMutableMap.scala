@@ -15,8 +15,9 @@ package de.sciss.lucre
 package swing
 package edit
 
+import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.{event => evt}
-import evt.{Publisher, Sys}
+import evt.Publisher
 import javax.swing.undo.{UndoableEdit, AbstractUndoableEdit}
 import de.sciss.serial
 

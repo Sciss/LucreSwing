@@ -1,11 +1,11 @@
 name               := "LucreSwing"
 
-version            := "0.10.0-SNAPSHOT"
+version            := "1.0.0-SNAPSHOT"
 
 organization       := "de.sciss"
 
-scalaVersion       := "2.11.6"
-crossScalaVersions := Seq("2.11.6", "2.10.5")
+scalaVersion       := "2.11.7"
+crossScalaVersions := Seq("2.11.7", "2.10.5")
 
 description        := "Swing support for Lucre, and common views"
 
@@ -15,28 +15,25 @@ licenses           := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-
 
 // ---- dependencies ----
 
-lazy val eventVersion     = "2.8.0-SNAPSHOT"
+lazy val lucreVersion     = "3.0.0-SNAPSHOT"
 lazy val desktopVersion   = "0.7.0"
-lazy val widgetsVersion   = "1.10.0-SNAPSHOT"
+lazy val widgetsVersion   = "1.9.1"
 lazy val treeTableVersion = "1.3.7"
 
 // ---- test-only ----
 
-lazy val stmVersion       = "2.2.0-SNAPSHOT"
 lazy val fileUtilVersion  = "1.1.1"
-lazy val xstreamVersion   = "1.4.8"  // 1.4.7 corrupt sha1 on Maven Central
 lazy val webLaFVersion    = "1.28"
 
 resolvers += "Oracle Repository" at "http://download.oracle.com/maven" // required for lucrestm-bdb
 
 libraryDependencies ++= Seq(
-  "de.sciss" %% "lucreevent"         % eventVersion,
+  "de.sciss" %% "lucre-expr"         % lucreVersion,
   "de.sciss" %% "desktop"            % desktopVersion,
   "de.sciss" %% "audiowidgets-swing" % widgetsVersion,   // TODO: should be possible to just depend on the range slider
   "de.sciss" %% "treetable-scala"    % treeTableVersion, // TODO: should be going into a dedicated sub-project?
-  "de.sciss" %% "lucrestm-bdb"       % stmVersion      % "test",
+  "de.sciss" %% "lucre-bdb"          % lucreVersion    % "test",
   "de.sciss" %% "fileutil"           % fileUtilVersion % "test",
-  "com.thoughtworks.xstream" % "xstream" % xstreamVersion % "test", // PROBLEM WITH MAVEN CENTRAL
   "de.sciss" %  "weblaf"             % webLaFVersion   % "test"
 )
 
