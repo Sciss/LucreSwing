@@ -1,8 +1,7 @@
 package de.sciss.lucre.swing
 
-import de.sciss.lucre
 import de.sciss.lucre.expr
-import de.sciss.lucre.expr.Expr
+import de.sciss.lucre.expr.{Expr, StringObj}
 import de.sciss.model.Change
 
 import scala.concurrent.stm.{Ref, Txn}
@@ -40,7 +39,7 @@ object TestListApp extends AppLike {
     val retries = Ref(3)
     system.step { implicit tx =>
       implicit val itx = tx.peer
-      val s     = lucre.expr.String.newConst[S](text)
+      val s     = StringObj.newConst[S](text)
       val list  = listH()
       list.addLast(s)
       if (retries() > 0) {

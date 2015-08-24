@@ -1,7 +1,7 @@
 package de.sciss.lucre.swing
 
 import de.sciss.lucre.expr
-import de.sciss.lucre.expr.Expr
+import de.sciss.lucre.expr.{BooleanObj, DoubleObj, StringObj}
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.event.ButtonClicked
@@ -13,16 +13,14 @@ object OptionalApp extends AppLike {
   // private val rows = 1
 
   private lazy val views: Vec[View[S]] = system.step { implicit tx =>
-    implicit val doubleEx  = de.sciss.lucre.expr.Double
-    implicit val booleanEx = de.sciss.lucre.expr.Boolean
-    implicit val stringEx  = de.sciss.lucre.expr.String
-
-    import doubleEx.{serializer => doubleSer, varSerializer => doubleVarSer}
+    implicit val doubleEx  = DoubleObj
+    implicit val booleanEx = BooleanObj
+    implicit val stringEx  = StringObj
 
     val exprD1  = doubleEx.newVar[S](doubleEx.newConst(0.0))
-    val map     = expr.Map.Modifiable[S, String, Expr[S, Double]]
+    val map     = expr.Map.Modifiable[S, String, DoubleObj[S]]
     val key     = "foo"
-    val mapView = CellView.exprMap[S, String, Double](map, key)
+    val mapView = CellView.exprMap[S, String, Double, DoubleObj](map, key)
     val vD1     = DoubleSpinnerView(exprD1, "d1")
     val vD2     = DoubleSpinnerView.optional[S](mapView, "d2")
     // vD2.default = Some(1234.0)

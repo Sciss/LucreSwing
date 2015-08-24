@@ -39,7 +39,7 @@ object IntSpinnerViewImpl extends CellViewFactory[Int] {
                                           (implicit cursor: stm.Cursor[S], undoManager: UndoManager)
     extends DefinedNumberSpinnerViewImpl[S, Int](maxWidth) with IntSpinnerView[S] {
 
-    final protected val tpe = expr.Int
+    // final protected val tpe = expr.Int
 
     protected def parseModelValue(v: Any): Option[Int] = v match {
       case i: Int => Some(i)

@@ -20,20 +20,22 @@ import javax.swing.undo.UndoableEdit
 import de.sciss.lucre.expr.{Expr, Type}
 import de.sciss.lucre.stm.Sys
 
+import scala.language.higherKinds
+
 object EditExprMap {
-  def apply[S <: Sys[S], A, B](name: String, map: expr.Map.Modifiable[S, A, Expr[S, B]],
-                               key: A, value: Option[Expr[S, B]])
+  def apply[S <: Sys[S], K, A, Ex[~ <: Sys[~]] <: expr.Expr[~, A]](name: String, map: expr.Map.Modifiable[S, K, Ex[S]],
+                               key: K, value: Option[Ex[S]])
                               (implicit tx: S#Tx, cursor: stm.Cursor[S],
-                               keyType  : Type.Expr[A],
-                               valueType: Type.Expr[B]): UndoableEdit = {
-    import valueType.{serializer, varSerializer}
+                               keyType  : expr.Map.Key[K],
+                               valueType: Type.Expr[A, Ex]): UndoableEdit = {
     val before = map.get(key)
-    val now: Option[Expr[S, B]] = (before, value) match {
-      case (Some(Expr.Var(vr)), Some(v)) => return EditVar.Expr(name, vr, v) // current value is variable
+    val now: Option[Ex[S]] = (before, value) match {
+      case (Some(valueType.Var(vr)), Some(v)) => return EditVar.Expr[S, A, Ex](name, vr, v) // current value is variable
       case (_, None) | (_, Some(Expr.Var(_))) => value  // new value is none or some variable, just put it
       case _ => value.map(valueType.newVar(_))          // new value is some non-variable, wrap it, then put it
     }
 
+    import valueType.serializer
     val mapH      = tx.newHandle(map) // (expr.Map.Modifiable.serializer[S, A, Expr[S, B], Change[B]])
     val beforeH   = tx.newHandle(before)
     val nowH      = tx.newHandle(now)

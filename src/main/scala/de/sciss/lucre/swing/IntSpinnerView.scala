@@ -14,17 +14,17 @@
 package de.sciss.lucre.swing
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.expr.Expr
+import de.sciss.lucre.expr.IntObj
 import de.sciss.lucre.stm
+import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.impl.{IntSpinnerViewImpl => Impl}
 import de.sciss.swingplus.Spinner
 
 object IntSpinnerView {
-  def apply[S <: Sys[S]](expr: Expr[S, Int], name: String, width: Int = 160)
+  def apply[S <: Sys[S]](expr: IntObj[S], name: String, width: Int = 160)
                         (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): IntSpinnerView[S] = {
-    implicit val intEx = de.sciss.lucre.expr.Int
-    Impl(CellView.expr(expr), name = name, width = width)
+    implicit val tpe = IntObj
+    Impl(CellView.expr[S, Int, IntObj](expr), name = name, width = width)
   }
 
   def cell[S <: Sys[S]](cell: CellView[S#Tx, Int], name: String, width: Int = 160)

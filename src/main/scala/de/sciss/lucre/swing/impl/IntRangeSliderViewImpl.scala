@@ -18,10 +18,9 @@ import javax.swing.undo.UndoableEdit
 
 import de.sciss.audiowidgets.{DualRangeModel, DualRangeSlider}
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre
-import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.expr.Expr
+import de.sciss.lucre.expr.{Expr, IntObj}
 import de.sciss.lucre.stm
+import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.edit.EditVar
 
 import scala.concurrent.stm.{Ref, TxnLocal}
@@ -50,9 +49,7 @@ object IntRangeSliderViewImpl {
                                  (implicit cursor: stm.Cursor[S], undo: UndoManager)
     extends IntRangeSliderView[S] with ComponentHolder[DualRangeSlider] {
 
-    import de.sciss.lucre.expr.Int.{serializer, varSerializer}
-
-    type Obs    = Observation[S, Expr[S, Int]]
+    type Obs    = Observation[S, IntObj[S]]
     type ObsOpt = Option[Obs]
 
     private val _value      = Ref(Option.empty[Obs])
@@ -62,7 +59,7 @@ object IntRangeSliderViewImpl {
     private var _rangeState = RangeState(ExprNone, ExprNone, ExprNone)
 
     // executes the `now` function on the GUI thread
-    private def mkObs(expr: Option[Expr[S, Int]])(now: Int => Unit)(implicit tx: S#Tx) = expr.map { ex =>
+    private def mkObs(expr: Option[IntObj[S]])(now: Int => Unit)(implicit tx: S#Tx) = expr.map { ex =>
       Observation(ex)(tx => upd => if (!eventOrigin.get(tx.peer)) deferTx(now(upd.now))(tx))
     }
 
@@ -81,14 +78,14 @@ object IntRangeSliderViewImpl {
       component.value = value
     }
 
-    private def examine(expr: Option[Expr[S, Int]])(implicit tx: S#Tx): (Option[Int], Boolean) = {
+    private def examine(expr: Option[IntObj[S]])(implicit tx: S#Tx): (Option[Int], Boolean) = {
       val valOpt    = expr.map(_.value)
       val editable  = expr.flatMap(Expr.Var.unapply).isDefined
       (valOpt, editable)
     }
 
-    def value(implicit tx: S#Tx): Option[Expr[S, Int]] = _value.get(tx.peer).map(_.value())
-    def value_=(expr: Option[Expr[S, Int]])(implicit tx: S#Tx): Unit = {
+    def value(implicit tx: S#Tx): Option[IntObj[S]] = _value.get(tx.peer).map(_.value())
+    def value_=(expr: Option[IntObj[S]])(implicit tx: S#Tx): Unit = {
       val newObs = mkObs(expr)(setValue)
       _value.swap(newObs)(tx.peer).foreach(_.dispose())
       val (valOpt, editable) = examine(expr)
@@ -109,8 +106,8 @@ object IntRangeSliderViewImpl {
       }
     }
 
-    def rangeLo(implicit tx: S#Tx): Option[Expr[S, Int]] = _rangeLo.get(tx.peer).map(_.value())
-    def rangeLo_=(expr: Option[Expr[S, Int]])(implicit tx: S#Tx): Unit = {
+    def rangeLo(implicit tx: S#Tx): Option[IntObj[S]] = _rangeLo.get(tx.peer).map(_.value())
+    def rangeLo_=(expr: Option[IntObj[S]])(implicit tx: S#Tx): Unit = {
       val newObs = mkObs(expr)(setRangeLo)
       _rangeLo.swap(newObs)(tx.peer).foreach(_.dispose())
       val (valOpt, editable) = examine(expr)
@@ -128,8 +125,8 @@ object IntRangeSliderViewImpl {
       model0.range = (model0.range._1, value)
     }
 
-    def rangeHi(implicit tx: S#Tx): Option[Expr[S, Int]] = _rangeHi.get(tx.peer).map(_.value())
-    def rangeHi_=(expr: Option[Expr[S, Int]])(implicit tx: S#Tx): Unit = {
+    def rangeHi(implicit tx: S#Tx): Option[IntObj[S]] = _rangeHi.get(tx.peer).map(_.value())
+    def rangeHi_=(expr: Option[IntObj[S]])(implicit tx: S#Tx): Unit = {
       val newObs = mkObs(expr)(setRangeHi)
       if (expr.isDefined) _extent.swap(None)(tx.peer).foreach(_.dispose())
       _rangeHi.swap(newObs)(tx.peer).foreach(_.dispose())
@@ -151,8 +148,8 @@ object IntRangeSliderViewImpl {
       model0.extent = value
     }
 
-    def extent(implicit tx: S#Tx): Option[Expr[S, Int]] = _extent.get(tx.peer).map(_.value())
-    def extent_=(expr: Option[Expr[S, Int]])(implicit tx: S#Tx): Unit = {
+    def extent(implicit tx: S#Tx): Option[IntObj[S]] = _extent.get(tx.peer).map(_.value())
+    def extent_=(expr: Option[IntObj[S]])(implicit tx: S#Tx): Unit = {
       val newObs = mkObs(expr)(setRangeExt)
       if (expr.isDefined) _rangeHi.swap(None)(tx.peer).foreach(_.dispose())
       _extent.swap(newObs)(tx.peer).foreach(_.dispose())
@@ -182,9 +179,13 @@ object IntRangeSliderViewImpl {
         eventOrigin.set(true)
 
         def tryEdit(obsRef: Ref[Option[Obs]], modelVal: Int): Option[UndoableEdit] = obsRef().flatMap { obs =>
-          Expr.Var.unapply(obs.value()).flatMap { vr =>
-            if (vr.value != modelVal)
-              Some(EditVar.Expr[S, Int](editName, vr, lucre.expr.Int.newConst(modelVal)))
+          IntObj.Var.unapply(obs.value()).flatMap { vr =>
+            if (vr.value != modelVal) {
+              val ex   = IntObj.newConst[S](modelVal)
+              implicit val intTpe = IntObj
+              val edit = EditVar.Expr[S, Int, IntObj](editName, vr, ex)
+              Some(edit)
+            }
             else None
           }
         }

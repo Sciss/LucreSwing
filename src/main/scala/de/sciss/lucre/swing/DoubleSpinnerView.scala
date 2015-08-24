@@ -14,9 +14,9 @@
 package de.sciss.lucre.swing
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.expr.Expr
+import de.sciss.lucre.expr.DoubleObj
 import de.sciss.lucre.stm
+import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.impl.{DoubleSpinnerViewImpl => Impl}
 import de.sciss.swingplus.Spinner
 
@@ -25,10 +25,10 @@ object DoubleSpinnerView {
                         (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): DoubleSpinnerView[S] =
     Impl(cell, name = name, width = width)
 
-  def apply[S <: Sys[S]](expr: Expr[S, Double], name: String, width: Int = 160)
+  def apply[S <: Sys[S]](expr: DoubleObj[S], name: String, width: Int = 160)
                         (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): DoubleSpinnerView[S] = {
-    implicit val doubleEx = de.sciss.lucre.expr.Double
-    Impl(CellView.expr(expr), name = name, width = width)
+    implicit val tpe = DoubleObj
+    Impl(CellView.expr[S, Double, DoubleObj](expr), name = name, width = width)
   }
 
   def optional[S <: Sys[S]](cell: CellView[S#Tx, Option[Double]], name: String, width: Int = 160,

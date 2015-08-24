@@ -17,7 +17,7 @@ package impl
 import javax.swing.undo.UndoableEdit
 
 import de.sciss.lucre.expr.{Expr, Type}
-import de.sciss.lucre.stm.{Disposable, Sys}
+import de.sciss.lucre.stm.{Elem, Disposable, Sys}
 import de.sciss.lucre.swing.edit.{EditCellView, EditExprMap}
 import de.sciss.lucre.{expr, stm}
 
@@ -53,17 +53,17 @@ object CellViewFactory {
 trait CellViewFactory[A] {
   import CellViewFactory.Committer
 
-  protected def mkMapCommitter[S <: Sys[S], K](map: expr.Map[S, K, Expr[S, A]], key: K, default: A,
-                                               name: String)
+  protected def mkMapCommitter[S <: Sys[S], K, Ex[~ <: Sys[~]] <: Expr[~, A]](map: expr.Map[S, K, Ex[S]], key: K,
+                                                                           default: A, name: String)
                                             (implicit tx: S#Tx, cursor: stm.Cursor[S],
-                                             keyType: Type.Expr[K],
-                                             tpe: Type.Expr[A]): (A, Option[Committer[S, A]]) = {
+                                             keyType: expr.Map.Key[K],
+                                             tpe: Type.Expr[A, Ex]): (A, Option[Committer[S, A]]) = {
     import tpe.newConst
     val com = map.modifiableOption.map { mapMod =>
       val mapH = tx.newHandle(mapMod)
       new Committer[S, A] {
         def commit(newValue: A)(implicit tx: S#Tx): UndoableEdit = {
-          EditExprMap[S, K, A](s"Change $name", map = mapH(), key = key, value = Some(newConst[S](newValue)))
+          EditExprMap[S, K, A, Ex](s"Change $name", map = mapH(), key = key, value = Some(newConst[S](newValue)))
         }
       }
     }
@@ -71,7 +71,7 @@ trait CellViewFactory[A] {
     (value0, com)
   }
 
-  protected def mkMapObserver[S <: Sys[S], K](map: expr.Map[S, K, Expr[S, A]], key: K,
+  protected def mkMapObserver[S <: Sys[S], K, Ex[~ <: Sys[~]] <: Expr[S, A]](map: expr.Map[S, K, Ex[S]], key: K,
                                               view: CellViewFactory.View[A])
                                            (implicit tx: S#Tx): Disposable[S#Tx] =
     map.changed.react {

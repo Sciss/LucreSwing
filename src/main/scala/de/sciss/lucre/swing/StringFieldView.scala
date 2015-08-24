@@ -14,18 +14,18 @@
 package de.sciss.lucre.swing
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.expr.Expr
+import de.sciss.lucre.expr.StringObj
 import de.sciss.lucre.stm
+import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.impl.{StringFieldViewImpl => Impl}
 
 import scala.swing.TextField
 
 object StringFieldView {
-  def apply[S <: Sys[S]](expr: Expr[S, String], name: String, columns: Int = 16)
+  def apply[S <: Sys[S]](expr: StringObj[S], name: String, columns: Int = 16)
                         (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): StringFieldView[S] = {
-    implicit val stringEx = de.sciss.lucre.expr.String
-    Impl(CellView.expr(expr), name = name, columns = columns)
+    implicit val tpe = StringObj
+    Impl(CellView.expr[S, String, StringObj](expr), name = name, columns = columns)
   }
 
   def cell[S <: Sys[S]](cell: CellView[S#Tx, String], name: String, columns: Int = 16)

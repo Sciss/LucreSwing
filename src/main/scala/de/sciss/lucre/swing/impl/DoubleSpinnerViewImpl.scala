@@ -76,7 +76,7 @@ object DoubleSpinnerViewImpl {
                                           (implicit cursor: stm.Cursor[S], undoManager: UndoManager)
     extends DefinedNumberSpinnerViewImpl[S, Double](maxWidth) with DoubleSpinnerView[S] {
 
-    final protected val tpe = expr.Double
+    // final protected val tpe = expr.Double
 
     final protected def parseModelValue(v: Any): Option[Double] = v match {
       case i: Double  => Some(i)

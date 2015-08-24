@@ -24,33 +24,33 @@ import de.sciss.serial.Serializer
 import scala.language.higherKinds
 
 object CellView {
-  def expr[S <: Sys[S], A](x: Expr[S, A])(implicit tx: S#Tx,
-                                          tpe: Type.Expr[A]): CellView[S#Tx, A] { type Repr = Expr[S, A] } = {
+  def expr[S <: Sys[S], A, Ex[~ <: Sys[~]] <: Expr[~, A]](x: Ex[S])(implicit tx: S#Tx,
+                                          tpe: Type.Expr[A, Ex]): CellView[S#Tx, A] { type Repr = Ex[S] } = {
     import tpe.{serializer, varSerializer}
     x match {
-      case Expr.Var(vr) =>
-        new Impl.ExprVar[S, A](tx.newHandle(vr))
+      case tpe.Var(vr) =>
+        new Impl.ExprVar[S, A, Ex](tx.newHandle(vr))
 
       case _ =>
-        new Impl.Expr[S, A, Expr[S, A]](tx.newHandle(x))
+        new Impl.Expr[S, A, Ex](tx.newHandle(x))
     }
   }
 
-  def exprMap[S <: Sys[S], K, A](map: _expr.Map[S, K, Expr[S, A]], key: K)
-                                (implicit tx: S#Tx, tpe: Type.Expr[A], keyType: Type.Expr[K])
-  : CellView[S#Tx, Option[A]] { type Repr = Option[Expr[S, A]] } = {
+  def exprMap[S <: Sys[S], K, A, Ex[~ <: Sys[~]] <: _expr.Expr[~, A]](map: _expr.Map[S, K, Ex[S]], key: K)
+                                (implicit tx: S#Tx, tpe: Type.Expr[A, Ex], keyType: _expr.Map.Key[K])
+  : CellView[S#Tx, Option[A]] { type Repr = Option[Ex[S]] } = {
     // import tpe.serializer
-    map.modifiableOption.fold[CellView[S#Tx, Option[A]] { type Repr = Option[Expr[S, A]] }] {
-      new Impl.ExprMap[S, K, A, Expr[S, A], Change[A]](tx.newHandle(map), key, ch =>
+    map.modifiableOption.fold[CellView[S#Tx, Option[A]] { type Repr = Option[Ex[S]] }] {
+      new Impl.ExprMap[S, K, A, Ex, Change[A]](tx.newHandle(map), key, ch =>
         if (ch.isSignificant) Some(ch.now) else None)
     } { mv =>
-      new Impl.ExprModMap[S, K, A](tx.newHandle(mv), key)
+      new Impl.ExprModMap[S, K, A, Ex](tx.newHandle(mv), key)
     }
   }
 
-  def exprLike[S <: Sys[S], A, Ex <: Expr[S, A]](x: Ex)
+  def exprLike[S <: Sys[S], A, Ex[~ <: Sys[~]] <: Expr[~, A]](x: Ex[S])
                                                 (implicit tx: S#Tx,
-                                                 serializer: Serializer[S#Tx, S#Acc, Ex]): CellView[S#Tx, A] { type Repr = Ex } =
+                                                 serializer: Serializer[S#Tx, S#Acc, Ex[S]]): CellView[S#Tx, A] { type Repr = Ex[S] } =
     new Impl.Expr[S, A, Ex](tx.newHandle(x))
 
   def const[S <: Sys[S], A](value: A): CellView[S#Tx, A] = new Impl.Const(value)

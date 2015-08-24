@@ -14,19 +14,19 @@
 package de.sciss.lucre.swing
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.expr.Expr
+import de.sciss.lucre.expr.BooleanObj
 import de.sciss.lucre.stm
+import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.impl.{BooleanCheckBoxViewImpl => Impl}
 
 import scala.swing.CheckBox
 
 object BooleanCheckBoxView {
   /** Creates a new view from an expression. The check box's label will initially be set to `name`. */
-  def apply[S <: Sys[S]](expr: Expr[S, Boolean], name: String)
+  def apply[S <: Sys[S]](expr: BooleanObj[S], name: String)
                         (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): BooleanCheckBoxView[S] = {
-    implicit val booleanEx = de.sciss.lucre.expr.Boolean
-    Impl(CellView.expr(expr), name = name)
+    implicit val tpe = BooleanObj
+    Impl(CellView.expr[S, Boolean, BooleanObj](expr), name = name)
   }
 
   def cell[S <: Sys[S]](cell: CellView[S#Tx, Boolean], name: String)

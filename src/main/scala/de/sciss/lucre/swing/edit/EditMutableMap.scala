@@ -17,16 +17,17 @@ package edit
 
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
-import de.sciss.lucre.expr.Type
-import de.sciss.lucre.stm.{Obj, Sys}
+import de.sciss.lucre.stm.{Elem, Sys}
 import de.sciss.serial.Serializer
 
+import scala.language.higherKinds
+
 object EditMutableMap {
-  def apply[S <: Sys[S], A, B <: Obj[S]](name: String, map: expr.Map.Modifiable[S, A, B],
-                                         key: A, value: Option[B])
+  def apply[S <: Sys[S], K, Ex[~ <: Sys[~]] <: Elem[S]](name: String, map: expr.Map.Modifiable[S, K, Ex[S]],
+                                         key: K, value: Option[Ex[S]])
                                         (implicit tx: S#Tx, cursor: stm.Cursor[S],
-                                         keyType: Type.Expr[A],
-                                         valueSerializer: Serializer[S#Tx, S#Acc, B]): UndoableEdit = {
+                                         keyType: expr.Map.Key[K],
+                                         valueSerializer: Serializer[S#Tx, S#Acc, Ex[S]]): UndoableEdit = {
     val before = map.get(key)
 
     val mapH      = tx.newHandle(map) // (expr.Map.Modifiable.serializer[S, A, B, U])

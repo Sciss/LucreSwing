@@ -3,15 +3,14 @@ package de.sciss.lucre.swing
 import javax.swing.event.{CellEditorListener, ChangeEvent}
 import javax.swing.{CellEditor, JComponent, JTextField}
 
-import de.sciss.lucre
 import de.sciss.lucre.data.Iterator
-import de.sciss.lucre.event.{Targets, Pull}
-import de.sciss.lucre.expr.Expr
-import de.sciss.lucre.stm.Durable.Txn
-import de.sciss.lucre.stm.{Sys, Obj}
+import de.sciss.lucre.event.Targets
+import de.sciss.lucre.expr.IntObj
+import de.sciss.lucre.stm.impl.ObjSerializer
+import de.sciss.lucre.stm.{Obj, Sys}
 import de.sciss.lucre.swing.TestTreeTableApp.Node.Update
 import de.sciss.lucre.swing.TreeTableView.ModelUpdate
-import de.sciss.lucre.{expr, event => evt}
+import de.sciss.lucre.{event => evt, expr}
 import de.sciss.model.Change
 import de.sciss.serial.{DataInput, DataOutput, Serializer}
 import de.sciss.treetable.TreeTableCellRenderer.State
@@ -30,13 +29,13 @@ object TestTreeTableApp extends AppLike {
     }
     trait Update
 
-    implicit object Ser extends Obj.Serializer[S, Node] {
+    implicit object Ser extends ObjSerializer[S, Node] {
 //      def read(in: DataInput, access: S#Acc)(implicit tx: S#Tx): Node = {
 //        val targets = evt.Targets.read[S](in, access)
 //        read(in, access, targets)
 //      }
 
-      def typeID: Int = Node.typeID
+      def tpe: Obj.Type = Node
 
       def read(in: DataInput, access: S#Acc, targets: evt.Targets[S])(implicit tx: S#Tx): Node with evt.Node[S] =
         in.readByte() match {
@@ -44,7 +43,7 @@ object TestTreeTableApp extends AppLike {
             val peer = expr.List.Modifiable.read[S, Node](in, access)
             new Branch(targets, peer)
           case 1 =>
-            val peer = lucre.expr.Int.readVar[S](in, access)
+            val peer = IntObj.readVar[S](in, access)
             new Leaf(targets, peer)
         }
 
@@ -60,12 +59,12 @@ object TestTreeTableApp extends AppLike {
     }
   }
 
-  sealed trait Node
-    extends evt.Publisher[S, Node.Update] with evt.Node[S] {
+  sealed trait Node extends Obj[S] with
+    evt.Publisher[S, Node.Update] with evt.Node[S] {
 
-    def typeID: Int = Node.typeID
+    def tpe: Obj.Type = Node
 
-    def reader = Node.Ser
+    // def reader = Node.Ser
     def branchOption: Option[Branch]
   }
 
@@ -93,7 +92,7 @@ object TestTreeTableApp extends AppLike {
     def foldUpdate(generated: Option[Node.Update], input: expr.List.Update[S, Node])
                   (implicit tx: S#Tx): Option[Node.Update] = Some(Node.Update.Branch(this, input))
   }
-  class Leaf(val targets: evt.Targets[S], val expr: Expr.Var[S, Int])
+  class Leaf(val targets: evt.Targets[S], val expr: IntObj.Var[S])
     extends Node
     with evt.impl.SingleNode[S, Node.Update]
     /* with evt.impl.MappingGenerator[S, Node.Update, Change[Int], Node] */ {
@@ -185,7 +184,7 @@ object TestTreeTableApp extends AppLike {
             editingNode.foreach { nodeView =>
               system.step { implicit tx =>
                 nodeView.modelData() match {
-                  case l: Leaf => l.expr() = lucre.expr.Int.newConst[S](i)
+                  case l: Leaf => l.expr() = IntObj.newConst[S](i)
                   case _ =>
                 }
               }
@@ -259,7 +258,7 @@ object TestTreeTableApp extends AppLike {
   }
 
   def newLeaf()(implicit tx: S#Tx) = {
-    val ex    = lucre.expr.Int.newVar[S](lucre.expr.Int.newConst((math.random * 100).toInt))
+    val ex    = IntObj.newVar[S](IntObj.newConst((math.random * 100).toInt))
     val tgt   = evt.Targets[S]
     new Leaf(tgt, ex)
   }
@@ -310,7 +309,7 @@ object TestTreeTableApp extends AppLike {
   private def modifyAction(): Unit = system.step { implicit tx =>
     view.selection.foreach { v =>
       v.modelData() match {
-        case l: Leaf => l.expr() = lucre.expr.Int.newConst[S]((math.random * 100).toInt)
+        case l: Leaf => l.expr() = IntObj.newConst[S]((math.random * 100).toInt)
         case _ =>
       }
     }

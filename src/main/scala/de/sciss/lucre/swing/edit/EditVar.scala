@@ -16,17 +16,19 @@ package swing
 package edit
 
 import de.sciss.lucre
+import de.sciss.lucre.expr.Type
 import lucre.stm.Sys
 import lucre.stm
 import javax.swing.undo.{UndoableEdit, AbstractUndoableEdit}
 import de.sciss.serial
 
+import scala.language.higherKinds
+
 object EditVar {
-  def Expr[S <: Sys[S], A](name: String, expr: lucre.expr.Expr.Var[S, A], value: lucre.expr.Expr[S, A])
-                          (implicit tx: S#Tx, cursor: stm.Cursor[S],
-                           serializer   : serial.Serializer[S#Tx, S#Acc, lucre.expr.Expr    [S, A]],
-                           varSerializer: serial.Serializer[S#Tx, S#Acc, lucre.expr.Expr.Var[S, A]]): UndoableEdit =
-    apply(name, expr, value)
+  def Expr[S <: Sys[S], A, Ex[~ <: Sys[~]] <: expr.Expr[~, A]](name: String, expr: Ex[S] with stm.Var[S#Tx, Ex[S]],
+                                                               value: Ex[S])
+                          (implicit tx: S#Tx, cursor: stm.Cursor[S], tpe: Type.Expr[A, Ex]): UndoableEdit =
+    apply[S, Ex[S], Ex[S] with stm.Var[S#Tx, Ex[S]]](name, expr, value)(tx, cursor, tpe.serializer, tpe.varSerializer)
 
   def apply[S <: Sys[S], Elem, Vr <: stm.Source[S#Tx, Elem] with stm.Sink[S#Tx, Elem]](
     name: String, expr: Vr, value: Elem)(implicit tx: S#Tx, cursor: stm.Cursor[S],
