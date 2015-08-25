@@ -6,7 +6,7 @@ import javax.swing.{CellEditor, JComponent, JTextField}
 import de.sciss.lucre.event.Targets
 import de.sciss.lucre.expr.IntObj
 import de.sciss.lucre.stm.impl.ObjSerializer
-import de.sciss.lucre.stm.{Obj, Sys}
+import de.sciss.lucre.stm.{Elem, Obj, Sys, Copy}
 import de.sciss.lucre.swing.TestTreeTableApp.Node.Update
 import de.sciss.lucre.swing.TreeTableView.ModelUpdate
 import de.sciss.lucre.{event => evt, expr}
@@ -78,7 +78,10 @@ object TestTreeTableApp extends AppLike {
 
     def branchOption = Some(this)
 
-    object changed extends Changed with evt.impl.Generator[S, Node.Update] with evt.impl.Root[S, Node.Update]
+    object changed extends Changed with evt.impl.RootGenerator[S, Node.Update]
+
+    def copy()(implicit tx: S#Tx, context: Copy[S]): Elem[S] =
+      new Branch(Targets[S], context(children)) // .connect()
 
     def writeData(out: DataOutput): Unit = {
       out.writeByte(0)
@@ -88,8 +91,8 @@ object TestTreeTableApp extends AppLike {
     def disposeData()(implicit tx: S#Tx): Unit =
       children.dispose()
 
-    def foldUpdate(generated: Option[Node.Update], input: expr.List.Update[S, Node])
-                  (implicit tx: S#Tx): Option[Node.Update] = Some(Node.Update.Branch(this, input))
+//    def foldUpdate(generated: Option[Node.Update], input: expr.List.Update[S, Node])
+//                  (implicit tx: S#Tx): Option[Node.Update] = Some(Node.Update.Branch(this, input))
   }
   class Leaf(val targets: evt.Targets[S], val expr: IntObj.Var[S])
     extends Node
@@ -100,6 +103,9 @@ object TestTreeTableApp extends AppLike {
 
     def branchOption = None
 
+    def copy()(implicit tx: S#Tx, context: Copy[S]): Elem[S] =
+      new Leaf(Targets[S], context(expr)) // .connect()
+
     def writeData(out: DataOutput): Unit = {
       out.writeByte(1)
       expr.write(out)
@@ -108,10 +114,10 @@ object TestTreeTableApp extends AppLike {
     def disposeData()(implicit tx: S#Tx): Unit =
       expr.dispose()
 
-    object changed extends Changed with evt.impl.Generator[S, Node.Update] with evt.impl.Root[S, Node.Update]
+    object changed extends Changed with evt.impl.RootGenerator[S, Node.Update]
 
-    def foldUpdate(generated: Option[Node.Update], input: Change[Int])
-                  (implicit tx: S#Tx): Option[Node.Update] = Some(Node.Update.Leaf(this, input))
+//    def foldUpdate(generated: Option[Node.Update], input: Change[Int])
+//                  (implicit tx: S#Tx): Option[Node.Update] = Some(Node.Update.Leaf(this, input))
   }
 
   implicit object BranchSer extends Serializer[S#Tx, S#Acc, Branch] {
