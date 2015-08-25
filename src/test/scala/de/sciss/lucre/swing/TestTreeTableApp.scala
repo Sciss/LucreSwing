@@ -3,7 +3,6 @@ package de.sciss.lucre.swing
 import javax.swing.event.{CellEditorListener, ChangeEvent}
 import javax.swing.{CellEditor, JComponent, JTextField}
 
-import de.sciss.lucre.data.Iterator
 import de.sciss.lucre.event.Targets
 import de.sciss.lucre.expr.IntObj
 import de.sciss.lucre.stm.impl.ObjSerializer
@@ -142,7 +141,7 @@ object TestTreeTableApp extends AppLike {
   private val h = new TreeTableView.Handler[S, Node, Branch, Node.Update, Data] {
     def nodeID(node: Node): S#ID = node.id
 
-    def children(b: Branch)(implicit tx: S#Tx): Iterator[S#Tx, Node] = b.children.iterator
+    def children(b: Branch)(implicit tx: S#Tx): Iterator[Node] = b.children.iterator
 
     def branchOption(node: Node): Option[Branch] = node.branchOption
 

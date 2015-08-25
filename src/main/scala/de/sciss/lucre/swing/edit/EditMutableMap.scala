@@ -17,20 +17,21 @@ package edit
 
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
+import de.sciss.lucre.{event => evt}
 import de.sciss.lucre.stm.{Elem, Sys}
 import de.sciss.serial.Serializer
 
 import scala.language.higherKinds
 
 object EditMutableMap {
-  def apply[S <: Sys[S], K, Ex[~ <: Sys[~]] <: Elem[S]](name: String, map: expr.Map.Modifiable[S, K, Ex[S]],
+  def apply[S <: Sys[S], K, Ex[~ <: Sys[~]] <: Elem[~]](name: String, map: evt.Map.Modifiable[S, K, Ex],
                                          key: K, value: Option[Ex[S]])
                                         (implicit tx: S#Tx, cursor: stm.Cursor[S],
-                                         keyType: expr.Map.Key[K],
+                                         keyType: evt.Map.Key[K],
                                          valueSerializer: Serializer[S#Tx, S#Acc, Ex[S]]): UndoableEdit = {
     val before = map.get(key)
 
-    val mapH      = tx.newHandle(map) // (expr.Map.Modifiable.serializer[S, A, B, U])
+    val mapH      = tx.newHandle(map) // (evt.Map.Modifiable.serializer[S, K, Ex])
     val beforeH   = tx.newHandle(before)
     val nowH      = tx.newHandle(value)
     val res       = new Impl(name, key, mapH, beforeH, nowH)
@@ -38,11 +39,13 @@ object EditMutableMap {
     res
   }
 
-  private[edit] final class Impl[S <: Sys[S], A, B, U](name: String, key: A,
-                                                       mapH   : stm.Source[S#Tx, expr.Map.Modifiable[S, A, B]],
-                                                       beforeH: stm.Source[S#Tx, Option[B]],
-                                                       nowH   : stm.Source[S#Tx, Option[B]])(implicit cursor: stm.Cursor[S])
+  private[edit] final class Impl[S <: Sys[S], A, Repr[~ <: Sys[~]] <: Elem[~], U](name: String, key: A,
+                                                       mapH   : stm.Source[S#Tx, evt.Map.Modifiable[S, A, Repr]],
+                                                       beforeH: stm.Source[S#Tx, Option[Repr[S]]],
+                                                       nowH   : stm.Source[S#Tx, Option[Repr[S]]])(implicit cursor: stm.Cursor[S])
     extends AbstractUndoableEdit {
+
+    type B = Repr[S]
 
     override def undo(): Unit = {
       super.undo()

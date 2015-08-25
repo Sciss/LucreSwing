@@ -16,10 +16,11 @@ package impl
 
 import javax.swing.undo.UndoableEdit
 
+import de.sciss.lucre.{event => evt}
 import de.sciss.lucre.expr.{Expr, Type}
-import de.sciss.lucre.stm.{Elem, Disposable, Sys}
+import de.sciss.lucre.stm
+import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.lucre.swing.edit.{EditCellView, EditExprMap}
-import de.sciss.lucre.{expr, stm}
 
 import scala.language.{existentials, higherKinds}
 
@@ -53,10 +54,10 @@ object CellViewFactory {
 trait CellViewFactory[A] {
   import CellViewFactory.Committer
 
-  protected def mkMapCommitter[S <: Sys[S], K, Ex[~ <: Sys[~]] <: Expr[~, A]](map: expr.Map[S, K, Ex[S]], key: K,
+  protected def mkMapCommitter[S <: Sys[S], K, Ex[~ <: Sys[~]] <: Expr[~, A]](map: evt.Map[S, K, Ex], key: K,
                                                                            default: A, name: String)
                                             (implicit tx: S#Tx, cursor: stm.Cursor[S],
-                                             keyType: expr.Map.Key[K],
+                                             keyType: evt.Map.Key[K],
                                              tpe: Type.Expr[A, Ex]): (A, Option[Committer[S, A]]) = {
     import tpe.newConst
     val com = map.modifiableOption.map { mapMod =>
@@ -71,16 +72,16 @@ trait CellViewFactory[A] {
     (value0, com)
   }
 
-  protected def mkMapObserver[S <: Sys[S], K, Ex[~ <: Sys[~]] <: Expr[S, A]](map: expr.Map[S, K, Ex[S]], key: K,
+  protected def mkMapObserver[S <: Sys[S], K, Ex[~ <: Sys[~]] <: Expr[~, A]](map: evt.Map[S, K, Ex], key: K,
                                               view: CellViewFactory.View[A])
                                            (implicit tx: S#Tx): Disposable[S#Tx] =
     map.changed.react {
       implicit tx => upd => upd.changes.foreach {
-        case expr.Map.Added  (`key`, expr) =>
+        case evt.Map.Added  (`key`, expr) =>
           val now = expr.value
           deferTx(view.update(now))
 // ELEM
-//        case expr.Map.Element(`key`, expr, Change(_, now)) =>
+//        case evt.Map.Element(`key`, expr, Change(_, now)) =>
 //          deferTx(view.update(now))
         case _ =>
       }

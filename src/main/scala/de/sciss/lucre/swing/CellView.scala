@@ -13,6 +13,7 @@
 
 package de.sciss.lucre.swing
 
+import de.sciss.lucre.{event => evt}
 import de.sciss.lucre.event.Observable
 import de.sciss.lucre.expr.{Type, Expr}
 import de.sciss.lucre.stm.Sys
@@ -36,8 +37,8 @@ object CellView {
     }
   }
 
-  def exprMap[S <: Sys[S], K, A, Ex[~ <: Sys[~]] <: _expr.Expr[~, A]](map: _expr.Map[S, K, Ex[S]], key: K)
-                                (implicit tx: S#Tx, tpe: Type.Expr[A, Ex], keyType: _expr.Map.Key[K])
+  def exprMap[S <: Sys[S], K, A, Ex[~ <: Sys[~]] <: _expr.Expr[~, A]](map: evt.Map[S, K, Ex], key: K)
+                                (implicit tx: S#Tx, tpe: Type.Expr[A, Ex], keyType: evt.Map.Key[K])
   : CellView[S#Tx, Option[A]] { type Repr = Option[Ex[S]] } = {
     // import tpe.serializer
     map.modifiableOption.fold[CellView[S#Tx, Option[A]] { type Repr = Option[Ex[S]] }] {

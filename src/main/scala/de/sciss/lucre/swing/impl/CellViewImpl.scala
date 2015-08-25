@@ -15,6 +15,7 @@ package de.sciss.lucre
 package swing
 package impl
 
+import de.sciss.lucre.{event => evt}
 import de.sciss.lucre.expr.Type
 import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.model.Change
@@ -30,7 +31,7 @@ object CellViewImpl {
   private[swing] trait ExprMapLike[S <: Sys[S], K, A, Ex[~ <: Sys[~]] <: expr.Expr[~, A], U]
     extends Basic[S#Tx, Option[A]] {
 
-    protected def h: stm.Source[S#Tx, expr.Map[S, K, Ex[S]]]
+    protected def h: stm.Source[S#Tx, evt.Map[S, K, Ex]]
     protected val key: K
     protected def mapUpdate(u: U): Option[A]
 
@@ -39,10 +40,10 @@ object CellViewImpl {
     def react(fun: S#Tx => Option[A] => Unit)(implicit tx: S#Tx): Disposable[S#Tx] =
       h().changed.react { implicit tx => u =>
         u.changes.foreach {
-          case expr.Map.Added  (`key`, ex   ) => fun(tx)(Some(ex.value))
-          case expr.Map.Removed(`key`, _    ) => fun(tx)(None)
+          case evt.Map.Added  (`key`, ex   ) => fun(tx)(Some(ex.value))
+          case evt.Map.Removed(`key`, _    ) => fun(tx)(None)
 // ELEM
-//          case expr.Map.Element(`key`, _, ch) =>
+//          case evt.Map.Element(`key`, _, ch) =>
 //            val opt = mapUpdate(ch)
 //            if (opt.isDefined) fun(tx)(opt)
           case _ =>
@@ -56,7 +57,7 @@ object CellViewImpl {
   }
 
   private[swing] final class ExprMap[S <: Sys[S], K, A, Ex[~ <: Sys[~]] <: expr.Expr[~, A], U](
-      protected val h: stm.Source[S#Tx, expr.Map[S, K, Ex[S]]],
+      protected val h: stm.Source[S#Tx, evt.Map[S, K, Ex]],
       protected val key: K,
       val updFun: U => Option[A])
     extends ExprMapLike[S, K, A, Ex, U] {
@@ -67,7 +68,7 @@ object CellViewImpl {
   }
 
   private[swing] final class ExprModMap[S <: Sys[S], K, A, Ex[~ <: Sys[~]] <: expr.Expr[~, A]](
-      protected val h: stm.Source[S#Tx, expr.Map.Modifiable[S, K, Ex[S]]],
+      protected val h: stm.Source[S#Tx, evt.Map.Modifiable[S, K, Ex]],
       protected val key: K)
      (implicit tpe: Type.Expr[A, Ex])
     extends ExprMapLike[S, K, A, Ex, Change[A]] with CellView.Var[S, Option[A]] {
@@ -83,7 +84,8 @@ object CellViewImpl {
       val opt = h().get(key)
       // ! important to unwrap, otherwise we get infinite recursion with `repr = repr` !
       opt.map {
-        case tpe.Var(vr) => vr()
+        case tpe.Var(vr) =>
+          vr()
         case other => other
       }
     }

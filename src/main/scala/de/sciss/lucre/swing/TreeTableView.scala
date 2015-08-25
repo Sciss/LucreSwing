@@ -49,7 +49,7 @@ object TreeTableView {
     /** Queries the children of a node. If the node is not a branch, the method should return `None`,
       * otherwise it should return an iterator over the child nodes.
       */
-    def children(branch: Branch)(implicit tx: S#Tx): de.sciss.lucre.data.Iterator[S#Tx, Node]
+    def children(branch: Branch)(implicit tx: S#Tx): Iterator[Node]
 
     //    /** Note: this model is wrapped. The `getParent` method is never used and can safely be implemented
     //      * by returning `None` always.

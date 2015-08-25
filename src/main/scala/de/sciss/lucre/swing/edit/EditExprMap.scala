@@ -17,16 +17,17 @@ package edit
 
 import javax.swing.undo.UndoableEdit
 
+import de.sciss.lucre.{event => evt}
 import de.sciss.lucre.expr.{Expr, Type}
 import de.sciss.lucre.stm.Sys
 
 import scala.language.higherKinds
 
 object EditExprMap {
-  def apply[S <: Sys[S], K, A, Ex[~ <: Sys[~]] <: expr.Expr[~, A]](name: String, map: expr.Map.Modifiable[S, K, Ex[S]],
+  def apply[S <: Sys[S], K, A, Ex[~ <: Sys[~]] <: expr.Expr[~, A]](name: String, map: evt.Map.Modifiable[S, K, Ex],
                                key: K, value: Option[Ex[S]])
                               (implicit tx: S#Tx, cursor: stm.Cursor[S],
-                               keyType  : expr.Map.Key[K],
+                               keyType  : evt.Map.Key[K],
                                valueType: Type.Expr[A, Ex]): UndoableEdit = {
     val before = map.get(key)
     val now: Option[Ex[S]] = (before, value) match {
@@ -36,7 +37,7 @@ object EditExprMap {
     }
 
     import valueType.serializer
-    val mapH      = tx.newHandle(map) // (expr.Map.Modifiable.serializer[S, A, Expr[S, B], Change[B]])
+    val mapH      = tx.newHandle(map) // (evt.Map.Modifiable.serializer[S, A, Expr[S, B], Change[B]])
     val beforeH   = tx.newHandle(before)
     val nowH      = tx.newHandle(now)
     val res       = new EditMutableMap.Impl(name, key, mapH, beforeH, nowH)

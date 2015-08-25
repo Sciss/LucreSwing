@@ -1,6 +1,6 @@
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.expr
+import de.sciss.lucre.{event => evt}
 import de.sciss.lucre.expr.{BooleanObj, DoubleObj, StringObj}
 
 import scala.collection.immutable.{IndexedSeq => Vec}
@@ -18,7 +18,7 @@ object OptionalApp extends AppLike {
     implicit val stringEx  = StringObj
 
     val exprD1  = doubleEx.newVar[S](doubleEx.newConst(0.0))
-    val map     = expr.Map.Modifiable[S, String, DoubleObj[S]]
+    val map     = evt.Map.Modifiable[S, String, DoubleObj]
     val key     = "foo"
     val mapView = CellView.exprMap[S, String, Double, DoubleObj](map, key)
     val vD1     = DoubleSpinnerView(exprD1, "d1")
