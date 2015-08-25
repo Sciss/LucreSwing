@@ -21,6 +21,7 @@ import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.model.Change
 import de.sciss.serial.Serializer
 
+import scala.concurrent.stm.Ref
 import scala.language.higherKinds
 
 object CellViewImpl {
@@ -28,27 +29,17 @@ object CellViewImpl {
     def map[B](f: A => B): CellView[Tx, B] = new MapImpl(this, f)
   }
 
-  private[swing] trait ExprMapLike[S <: Sys[S], K, A, Ex[~ <: Sys[~]] <: expr.Expr[~, A], U]
+  private[swing] trait ExprMapLike[S <: Sys[S], K, A, Ex[~ <: Sys[~]] <: expr.Expr[~, A] /* , U */]
     extends Basic[S#Tx, Option[A]] {
 
     protected def h: stm.Source[S#Tx, evt.Map[S, K, Ex]]
     protected val key: K
-    protected def mapUpdate(u: U): Option[A]
+    // protected def mapUpdate(u: U): Option[A]
 
     type Repr = Option[Ex[S]]
 
     def react(fun: S#Tx => Option[A] => Unit)(implicit tx: S#Tx): Disposable[S#Tx] =
-      h().changed.react { implicit tx => u =>
-        u.changes.foreach {
-          case evt.Map.Added  (`key`, ex   ) => fun(tx)(Some(ex.value))
-          case evt.Map.Removed(`key`, _    ) => fun(tx)(None)
-// ELEM
-//          case evt.Map.Element(`key`, _, ch) =>
-//            val opt = mapUpdate(ch)
-//            if (opt.isDefined) fun(tx)(opt)
-          case _ =>
-        }
-      }
+      new ExprMapLikeObs(h(), key, fun, tx)
 
     // XXX TODO -- remove in next major version
     def repr(implicit tx: S#Tx): Repr = throw new Exception("Subclass responsibility")
@@ -56,29 +47,75 @@ object CellViewImpl {
     def apply()(implicit tx: S#Tx): Option[A] = repr.map(_.value)
   }
 
-  private[swing] final class ExprMap[S <: Sys[S], K, A, Ex[~ <: Sys[~]] <: expr.Expr[~, A], U](
+  private[this] final class ExprMapLikeObs[S <: Sys[S], K, A, Ex[~ <: Sys[~]] <: expr.Expr[~, A], U](
+      map: evt.Map[S, K, Ex], key: K, fun: S#Tx => Option[A] => Unit, tx0: S#Tx)
+    extends Disposable[S#Tx] {
+
+    private val valObs = Ref(null: Disposable[S#Tx])
+
+    private val mapObs = map.changed.react { implicit tx => u =>
+      u.changes.foreach {
+        case evt.Map.Added  (`key`, expr) =>
+          valueAdded(expr)
+          // XXX TODO -- if we moved this into `valueAdded`, the contract
+          // could be that initially the view is updated
+          val now0 = expr.value
+          fun(tx)(Some(now0))
+        case evt.Map.Removed(`key`, _ ) =>
+          if (valueRemoved()) fun(tx)(None)
+        case _ =>
+      }
+    } (tx0)
+
+    map.get(key)(tx0).foreach(valueAdded(_)(tx0))
+
+    private def valueAdded(expr: Ex[S])(implicit tx: S#Tx): Unit = {
+      val res = expr.changed.react { implicit tx => {
+        case Change(_, now) =>
+          fun(tx)(Some(now))
+        //            val opt = mapUpdate(ch)
+        //            if (opt.isDefined) fun(tx)(opt)
+        case _ =>  // XXX TODO -- should we ask for expr.value ?
+      }}
+      val v = valObs.swap(res)(tx.peer)
+      if (v != null) v.dispose()
+    }
+
+    private def valueRemoved()(implicit tx: S#Tx): Boolean = {
+      val v   = valObs.swap(null)(tx.peer)
+      val res = v != null
+      if (res) v.dispose()
+      res
+    }
+
+    def dispose()(implicit tx: S#Tx): Unit = {
+      valueRemoved()
+      mapObs.dispose()
+    }
+  }
+
+  private[swing] final class ExprMap[S <: Sys[S], K, A, Ex[~ <: Sys[~]] <: expr.Expr[~, A] /* , U */](
       protected val h: stm.Source[S#Tx, evt.Map[S, K, Ex]],
-      protected val key: K,
-      val updFun: U => Option[A])
-    extends ExprMapLike[S, K, A, Ex, U] {
+      protected val key: K /* , val updFun: U => Option[A] */)
+    extends ExprMapLike[S, K, A, Ex /* , U */] {
 
     override def repr(implicit tx: S#Tx): Repr = h().get(key)
 
-    protected def mapUpdate(u: U): Option[A] = updFun(u)
+    // protected def mapUpdate(u: U): Option[A] = updFun(u)
   }
 
   private[swing] final class ExprModMap[S <: Sys[S], K, A, Ex[~ <: Sys[~]] <: expr.Expr[~, A]](
       protected val h: stm.Source[S#Tx, evt.Map.Modifiable[S, K, Ex]],
       protected val key: K)
      (implicit tpe: Type.Expr[A, Ex])
-    extends ExprMapLike[S, K, A, Ex, Change[A]] with CellView.Var[S, Option[A]] {
+    extends ExprMapLike[S, K, A, Ex /* , Change[A] */] with CellView.Var[S, Option[A]] {
 
     def serializer: Serializer[S#Tx, S#Acc, Repr] = {
       implicit val exSer = tpe.serializer[S]
       Serializer.option[S#Tx, S#Acc, Ex[S]]
     }
 
-    protected def mapUpdate(ch: Change[A]): Option[A] = if (ch.isSignificant) Some(ch.now) else None
+    // protected def mapUpdate(ch: Change[A]): Option[A] = if (ch.isSignificant) Some(ch.now) else None
 
     override def repr(implicit tx: S#Tx): Repr = {
       val opt = h().get(key)

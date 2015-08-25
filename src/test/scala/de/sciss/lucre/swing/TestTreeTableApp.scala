@@ -267,17 +267,17 @@ object TestTreeTableApp extends AppLike {
     tx.newHandle(root) -> TreeTableView(root, h)
   }
 
-  private def scramble(s: String): String = {
-    val sb  = new StringBuilder
-    var bag = (0 until s.length).toIndexedSeq
-    while (bag.nonEmpty) {
-      val i = (math.random * bag.size).toInt
-      val j = bag(i)
-      bag   = bag.patch(i, Nil, 1)
-      sb.append(s.charAt(j))
-    }
-    sb.result()
-  }
+//  private def scramble(s: String): String = {
+//    val sb  = new StringBuilder
+//    var bag = (0 until s.length).toIndexedSeq
+//    while (bag.nonEmpty) {
+//      val i = (math.random * bag.size).toInt
+//      val j = bag(i)
+//      bag   = bag.patch(i, Nil, 1)
+//      sb.append(s.charAt(j))
+//    }
+//    sb.result()
+//  }
 
   private def add(child: Node)(implicit tx: S#Tx): Unit = {
     val (parent, idx) = view.insertionPoint

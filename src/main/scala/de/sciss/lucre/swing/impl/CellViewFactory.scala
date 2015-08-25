@@ -21,7 +21,9 @@ import de.sciss.lucre.expr.{Expr, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.lucre.swing.edit.{EditCellView, EditExprMap}
+import de.sciss.model.Change
 
+import scala.concurrent.stm.Ref
 import scala.language.{existentials, higherKinds}
 
 object CellViewFactory {
@@ -75,15 +77,49 @@ trait CellViewFactory[A] {
   protected def mkMapObserver[S <: Sys[S], K, Ex[~ <: Sys[~]] <: Expr[~, A]](map: evt.Map[S, K, Ex], key: K,
                                               view: CellViewFactory.View[A])
                                            (implicit tx: S#Tx): Disposable[S#Tx] =
-    map.changed.react {
+    new MapObserver(map, key, view, tx)
+
+  private[this] final class MapObserver[S <: Sys[S], K, Ex[~ <: Sys[~]] <: Expr[~, A]](map: evt.Map[S, K, Ex], key: K,
+                                                                                       view: CellViewFactory.View[A], tx0: S#Tx)
+    extends Disposable[S#Tx] {
+
+    private val valObs = Ref(null: Disposable[S#Tx])
+    private val mapObs = map.changed.react {
       implicit tx => upd => upd.changes.foreach {
         case evt.Map.Added  (`key`, expr) =>
-          val now = expr.value
-          deferTx(view.update(now))
-// ELEM
-//        case evt.Map.Element(`key`, expr, Change(_, now)) =>
-//          deferTx(view.update(now))
+          valueAdded(expr)
+          // XXX TODO -- if we moved this into `valueAdded`, the contract
+          // could be that initially the view is updated
+          val now0 = expr.value
+          deferTx(view.update(now0))
+        case evt.Map.Removed(`key`, _   ) =>
+          valueRemoved()
         case _ =>
       }
+    } (tx0)
+
+    map.get(key)(tx0).foreach(valueAdded(_)(tx0))
+
+    private def valueAdded(expr: Ex[S])(implicit tx: S#Tx): Unit = {
+      val res = expr.changed.react { implicit tx => {
+        case Change(_, now) =>
+          deferTx(view.update(now))
+        case _ =>  // XXX TODO -- should we ask for expr.value ?
+      }}
+      val v = valObs.swap(res)(tx.peer)
+      if (v != null) v.dispose()
     }
+
+    private def valueRemoved()(implicit tx: S#Tx): Boolean = {
+      val v = valObs.swap(null)(tx.peer)
+      val res = v != null
+      if (res) v.dispose()
+      res
+    }
+
+    def dispose()(implicit tx: S#Tx): Unit = {
+      valueRemoved()
+      mapObs.dispose()
+    }
+  }
 }

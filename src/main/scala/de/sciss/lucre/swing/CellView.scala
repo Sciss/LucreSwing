@@ -42,8 +42,8 @@ object CellView {
   : CellView[S#Tx, Option[A]] { type Repr = Option[Ex[S]] } = {
     // import tpe.serializer
     map.modifiableOption.fold[CellView[S#Tx, Option[A]] { type Repr = Option[Ex[S]] }] {
-      new Impl.ExprMap[S, K, A, Ex, Change[A]](tx.newHandle(map), key, ch =>
-        if (ch.isSignificant) Some(ch.now) else None)
+      new Impl.ExprMap[S, K, A, Ex  /* , Change[A] */](tx.newHandle(map), key /* , ch =>
+        if (ch.isSignificant) Some(ch.now) else None */)
     } { mv =>
       new Impl.ExprModMap[S, K, A, Ex](tx.newHandle(mv), key)
     }
