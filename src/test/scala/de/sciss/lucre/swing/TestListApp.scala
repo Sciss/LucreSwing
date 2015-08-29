@@ -8,17 +8,17 @@ import scala.concurrent.stm.{Ref, Txn}
 import scala.swing.{BorderPanel, Button, Component, FlowPanel}
 
 object TestListApp extends AppLike {
-  implicit private val listModSer = expr.List.Modifiable.serializer[S, Expr[S, String]]
-  implicit private val listSer    = expr.List.serializer[S, Expr[S, String]]
+  implicit private val listModSer = expr.List.Modifiable.serializer[S, StringObj[S]]
+  implicit private val listSer    = expr.List.serializer[S, StringObj[S]]
 
-  private val h     = ListView.Handler[S, Expr[S, String], Change[String]] {
+  private val h     = ListView.Handler[S, StringObj[S], Change[String]] {
     implicit tx => _.value
   } {
     implicit tx => (_, ch) => Some(ch.now)
   }
 
   private lazy val (listH, view) = system.step { implicit tx =>
-    val li = expr.List.Modifiable[S, Expr[S, String]]
+    val li = expr.List.Modifiable[S, StringObj]
     tx.newHandle(li) -> ListView(li, h)
   }
 

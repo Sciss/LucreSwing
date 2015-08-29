@@ -7,9 +7,8 @@ import de.sciss.lucre.event.Targets
 import de.sciss.lucre.expr.IntObj
 import de.sciss.lucre.stm.impl.ObjSerializer
 import de.sciss.lucre.stm.{Elem, Obj, Sys, Copy}
-import de.sciss.lucre.swing.TestTreeTableApp.Node.Update
 import de.sciss.lucre.swing.TreeTableView.ModelUpdate
-import de.sciss.lucre.{event => evt, expr}
+import de.sciss.lucre.{event => evt, stm, expr}
 import de.sciss.model.Change
 import de.sciss.serial.{DataInput, DataOutput, Serializer}
 import de.sciss.treetable.TreeTableCellRenderer.State
@@ -19,16 +18,23 @@ import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.{BorderPanel, Button, Component, FlowPanel}
 
 object TestTreeTableApp extends AppLike {
+  private val instance = new TestTreeTableApp[S](system)(system)
+
+  protected def mkView(): Component = instance.mkView()
+}
+class TestTreeTableApp[T <: Sys[T]](system: T)(implicit val cursor: stm.Cursor[T]) { app =>
   object Node extends Obj.Type {
     final val typeID = 0x10000000
 
     object Update {
-      case class Branch(branch: TestTreeTableApp.Branch, peer: expr.List.Update[S, Node]) extends Update
-      case class Leaf  (leaf  : TestTreeTableApp.Leaf, peer: Change[Int]) extends Update
+      case class Branch[S <: Sys[S]](branch: app.Branch[S], peer: expr.List.Update[S, Node[S]]) extends Update[S]
+      case class Leaf  [S <: Sys[S]](leaf  : app.Leaf  [S], peer: Change[Int]) extends Update[S]
     }
-    trait Update
+    trait Update[S <: Sys[S]]
 
-    implicit object Ser extends ObjSerializer[S, Node] {
+    implicit def serializer[S <: Sys[S]]: Ser[S] = new Ser[S]
+
+    class Ser[S <: Sys[S]] extends ObjSerializer[S, Node[S]] {
 //      def read(in: DataInput, access: S#Acc)(implicit tx: S#Tx): Node = {
 //        val targets = evt.Targets.read[S](in, access)
 //        read(in, access, targets)
@@ -36,10 +42,10 @@ object TestTreeTableApp extends AppLike {
 
       def tpe: Obj.Type = Node
 
-      def read(in: DataInput, access: S#Acc, targets: evt.Targets[S])(implicit tx: S#Tx): Node with evt.Node[S] =
+      def read(in: DataInput, access: S#Acc, targets: evt.Targets[S])(implicit tx: S#Tx): Node[S] with evt.Node[S] =
         in.readByte() match {
           case 0 =>
-            val peer = expr.List.Modifiable.read[S, Node](in, access)
+            val peer = expr.List.Modifiable.read[S, Node[S]](in, access)
             new Branch(targets, peer)
           case 1 =>
             val peer = IntObj.readVar[S](in, access)
@@ -49,39 +55,38 @@ object TestTreeTableApp extends AppLike {
 //      def write(node: Node, out: DataOutput): Unit = node.write(out)
     }
 
-    def readIdentifiedObj[T <: Sys[T]](in: DataInput, access: T#Acc)(implicit tx: T#Tx): Obj[T] = {
-      // Well, whatever, it's just testing...
-      val acc1          = access.asInstanceOf[S#Acc]
-      implicit val tx1  = tx.asInstanceOf[S#Tx]
-      val targets       = Targets.read[S](in, acc1)
-      Ser.read(in, acc1, targets).asInstanceOf[Obj[T]]
+    def readIdentifiedObj[S <: Sys[S]](in: DataInput, access: S#Acc)(implicit tx: S#Tx): Obj[S] = {
+      val targets = Targets.read[S](in, access)
+      serializer[S].read(in, access, targets)
     }
   }
 
-  sealed trait Node extends Obj[S] with
-    evt.Publisher[S, Node.Update] with evt.Node[S] {
+  sealed trait Node[S <: Sys[S]] extends Obj[S] with
+    evt.Publisher[S, Node.Update[S]] with evt.Node[S] {
 
     def tpe: Obj.Type = Node
 
     // def reader = Node.Ser
-    def branchOption: Option[Branch]
+    def branchOption: Option[Branch[S]]
   }
 
   Node.init()
 
-  class Branch(val targets: evt.Targets[S], val children: expr.List.Modifiable[S, Node])
-    extends Node
-    with evt.impl.SingleNode[S, Node.Update]
+  class Branch[S <: Sys[S]](val targets: evt.Targets[S], val children: expr.List.Modifiable[S, Node[S]])
+    extends Node[S]
+    with evt.impl.SingleNode[S, Node.Update[S]]
     /* with evt.impl.MappingGenerator[S, Node.Update, expr.List.Update[S, Node], Node] */ {
 
     def inputEvent = children.changed
 
     def branchOption = Some(this)
 
-    object changed extends Changed with evt.impl.RootGenerator[S, Node.Update]
+    object changed extends Changed with evt.impl.RootGenerator[S, Node.Update[S]]
 
-    def copy()(implicit tx: S#Tx, context: Copy[S]): Elem[S] =
-      new Branch(Targets[S], context(children)) // .connect()
+    def copy[Out <: Sys[Out]]()(implicit tx: S#Tx, txOut: Out#Tx, context: Copy[S, Out]): Elem[Out] = {
+      type ListAux[~ <: Sys[~]] = expr.List.Modifiable[~, Node[~]]
+      new Branch[Out](Targets[Out], context[ListAux](children)) // .connect()
+    }
 
     def writeData(out: DataOutput): Unit = {
       out.writeByte(0)
@@ -94,17 +99,17 @@ object TestTreeTableApp extends AppLike {
 //    def foldUpdate(generated: Option[Node.Update], input: expr.List.Update[S, Node])
 //                  (implicit tx: S#Tx): Option[Node.Update] = Some(Node.Update.Branch(this, input))
   }
-  class Leaf(val targets: evt.Targets[S], val expr: IntObj.Var[S])
-    extends Node
-    with evt.impl.SingleNode[S, Node.Update]
+  class Leaf[S <: Sys[S]](val targets: evt.Targets[S], val expr: IntObj.Var[S])
+    extends Node[S]
+    with evt.impl.SingleNode[S, Node.Update[S]]
     /* with evt.impl.MappingGenerator[S, Node.Update, Change[Int], Node] */ {
 
     def inputEvent = expr.changed
 
     def branchOption = None
 
-    def copy()(implicit tx: S#Tx, context: Copy[S]): Elem[S] =
-      new Leaf(Targets[S], context(expr)) // .connect()
+    def copy[Out <: Sys[Out]]()(implicit tx: S#Tx, txOut: Out#Tx, context: Copy[S, Out]): Elem[Out] =
+      new Leaf(Targets[Out], context(expr)) // .connect()
 
     def writeData(out: DataOutput): Unit = {
       out.writeByte(1)
@@ -114,26 +119,29 @@ object TestTreeTableApp extends AppLike {
     def disposeData()(implicit tx: S#Tx): Unit =
       expr.dispose()
 
-    object changed extends Changed with evt.impl.RootGenerator[S, Node.Update]
+    object changed extends Changed with evt.impl.RootGenerator[S, Node.Update[S]]
 
 //    def foldUpdate(generated: Option[Node.Update], input: Change[Int])
 //                  (implicit tx: S#Tx): Option[Node.Update] = Some(Node.Update.Leaf(this, input))
   }
 
-  implicit object BranchSer extends Serializer[S#Tx, S#Acc, Branch] {
-    def read(in: DataInput, access: S#Acc)(implicit tx: S#Tx): Branch = {
+  implicit def branchSerializer[S <: Sys[S]]: Serializer[S#Tx, S#Acc, Branch[S]] =
+    new BranchSer[S]
+
+  private class BranchSer[S <: Sys[S]] extends Serializer[S#Tx, S#Acc, Branch[S]] {
+    def read(in: DataInput, access: S#Acc)(implicit tx: S#Tx): Branch[S] = {
       val targets = evt.Targets.read[S](in, access)
       read(in, access, targets)
     }
 
-    def read(in: DataInput, access: S#Acc, targets: evt.Targets[S])(implicit tx: S#Tx): Branch with evt.Node[S] =
+    def read(in: DataInput, access: S#Acc, targets: evt.Targets[S])(implicit tx: S#Tx): Branch[S] with evt.Node[S] =
       in.readByte() match {
         case 0 =>
-          val peer = expr.List.Modifiable.read[S, Node](in, access)
-          new Branch(targets, peer)
+          val peer = expr.List.Modifiable.read[S, Node[S]](in, access)
+          new Branch[S](targets, peer)
       }
 
-    def write(node: Branch, out: DataOutput): Unit = node.write(out)
+    def write(node: Branch[S], out: DataOutput): Unit = node.write(out)
   }
 
   object Data {
@@ -144,16 +152,20 @@ object TestTreeTableApp extends AppLike {
   }
   sealed trait Data
 
-  private val h = new TreeTableView.Handler[S, Node, Branch, Node.Update, Data] {
-    def nodeID(node: Node): S#ID = node.id
+  class Handler[S <: Sys[S]](implicit cursor: stm.Cursor[S])
+    extends TreeTableView.Handler[S, Node[S], Branch[S], Node.Update[S], Data] {
 
-    def children(b: Branch)(implicit tx: S#Tx): Iterator[Node] = b.children.iterator
+    var view: TreeTableView[S, Node[S], Branch[S], Data] = _
 
-    def branchOption(node: Node): Option[Branch] = node.branchOption
+    def nodeID(node: Node[S]): S#ID = node.id
 
-    def mapUpdate(upd: Update)(implicit tx: S#Tx): Vec[ModelUpdate[Node, Branch]] =
+    def children(b: Branch[S])(implicit tx: S#Tx): Iterator[Node[S]] = b.children.iterator
+
+    def branchOption(node: Node[S]): Option[Branch[S]] = node.branchOption
+
+    def mapUpdate(upd: Node.Update[S])(implicit tx: S#Tx): Vec[ModelUpdate[Node[S], Branch[S]]] =
       upd match {
-        case Update.Branch(parent, peer) =>
+        case Node.Update.Branch(parent, peer) =>
           peer.changes.flatMap {
             case expr.List.Added  (idx, elem) => Vec(TreeTableView.NodeAdded  (parent, idx, elem))
             case expr.List.Removed(idx, elem) => Vec(TreeTableView.NodeRemoved(parent, idx, elem))
@@ -162,8 +174,8 @@ object TestTreeTableApp extends AppLike {
 //              mapUpdate(eUpd)
           }
 
-        case Update.Leaf(l, Change(_, now)) =>
-          view.nodeView(l).fold[Vec[ModelUpdate[Node, Branch]]](Vec.empty) { nv =>
+        case Node.Update.Leaf(l, Change(_, now)) =>
+          view.nodeView(l).fold[Vec[ModelUpdate[Node[S], Branch[S]]]](Vec.empty) { nv =>
             nv.renderData match {
               case ld: Data.Leaf =>
                 deferTx {
@@ -175,7 +187,7 @@ object TestTreeTableApp extends AppLike {
           }
       }
 
-    private var editingNode = Option.empty[TreeTableView.NodeView[S, Node, Branch, Data]]
+    private var editingNode = Option.empty[TreeTableView.NodeView[S, Node[S], Branch[S], Data]]
 
     private lazy val r = new DefaultTreeTableCellRenderer
     private lazy val e = {
@@ -187,9 +199,9 @@ object TestTreeTableApp extends AppLike {
           try {
             val i = res.getCellEditorValue.toString.toInt
             editingNode.foreach { nodeView =>
-              system.step { implicit tx =>
+              cursor.step { implicit tx =>
                 nodeView.modelData() match {
-                  case l: Leaf => l.expr() = IntObj.newConst[S](i)
+                  case l: Leaf[S] => l.expr() = IntObj.newConst[S](i)
                   case _ =>
                 }
               }
@@ -202,7 +214,7 @@ object TestTreeTableApp extends AppLike {
       res
     }
 
-    def renderer(tt: TreeTableView[S, Node, Branch, Data], node: TreeTableView.NodeView[S, Node, Branch, Data],
+    def renderer(tt: TreeTableView[S, Node[S], Branch[S], Data], node: TreeTableView.NodeView[S, Node[S], Branch[S], Data],
                  row: Int, column: Int, state: State): Component = {
       val value = node.renderData match {
         case Data.Branch  => if (column == 0) "Branch" else ""
@@ -218,7 +230,7 @@ object TestTreeTableApp extends AppLike {
       Component.wrap(c.asInstanceOf[JComponent])
     }
 
-    def editor(tt: TreeTableView[S, Node, Branch, Data], node: TreeTableView.NodeView[S, Node, Branch, Data],
+    def editor(tt: TreeTableView[S, Node[S], Branch[S], Data], node: TreeTableView.NodeView[S, Node[S], Branch[S], Data],
                row: Int, column: Int, selected: Boolean): (Component, CellEditor) = {
       editingNode = None
       val value = node.renderData match {
@@ -250,27 +262,31 @@ object TestTreeTableApp extends AppLike {
     //      }
     //    }
 
-    def data(node: Node)(implicit tx:  S#Tx): Data = node match {
-      case b: Branch  => Data.Branch
-      case l: Leaf    => new Data.Leaf(l.expr.value)
+    def data(node: Node[S])(implicit tx:  S#Tx): Data = node match {
+      case b: Branch[S]  => Data.Branch
+      case l: Leaf  [S]  => new Data.Leaf(l.expr.value)
     }
   }
 
-  def newBranch()(implicit tx: S#Tx) = {
+  // lazy val h = new Handler[T](view)
+
+  def newBranch[S <: Sys[S]]()(implicit tx: S#Tx) = {
     val li    = expr.List.Modifiable[S, Node]
     val tgt   = evt.Targets[S]
-    new Branch(tgt, li)
+    new Branch[S](tgt, li)
   }
 
-  def newLeaf()(implicit tx: S#Tx) = {
+  def newLeaf[S <: Sys[S]]()(implicit tx: S#Tx) = {
     val ex    = IntObj.newVar[S](IntObj.newConst((math.random * 100).toInt))
     val tgt   = evt.Targets[S]
     new Leaf(tgt, ex)
   }
 
-  private lazy val (treeH, view: TreeTableView[S, Node, Branch, Data]) = system.step { implicit tx =>
-    val root = newBranch()
-    tx.newHandle(root) -> TreeTableView(root, h)
+  private lazy val (treeH, view: TreeTableView[T, Node[T], Branch[T], Data]) = cursor.step { implicit tx =>
+    val root  = newBranch[T]()
+    val h     =  new Handler[T]
+    val _view = TreeTableView(root, h)
+    tx.newHandle(root) -> _view
   }
 
 //  private def scramble(s: String): String = {
@@ -285,25 +301,25 @@ object TestTreeTableApp extends AppLike {
 //    sb.result()
 //  }
 
-  private def add(child: Node)(implicit tx: S#Tx): Unit = {
+  private def add(child: Node[T])(implicit tx: T#Tx): Unit = {
     val (parent, idx) = view.insertionPoint
     parent.children.insert(idx, child)
   }
 
-  private def addBranchAction(): Unit = system.step { implicit tx =>
+  private def addBranchAction(): Unit = cursor.step { implicit tx =>
     add(newBranch())
   }
 
-  private def addLeafAction(): Unit = system.step { implicit tx =>
+  private def addLeafAction(): Unit = cursor.step { implicit tx =>
     add(newLeaf())
   }
 
-  private def removeAction(): Unit = system.step { implicit tx =>
+  private def removeAction(): Unit = cursor.step { implicit tx =>
     val toRemove = view.selection.flatMap { childView =>
-      val parent = childView.parentView.fold[Node](treeH())(_.modelData())
+      val parent = childView.parentView.fold[Node[T]](treeH())(_.modelData())
       parent match {
-        case b: Branch  => Some(b -> childView.modelData())
-        case _          => None
+        case b: Branch[T] => Some(b -> childView.modelData())
+        case _            => None
       }
     }
     toRemove.reverse.foreach { case (parent, child) =>
@@ -311,10 +327,10 @@ object TestTreeTableApp extends AppLike {
     }
   }
 
-  private def modifyAction(): Unit = system.step { implicit tx =>
+  private def modifyAction(): Unit = cursor.step { implicit tx =>
     view.selection.foreach { v =>
       v.modelData() match {
-        case l: Leaf => l.expr() = IntObj.newConst[S]((math.random * 100).toInt)
+        case l: Leaf[T] => l.expr() = IntObj.newConst[T]((math.random * 100).toInt)
         case _ =>
       }
     }
