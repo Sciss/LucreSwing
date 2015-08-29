@@ -22,8 +22,8 @@ import javax.swing.{CellEditor, DropMode, JTable}
 
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm.{Disposable, Identifiable, IdentifierMap}
-import de.sciss.lucre.swing.TreeTableView.Handler
-import de.sciss.lucre.{stm, event => evt}
+import de.sciss.lucre.swing.TreeTableView.{ModelUpdate, Handler}
+import de.sciss.lucre.stm
 import de.sciss.model.impl.ModelImpl
 import de.sciss.serial.Serializer
 import de.sciss.treetable.TreeTable.Path
@@ -40,10 +40,14 @@ object TreeTableViewImpl {
   var DEBUG = false
 
   private object NodeViewImpl {
-    sealed trait Base[S <: Sys[S], Node, Branch, Data] {
+    sealed trait Base[S <: Sys[S], Node, Branch, Data] extends Disposable[S#Tx] {
       def isLeaf: Boolean
       def numChildren: Int
       def parentOption1: Option[BranchOrRoot[S, Node, Branch, Data]]
+
+      protected def observer: Disposable[S#Tx]
+
+      def dispose()(implicit tx: S#Tx): Unit = observer.dispose()
     }
 
     sealed trait BranchOrRoot[S <: Sys[S], Node, Branch, Data] extends Base[S, Node, Branch, Data] {
@@ -61,7 +65,8 @@ object TreeTableViewImpl {
     class BranchImpl[S <: Sys[S], Node, Branch, Data](val parentImpl: BranchOrRoot[S, Node, Branch, Data],
                                           val branchH: stm.Source[S#Tx, Branch],
                                           val renderData: Data,
-                                          val modelData: stm.Source[S#Tx, Node])
+                                          val modelData: stm.Source[S#Tx, Node],
+                                          protected val observer: Disposable[S#Tx])
       extends BranchOrRoot[S, Node, Branch, Data] with NodeViewImpl[S, Node, Branch, Data] {
 
       override def toString = s"Branch($modelData, $renderData)"
@@ -69,7 +74,8 @@ object TreeTableViewImpl {
 
     class Leaf[S <: Sys[S], Node, Branch, Data](val parentImpl: BranchOrRoot[S, Node, Branch, Data],
                                         val renderData: Data,
-                                        val modelData: stm.Source[S#Tx, Node])
+                                        val modelData: stm.Source[S#Tx, Node],
+                                        protected val observer: Disposable[S#Tx])
       extends NodeViewImpl[S, Node, Branch, Data] {
 
       def isLeaf = true
@@ -78,7 +84,8 @@ object TreeTableViewImpl {
       override def toString = s"Leaf($modelData, $renderData)"
     }
 
-    class Root[S <: Sys[S], Node, Branch, Data](val branchH: stm.Source[S#Tx, Branch])
+    class Root[S <: Sys[S], Node, Branch, Data](val branchH: stm.Source[S#Tx, Branch],
+                                                protected val observer: Disposable[S#Tx])
       extends BranchOrRoot[S, Node, Branch, Data] {
 
       def parentOption1: Option[NodeViewImpl.BranchOrRoot[S, Node, Branch, Data]] = None
@@ -109,25 +116,26 @@ object TreeTableViewImpl {
     final def parent(implicit tx: S#Tx): Branch = parentImpl.branchH()
   }
 
-  def apply[S <: Sys[S], Node <: Identifiable[S#ID], Branch <: evt.Publisher[S, U] with Identifiable[S#ID], U, Data](
+  def apply[S <: Sys[S], Node <: Identifiable[S#ID], Branch <: Node, Data](
        root: Branch,
-       handler: Handler[S, Node, Branch, U, Data])(implicit tx: S#Tx, nodeSerializer: Serializer[S#Tx, S#Acc, Node],
+       handler: Handler[S, Node, Branch, Data])(implicit tx: S#Tx, nodeSerializer: Serializer[S#Tx, S#Acc, Node],
                                                    branchSerializer: Serializer[S#Tx, S#Acc, Branch])
       : TreeTableView[S, Node, Branch, Data] = {
     val _handler  = handler
     val _root     = root
-    new Impl[S, Node, Branch, U, Data] {
+    new Impl[S, Node, Branch, Data] {
       val mapViews    = tx.newInMemoryIDMap[VNode]      // node IDs to renderers
       val mapBranches = tx.newInMemoryIDMap[VBranchL]   // node IDs to renderers
       val handler     = _handler
-      val rootView    = new NodeViewImpl.Root[S, Node, Branch, Data](tx.newHandle(_root))
+      val rootView    = new NodeViewImpl.Root[S, Node, Branch, Data](tx.newHandle(_root),
+        _handler.observe(_root, processUpdateFun))
       mapBranches.put(_root.id, rootView)
       handler.children(_root).toList.zipWithIndex.foreach { case (c, ci) =>
         elemAdded(rootView, ci, c, refresh = false)
       }
-      val observer = _root.changed.react { implicit tx => upd =>
-        processUpdate(upd)
-      }
+//      val observer = _root.changed.react { implicit tx => upd =>
+//        processUpdate(upd)
+//      }
 
       deferTx {
         guiInit()
@@ -135,7 +143,7 @@ object TreeTableViewImpl {
     }
   }
 
-  private abstract class Impl[S <: Sys[S], Node <: Identifiable[S#ID], Branch <: evt.Publisher[S, U] with Identifiable[S#ID], U, Data](
+  private abstract class Impl[S <: Sys[S], Node <: Identifiable[S#ID], Branch <: Node, Data](
       implicit nodeSerializer: Serializer[S#Tx, S#Acc, Node], branchSerializer: Serializer[S#Tx, S#Acc, Branch])
     extends ComponentHolder[Component] with TreeTableView[S, Node, Branch, Data] with ModelImpl[TreeTableView.Update] {
     view =>
@@ -150,17 +158,21 @@ object TreeTableViewImpl {
 
     type NodeView = VNode // alias in the interface
 
+    type Update = ModelUpdate[Node, Branch]
+
     protected def rootView    : VRoot
     protected def mapViews    : IdentifierMap[S#ID, S#Tx, VNode   ]
     protected def mapBranches : IdentifierMap[S#ID, S#Tx, VBranchL]
-    protected def observer    : Disposable[S#Tx]
-    protected def handler     : Handler[S, Node, Branch, U, Data]
+    // protected def observer    : Disposable[S#Tx]
+    protected def handler     : Handler[S, Node, Branch, Data]
 
     private val didInsert = TxnLocal(false)
 
     def root: stm.Source[S#Tx, Branch] = rootView.branchH
 
     def nodeView(node: Node)(implicit tx: S#Tx): Option[NodeView] = mapViews.get(node.id)
+
+    protected final val processUpdateFun = (tx: S#Tx) => (upd: Update) => processUpdate(upd)(tx)
 
     private object treeModel extends AbstractTreeModel[VNodeL] {
       lazy val root: VNodeL = rootView // ! must be lazy
@@ -198,7 +210,7 @@ object TreeTableViewImpl {
       }
 
       def valueForPathChanged(path: TreeTable.Path[VNodeL], newValue: VNodeL): Unit =
-        println(s"valueForPathChanged($path, $newValue)")
+        if (DEBUG) println(s"valueForPathChanged($path, $newValue)")
 
       def elemAdded(parent: VBranchL, idx: Int, view: VNode): Unit = {
         elemAddedNoRefresh(parent, idx, view)
@@ -208,13 +220,13 @@ object TreeTableViewImpl {
       def elemAddedNoRefresh(parent: VBranchL, idx: Int, view: VNode): Unit = {
         if (DEBUG) println(s"model.elemAdded($parent, $idx, $view)")
         val g       = parent  // Option.getOrElse(_root)
-        require(idx >= 0 && idx <= g.children.size)
+        require(idx >= 0 && idx <= g.children.size, idx.toString)
         g.children  = g.children.patch(idx, Vector(view), 0)
       }
 
       def elemRemoved(parent: VBranchL, idx: Int): Unit = {
         if (DEBUG) println(s"model.elemRemoved($parent, $idx)")
-        require(idx >= 0 && idx < parent.children.size)
+        require(idx >= 0 && idx < parent.children.size, idx.toString)
         val v       = parent.children(idx)
         // this is insane. the tree UI still accesses the model based on the previous assumption
         // about the number of children, it seems. therefore, we must not update children before
@@ -324,12 +336,14 @@ object TreeTableViewImpl {
       val id    = elem.id // handler.nodeID(elem)
       val src   = tx.newHandle(elem)(nodeSerializer)
 
+      val observer = handler.observe(elem, processUpdateFun)
+
       val view = handler.branchOption(elem).fold[VNode] {
-        val _v = new NodeViewImpl.Leaf(parent, data, src)
+        val _v = new NodeViewImpl.Leaf(parent, data, src, observer)
         addView(id, _v)
         _v
       } { branch =>
-        val _v = new NodeViewImpl.BranchImpl(parent, tx.newHandle(branch), data, src)
+        val _v = new NodeViewImpl.BranchImpl(parent, tx.newHandle(branch), data, src, observer)
         addView(id, _v)
         mapBranches.put(branch.id, _v)
         val it = handler.children(branch)
@@ -361,7 +375,11 @@ object TreeTableViewImpl {
         }
         mapBranches.remove(bid)
       }
-      mapViews.remove(id)
+      mapViews.get(id).fold(warnNoView(elem)) { view =>
+        mapViews.remove(id)
+        view.dispose()
+      }
+
       deferTx {
         treeModel.elemRemoved(parent, idx)
       }
@@ -392,24 +410,24 @@ object TreeTableViewImpl {
     //      }
     //    }
 
-    private def warnNoBranchView(view: VNodeL): Unit =
-      println(s"Warning: should find a branch view but got $view:")
+//    private def warnNoBranchView(view: VNodeL): Unit =
+//      println(s"Warning: should find a branch view but got $view:")
 
     private def warnNoView(node: Any): Unit =
       println(s"Warning: should find a view for node $node")
 
-    private def warnRoot(): Unit =
-      println("Warning: should not refer to root node")
+//    private def warnRoot(): Unit =
+//      println("Warning: should not refer to root node")
 
-    def processUpdate(update0: U)(implicit tx: S#Tx): Unit = {
-      val mUpd0 = handler.mapUpdate(/* view0.modelData(), */ update0 /* , view0.renderData */)
+    def processUpdate(mUpd0: Update)(implicit tx: S#Tx): Unit = {
+      // val mUpd0 = handler.mapUpdate(/* view0.modelData(), */ update0 /* , view0.renderData */)
 
       def withParentView(parent: Branch)(fun: VBranchL => Unit): Unit = {
         val parentID = parent.id // handler.nodeID(parent)
         mapBranches.get(parentID).fold(warnNoView(parent))(fun.apply)
       }
 
-      mUpd0.foreach {
+      mUpd0 match /* .foreach */ {
         case TreeTableView.NodeAdded(parent, idx, child) =>
           withParentView(parent)(elemAdded(_, idx, child, refresh = true))
 
@@ -427,22 +445,16 @@ object TreeTableViewImpl {
     }
 
     def dispose()(implicit tx: S#Tx): Unit = {
-      observer.dispose()
-      //      def disposeChildren(node: Node): Unit = {
-      //        val nodeID        = handler.nodeID(node)
-      //        val nodeViewOpt   = mapViews.get(nodeID)
-      //        mapViews.remove(nodeID)
-      //        nodeViewOpt.foreach { nodeView =>
-      //          nodeView.observer.dispose()
-      //        }
-      //        handler.branchOption(node).foreach { branch =>
-      //          val it = handler.children(branch)
-      //          it.foreach { child =>
-      //            disposeChildren(child)
-      //          }
-      //        }
-      //      }
-      //      disposeChildren(rootView.modelData())
+      // observer.dispose()
+      def disposeChildren(node: VNodeL): Unit = {
+        node match {
+          case b: VBranchL =>
+            b.children.foreach(disposeChildren)
+          case _ =>
+        }
+        node.dispose()
+      }
+      disposeChildren(rootView)
       mapViews   .dispose()
       mapBranches.dispose()
     }

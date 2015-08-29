@@ -3,10 +3,10 @@ package de.sciss.lucre.swing
 import javax.swing.event.{CellEditorListener, ChangeEvent}
 import javax.swing.{CellEditor, JComponent, JTextField}
 
-import de.sciss.lucre.event.Targets
+import de.sciss.lucre.event.{Pull, Targets}
 import de.sciss.lucre.expr.IntObj
 import de.sciss.lucre.stm.impl.ObjSerializer
-import de.sciss.lucre.stm.{Elem, Obj, Sys, Copy}
+import de.sciss.lucre.stm.{Disposable, Elem, Obj, Sys, Copy}
 import de.sciss.lucre.swing.TreeTableView.ModelUpdate
 import de.sciss.lucre.{event => evt, stm, expr}
 import de.sciss.model.Change
@@ -75,26 +75,44 @@ class TestTreeTableApp[T <: Sys[T]](system: T)(implicit val cursor: stm.Cursor[T
   class Branch[S <: Sys[S]](val targets: evt.Targets[S], val children: expr.List.Modifiable[S, Node[S]])
     extends Node[S]
     with evt.impl.SingleNode[S, Node.Update[S]]
-    /* with evt.impl.MappingGenerator[S, Node.Update, expr.List.Update[S, Node], Node] */ {
+    /* with evt.impl.MappingGenerator[S, Node.Update, expr.List.Update[S, Node], Node] */ { branch =>
 
-    def inputEvent = children.changed
+    // def inputEvent = children.changed
 
     def branchOption = Some(this)
 
-    object changed extends Changed with evt.impl.RootGenerator[S, Node.Update[S]]
+    object changed extends Changed
+      // with evt.impl.RootGenerator[S, Node.Update[S]]
+    {
+      private[lucre] def pullUpdate(pull: Pull[S])(implicit tx: S#Tx): Option[Node.Update[S]] = {
+        pull(children.changed).map { peer =>
+          Node.Update.Branch(branch, peer)
+        }
+      }
+    }
 
     def copy[Out <: Sys[Out]]()(implicit tx: S#Tx, txOut: Out#Tx, context: Copy[S, Out]): Elem[Out] = {
       type ListAux[~ <: Sys[~]] = expr.List.Modifiable[~, Node[~]]
       new Branch[Out](Targets[Out], context[ListAux](children)) // .connect()
     }
 
+    def connect()(implicit tx: S#Tx): this.type = {
+      children.changed ---> changed
+      this
+    }
+
+    private def disconnect()(implicit tx: S#Tx): Unit =
+      children.changed -/-> changed
+
     def writeData(out: DataOutput): Unit = {
       out.writeByte(0)
       children.write(out)
     }
 
-    def disposeData()(implicit tx: S#Tx): Unit =
+    def disposeData()(implicit tx: S#Tx): Unit = {
+      disconnect()
       children.dispose()
+    }
 
 //    def foldUpdate(generated: Option[Node.Update], input: expr.List.Update[S, Node])
 //                  (implicit tx: S#Tx): Option[Node.Update] = Some(Node.Update.Branch(this, input))
@@ -102,24 +120,35 @@ class TestTreeTableApp[T <: Sys[T]](system: T)(implicit val cursor: stm.Cursor[T
   class Leaf[S <: Sys[S]](val targets: evt.Targets[S], val expr: IntObj.Var[S])
     extends Node[S]
     with evt.impl.SingleNode[S, Node.Update[S]]
-    /* with evt.impl.MappingGenerator[S, Node.Update, Change[Int], Node] */ {
-
-    def inputEvent = expr.changed
+    /* with evt.impl.MappingGenerator[S, Node.Update, Change[Int], Node] */ { leaf =>
 
     def branchOption = None
 
     def copy[Out <: Sys[Out]]()(implicit tx: S#Tx, txOut: Out#Tx, context: Copy[S, Out]): Elem[Out] =
       new Leaf(Targets[Out], context(expr)) // .connect()
 
+    def connect()(implicit tx: S#Tx): this.type = {
+      expr.changed ---> this.changed
+      this
+    }
+
+    private def disconnect()(implicit tx: S#Tx): Unit =
+      expr.changed -/-> this.changed
+
     def writeData(out: DataOutput): Unit = {
       out.writeByte(1)
       expr.write(out)
     }
 
-    def disposeData()(implicit tx: S#Tx): Unit =
+    def disposeData()(implicit tx: S#Tx): Unit = {
+      disconnect()
       expr.dispose()
+    }
 
-    object changed extends Changed with evt.impl.RootGenerator[S, Node.Update[S]]
+    object changed extends Changed {
+      def pullUpdate(pull: Pull[S])(implicit tx: S#Tx): Option[Node.Update[S]] =
+        pull(expr.changed).map(Node.Update.Leaf(leaf, _))
+    }
 
 //    def foldUpdate(generated: Option[Node.Update], input: Change[Int])
 //                  (implicit tx: S#Tx): Option[Node.Update] = Some(Node.Update.Leaf(this, input))
@@ -153,7 +182,7 @@ class TestTreeTableApp[T <: Sys[T]](system: T)(implicit val cursor: stm.Cursor[T
   sealed trait Data
 
   class Handler[S <: Sys[S]](implicit cursor: stm.Cursor[S])
-    extends TreeTableView.Handler[S, Node[S], Branch[S], Node.Update[S], Data] {
+    extends TreeTableView.Handler[S, Node[S], Branch[S], Data] {
 
     var view: TreeTableView[S, Node[S], Branch[S], Data] = _
 
@@ -163,7 +192,13 @@ class TestTreeTableApp[T <: Sys[T]](system: T)(implicit val cursor: stm.Cursor[T
 
     def branchOption(node: Node[S]): Option[Branch[S]] = node.branchOption
 
-    def mapUpdate(upd: Node.Update[S])(implicit tx: S#Tx): Vec[ModelUpdate[Node[S], Branch[S]]] =
+    def observe(n: Node[S], dispatch: (S#Tx) => (ModelUpdate[Node[S], Branch[S]]) => Unit)
+               (implicit tx: S#Tx): Disposable[S#Tx] = n.changed.react { implicit tx => upd =>
+      val m = mapUpdate(upd)
+      m.foreach(dispatch(tx)(_))
+    }
+
+    private def mapUpdate(upd: Node.Update[S])(implicit tx: S#Tx): Vec[ModelUpdate[Node[S], Branch[S]]] =
       upd match {
         case Node.Update.Branch(parent, peer) =>
           peer.changes.flatMap {
@@ -273,19 +308,20 @@ class TestTreeTableApp[T <: Sys[T]](system: T)(implicit val cursor: stm.Cursor[T
   def newBranch[S <: Sys[S]]()(implicit tx: S#Tx) = {
     val li    = expr.List.Modifiable[S, Node]
     val tgt   = evt.Targets[S]
-    new Branch[S](tgt, li)
+    new Branch[S](tgt, li).connect()
   }
 
   def newLeaf[S <: Sys[S]]()(implicit tx: S#Tx) = {
     val ex    = IntObj.newVar[S](IntObj.newConst((math.random * 100).toInt))
     val tgt   = evt.Targets[S]
-    new Leaf(tgt, ex)
+    new Leaf(tgt, ex).connect()
   }
 
   private lazy val (treeH, view: TreeTableView[T, Node[T], Branch[T], Data]) = cursor.step { implicit tx =>
     val root  = newBranch[T]()
-    val h     =  new Handler[T]
+    val h     = new Handler[T]
     val _view = TreeTableView(root, h)
+    h.view    = _view
     tx.newHandle(root) -> _view
   }
 

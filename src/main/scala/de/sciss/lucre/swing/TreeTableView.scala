@@ -15,6 +15,7 @@ package de.sciss.lucre.swing
 
 import javax.swing.CellEditor
 
+import de.sciss.lucre.event.Observable
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm.{Disposable, Identifiable}
 import de.sciss.lucre.swing.impl.{TreeTableViewImpl => Impl}
@@ -35,7 +36,7 @@ object TreeTableView {
   //  final case class Nested[Node, Data](index: Int, child: Node, u: ModelUpdate[Node, Data])
   //    extends ModelUpdate[Node, Data]
 
-  trait Handler[S <: Sys[S], Node, Branch, U, Data] {
+  trait Handler[S <: Sys[S], Node, Branch <: Node, Data] {
     def branchOption(node: Node): Option[Branch]
 
     //    /** The `Node` type must have an identifier. It is used to map between nodes
@@ -68,17 +69,19 @@ object TreeTableView {
 
     def columnNames: Vec[String]
 
-    /** Notifies the handler that a node has seen an update. The handler then casts that opaque update type
-      * to one of the resolved `ModelUpdate` types. If the update is irrelevant for the view, the method
-      * should return `None`.
-      *
-      * @param  update  the type of update
-      */
-    def mapUpdate(/* node: Node, */ update: U /* , data: Data */)(implicit tx: S#Tx): Vec[ModelUpdate[Node, Branch]]
+    def observe(n: Node, dispatch: S#Tx => ModelUpdate[Node, Branch] => Unit)(implicit tx: S#Tx): Disposable[S#Tx]
+
+//    /** Notifies the handler that a node has seen an update. The handler then casts that opaque update type
+//      * to one of the resolved `ModelUpdate` types. If the update is irrelevant for the view, the method
+//      * should return `None`.
+//      *
+//      * @param  update  the type of update
+//      */
+//    def mapUpdate(/* node: Node, */ update: U /* , data: Data */)(implicit tx: S#Tx): Vec[ModelUpdate[Node, Branch]]
   }
 
-  def apply[S <: Sys[S], Node <: Identifiable[S#ID], Branch <: evt.Publisher[S, U] with Identifiable[S#ID], U, Data](
-        root: Branch, handler: Handler[S, Node, Branch, U, Data])(
+  def apply[S <: Sys[S], Node <: Identifiable[S#ID], Branch <: Node, Data](
+        root: Branch, handler: Handler[S, Node, Branch, Data])(
         implicit tx: S#Tx, nodeSerializer: Serializer[S#Tx, S#Acc, Node],
       branchSerializer: Serializer[S#Tx, S#Acc, Branch]): TreeTableView[S, Node, Branch, Data] =
     Impl(root, handler)
