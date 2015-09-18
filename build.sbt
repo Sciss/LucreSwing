@@ -1,6 +1,6 @@
 name               := "LucreSwing"
 
-version            := "1.0.0"
+version            := "1.1.0"
 
 organization       := "de.sciss"
 
@@ -15,8 +15,8 @@ licenses           := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-
 
 // ---- dependencies ----
 
-lazy val lucreVersion     = "3.0.0"
-lazy val desktopVersion   = "0.7.0"
+lazy val lucreVersion     = "3.1.0"
+lazy val desktopVersion   = "0.7.1"
 lazy val widgetsVersion   = "1.9.1"
 lazy val treeTableVersion = "1.3.8"
 
