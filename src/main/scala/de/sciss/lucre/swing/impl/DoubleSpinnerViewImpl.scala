@@ -97,7 +97,7 @@ object DoubleSpinnerViewImpl {
     }
 
     final protected def valueToComponent(): Unit =
-      if (!parseModelValue(component.value).contains(value)) {
+      if (parseModelValue(component.value) != Some(value)) {
         component.value = value // .getOrElse(Double.NaN)
         // component.foreground  = if (value.isDefined) null else Color.gray
       }

@@ -13,13 +13,11 @@
 
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.{event => evt}
 import de.sciss.lucre.event.Observable
-import de.sciss.lucre.expr.{Type, Expr}
+import de.sciss.lucre.expr.{Expr, Type}
 import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.{expr => _expr, stm}
 import de.sciss.lucre.swing.impl.{CellViewImpl => Impl}
-import de.sciss.model.Change
+import de.sciss.lucre.{event => evt, expr => _expr, stm}
 import de.sciss.serial.Serializer
 
 import scala.language.higherKinds
