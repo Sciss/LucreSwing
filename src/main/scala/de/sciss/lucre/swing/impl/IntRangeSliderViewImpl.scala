@@ -18,7 +18,7 @@ import javax.swing.undo.UndoableEdit
 
 import de.sciss.audiowidgets.{DualRangeModel, DualRangeSlider}
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.expr.{Expr, IntObj}
+import de.sciss.lucre.expr.IntObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.edit.EditVar
@@ -80,7 +80,7 @@ object IntRangeSliderViewImpl {
 
     private def examine(expr: Option[IntObj[S]])(implicit tx: S#Tx): (Option[Int], Boolean) = {
       val valOpt    = expr.map(_.value)
-      val editable  = expr.flatMap(Expr.Var.unapply).isDefined
+      val editable  = expr.flatMap(IntObj.Var.unapply).isDefined
       (valOpt, editable)
     }
 

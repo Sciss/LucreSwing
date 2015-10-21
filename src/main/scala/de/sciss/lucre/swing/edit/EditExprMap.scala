@@ -17,9 +17,9 @@ package edit
 
 import javax.swing.undo.UndoableEdit
 
-import de.sciss.lucre.{event => evt}
-import de.sciss.lucre.expr.{Expr, Type}
+import de.sciss.lucre.expr.Type
 import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.{event => evt}
 
 import scala.language.higherKinds
 
@@ -32,8 +32,8 @@ object EditExprMap {
     val before = map.get(key)
     val now: Option[Ex[S]] = (before, value) match {
       case (Some(valueType.Var(vr)), Some(v)) => return EditVar.Expr[S, A, Ex](name, vr, v) // current value is variable
-      case (_, None) | (_, Some(Expr.Var(_))) => value  // new value is none or some variable, just put it
-      case _ => value.map(valueType.newVar(_))          // new value is some non-variable, wrap it, then put it
+      case (_, None) | (_, Some(valueType.Var(_))) => value  // new value is none or some variable, just put it
+      case _ => value.map(v => valueType.newVar(v))          // new value is some non-variable, wrap it, then put it
     }
 
     import valueType.serializer
