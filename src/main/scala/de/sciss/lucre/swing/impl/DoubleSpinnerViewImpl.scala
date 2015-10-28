@@ -20,6 +20,7 @@ import javax.swing.{JSpinner, SpinnerNumberModel}
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm.Disposable
+import de.sciss.swingplus.Spinner
 
 object DoubleSpinnerViewImpl {
   def apply[S <: Sys[S]](_cell: CellView[S#Tx, Double], name: String, width: Int)
@@ -60,8 +61,11 @@ object DoubleSpinnerViewImpl {
         requireEDT()
         _default = value
         if (this.value.isEmpty) {
-          val editor = component.peer.getEditor.asInstanceOf[JSpinner.DefaultEditor]
-          editor.getTextField.setValue(editor.getSpinner.getValue)
+          component.peer.getEditor match {
+            case editor: JSpinner.DefaultEditor =>
+              editor.getTextField.setValue(editor.getSpinner.getValue)
+            case _ =>
+          }
         }
       }
 
@@ -81,6 +85,20 @@ object DoubleSpinnerViewImpl {
     final protected def parseModelValue(v: Any): Option[Double] = v match {
       case i: Double  => Some(i)
       case _          => None
+    }
+
+    // do away with idiotic grouping and increase max fraction digits
+    override protected def mkSpinner: Spinner = {
+      val sp  = super.mkSpinner
+      sp.peer.getEditor match {
+        case ed: JSpinner.NumberEditor =>
+          val fmt = ed.getFormat
+          fmt.setMaximumFractionDigits(5)
+          fmt.setGroupingUsed(false)
+          ed.getTextField.setText(fmt.format(sp.value))
+        case _ =>
+      }
+      sp
     }
 
     protected lazy val model: SpinnerNumberModel = new SpinnerNumberModel(value, Double.MinValue, Double.MaxValue, 0.1)

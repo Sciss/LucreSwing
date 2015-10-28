@@ -15,11 +15,12 @@ package de.sciss.lucre
 package swing
 package impl
 
-import javax.swing.SpinnerNumberModel
+import javax.swing.{JSpinner, SpinnerNumberModel}
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm.Disposable
+import de.sciss.swingplus.Spinner
 
 object IntSpinnerViewImpl extends CellViewFactory[Int] {
   def apply[S <: Sys[S]](cell: CellView[S#Tx, Int], name: String, width: Int)
@@ -44,6 +45,19 @@ object IntSpinnerViewImpl extends CellViewFactory[Int] {
     protected def parseModelValue(v: Any): Option[Int] = v match {
       case i: Int => Some(i)
       case _      => None
+    }
+
+    override protected def mkSpinner: Spinner = {
+      val sp = super.mkSpinner
+      // do away with idiotic grouping
+      sp.peer.getEditor match {
+        case ed: JSpinner.NumberEditor =>
+          val fmt = ed.getFormat
+          fmt.setGroupingUsed(false)
+          ed.getTextField.setText(fmt.format(sp.value)) // annoyingly, the text doesn't update without this
+        case _ =>
+      }
+      sp
     }
 
     protected lazy val model: SpinnerNumberModel = new SpinnerNumberModel(value, Int.MinValue, Int.MaxValue, 1)

@@ -198,14 +198,18 @@ abstract class OptionalNumberSpinnerViewImpl[S <: Sys[S], A](protected val maxWi
     val fgNorm = ftf.getForeground
     val fmt: AbstractFormatter = new AbstractFormatter {
       private val dec = NumberFormat.getNumberInstance(Locale.US)
+      dec.setMaximumFractionDigits(5)
+      dec.setGroupingUsed(false)
 
-      def valueToString(value: Any): String = value match {
-        case Some(d: Double) =>
-          ftf.setForeground(fgNorm)
-          dec.format(d)
-        case _ =>
-          ftf.setForeground(Color.blue)
-          default.fold("")(dec.format)
+      def valueToString(value: Any): String = {
+        value match {
+          case Some(d: Double) =>
+            ftf.setForeground(fgNorm)
+            dec.format(d)
+          case _ =>
+            ftf.setForeground(Color.blue)
+            default.fold("")(dec.format)
+        }
       }
 
       def stringToValue(text: String): AnyRef = {
@@ -213,7 +217,7 @@ abstract class OptionalNumberSpinnerViewImpl[S <: Sys[S], A](protected val maxWi
         if (t.isEmpty) None else Some(dec.parse(t).doubleValue())
       }
     }
-    val factory = new DefaultFormatterFactory(fmt)
+    val factory = new DefaultFormatterFactory(fmt, fmt, fmt)
     ftf.setEditable(true)
     ftf.setFormatterFactory(factory)
     ftf.setHorizontalAlignment(SwingConstants.RIGHT)
