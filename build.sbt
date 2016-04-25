@@ -1,11 +1,11 @@
 name               := "LucreSwing"
 
-version            := "1.3.0"
+version            := "1.4.0-SNAPSHOT"
 
 organization       := "de.sciss"
 
-scalaVersion       := "2.11.7"
-crossScalaVersions := Seq("2.11.7", "2.10.6")
+scalaVersion       := "2.11.8"
+crossScalaVersions := Seq("2.11.8", "2.10.6")
 
 description        := "Swing support for Lucre, and common views"
 
@@ -15,15 +15,15 @@ licenses           := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-
 
 // ---- dependencies ----
 
-lazy val lucreVersion     = "3.3.0"
-lazy val desktopVersion   = "0.7.1"
-lazy val widgetsVersion   = "1.9.1"
+lazy val lucreVersion     = "3.3.1"
+lazy val desktopVersion   = "0.7.2"
+lazy val widgetsVersion   = "1.10.0-SNAPSHOT"
 lazy val treeTableVersion = "1.3.8"
 
 // ---- test-only ----
 
 lazy val fileUtilVersion  = "1.1.1"
-lazy val webLaFVersion    = "1.28"
+lazy val webLaFVersion    = "2.1.0"
 
 resolvers += "Oracle Repository" at "http://download.oracle.com/maven" // required for lucrestm-bdb
 
