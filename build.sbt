@@ -1,6 +1,6 @@
 name               := "LucreSwing"
 
-version            := "1.4.0-SNAPSHOT"
+version            := "1.4.0"
 
 organization       := "de.sciss"
 
@@ -17,13 +17,13 @@ licenses           := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-
 
 lazy val lucreVersion     = "3.3.1"
 lazy val desktopVersion   = "0.7.2"
-lazy val widgetsVersion   = "1.10.0-SNAPSHOT"
+lazy val widgetsVersion   = "1.10.0"
 lazy val treeTableVersion = "1.3.8"
 
 // ---- test-only ----
 
 lazy val fileUtilVersion  = "1.1.1"
-lazy val webLaFVersion    = "2.1.0"
+lazy val webLaFVersion    = "2.1.1"
 
 resolvers += "Oracle Repository" at "http://download.oracle.com/maven" // required for lucrestm-bdb
 
