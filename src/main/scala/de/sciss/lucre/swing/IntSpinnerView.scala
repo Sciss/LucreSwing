@@ -2,7 +2,7 @@
  *  IntSpinnerView.scala
  *  (LucreSwing)
  *
- *  Copyright (c) 2014-2015 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2014-2016 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -30,6 +30,18 @@ object IntSpinnerView {
   def cell[S <: Sys[S]](cell: CellView[S#Tx, Int], name: String, width: Int = 160)
                         (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): IntSpinnerView[S] =
     Impl(cell, name = name, width = width)
+
+  def optional[S <: Sys[S]](cell: CellView[S#Tx, Option[Int]], name: String, width: Int = 160,
+                            default: Option[Int] = None)
+                           (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): Optional[S] =
+    Impl.optional(cell, name = name, width = width, default0 = default)
+
+  trait Optional[S <: Sys[S]] extends IntSpinnerView[S] {
+    /** Sets a default value to be displayed when the model value is absent.
+      * This must be called on the EDT.
+      */
+    var default: Option[Int]
+  }
 }
 trait IntSpinnerView[S <: Sys[S]] extends View[S] {
   override def component: Spinner

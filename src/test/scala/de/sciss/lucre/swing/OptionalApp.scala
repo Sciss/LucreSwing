@@ -1,7 +1,8 @@
 package de.sciss.lucre.swing
 
+import de.sciss.lucre.expr.{DoubleObj, IntObj}
 import de.sciss.lucre.{event => evt}
-import de.sciss.lucre.expr.{BooleanObj, DoubleObj, StringObj}
+import de.sciss.swingplus.GroupPanel
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.event.ButtonClicked
@@ -12,40 +13,77 @@ object OptionalApp extends AppLike {
 
   // private val rows = 1
 
-  private lazy val views: Vec[View[S]] = system.step { implicit tx =>
-    implicit val doubleEx  = DoubleObj
-    implicit val booleanEx = BooleanObj
-    implicit val stringEx  = StringObj
+  private lazy val viewsDouble: Vec[View[S]] = system.step { implicit tx =>
+    implicit val doubleEx   = DoubleObj
+    implicit val intEx      = IntObj
 
-    val exprD1  = doubleEx.newVar[S](doubleEx.newConst(0.0))
-    val map     = evt.Map.Modifiable[S, String, DoubleObj]
-    val key     = "foo"
-    val mapView = CellView.exprMap[S, String, Double, DoubleObj](map, key)
-    val vD1     = DoubleSpinnerView(exprD1, "d1")
-    val vD2     = DoubleSpinnerView.optional[S](mapView, "d2")
-    // vD2.default = Some(1234.0)
-
-    def label(text: String) = View.wrap[S](new Label(s"$text:", null, Alignment.Trailing))
-
+    def label (text: String)                  = View.wrap[S](new Label(s"$text:", null, Alignment.Trailing))
     def button(text: String)(action: => Unit) = View.wrap[S](Button(text)(action))
 
-    val mapH    = tx.newHandle(map)
-    val exprD1H = tx.newHandle(exprD1)
+    val exDouble1       = DoubleObj.newVar[S](DoubleObj.newConst(0.0))
+    val mapDouble       = evt.Map.Modifiable[S, String, DoubleObj]
+    val keyDouble       = "foo-Double"
+    val mapViewDouble   = CellView.exprMap[S, String, Double, DoubleObj](mapDouble, keyDouble)
+    val vDouble1        = DoubleSpinnerView(exDouble1, "d1")
+    val vDouble2        = DoubleSpinnerView.optional[S](mapViewDouble, "d2")
+  
+    val mapDoubleH      = tx.newHandle(mapDouble)
+    val exDouble1H      = tx.newHandle(exDouble1)
 
-    val butPut    = button("Put"   )(system.step { implicit tx => mapH().put   (key, exprD1H()) })
-    val butRemove = button("Remove")(system.step { implicit tx => mapH().remove(key           ) })
+    val butPutDouble    = button("Put"   )(system.step { implicit tx => mapDoubleH().put   (keyDouble, exDouble1H()) })
+    val butRemoveDouble = button("Remove")(system.step { implicit tx => mapDoubleH().remove(keyDouble           ) })
 
-    val togDefault = new ToggleButton("Default: 0") {
+    val togDefaultDouble = new ToggleButton("Default: 0") {
       listenTo(this)
       reactions += {
-        case ButtonClicked(_) => vD2.default = if (selected) Some(0.0) else None
+        case ButtonClicked(_) => vDouble2.default = if (selected) Some(0.0) else None
       }
     }
 
     Vec(
-      label("Double"), vD1, vD2, butPut, butRemove, View.wrap[S](togDefault)
+      label("Double"), vDouble1, vDouble2, butPutDouble, butRemoveDouble, View.wrap[S](togDefaultDouble)
     )
   }
 
-  def mkView(): Component = new FlowPanel(views.map(_.component): _*)
+  private lazy val viewsInt: Vec[View[S]] = system.step { implicit tx =>
+    implicit val doubleEx   = DoubleObj
+    implicit val intEx      = IntObj
+
+    def label (text: String)                  = View.wrap[S](new Label(s"$text:", null, Alignment.Trailing))
+    def button(text: String)(action: => Unit) = View.wrap[S](Button(text)(action))
+
+    val exInt1       = IntObj.newVar[S](IntObj.newConst(0))
+    val mapInt       = evt.Map.Modifiable[S, String, IntObj]
+    val keyInt       = "foo-Int"
+    val mapViewInt   = CellView.exprMap[S, String, Int, IntObj](mapInt, keyInt)
+    val vInt1        = IntSpinnerView(exInt1, "d1")
+    val vInt2        = IntSpinnerView.optional[S](mapViewInt, "d2")
+
+    val mapIntH      = tx.newHandle(mapInt)
+    val exInt1H      = tx.newHandle(exInt1)
+
+    val butPutInt    = button("Put"   )(system.step { implicit tx => mapIntH().put   (keyInt, exInt1H()) })
+    val butRemoveInt = button("Remove")(system.step { implicit tx => mapIntH().remove(keyInt           ) })
+
+    val togDefaultInt = new ToggleButton("Default: 0") {
+      listenTo(this)
+      reactions += {
+        case ButtonClicked(_) => vInt2.default = if (selected) Some(0) else None
+      }
+    }
+
+    Vec(
+      label("Int"), vInt1, vInt2, butPutInt, butRemoveInt, View.wrap[S](togDefaultInt)
+    )
+  }
+
+  def mkView(): Component =
+    new GroupPanel {
+      horizontal = Seq((viewsDouble zip viewsInt).map { case (v1, v2) =>
+        Par(v1.component, v2.component)
+      } : _* )
+      vertical = Seq(
+        Par(viewsDouble.map(v => GroupPanel.Element(v.component)): _*), // can't use implicit conversion in Scala 2.10
+        Par(viewsInt   .map(v => GroupPanel.Element(v.component)): _*))
+    }
 }

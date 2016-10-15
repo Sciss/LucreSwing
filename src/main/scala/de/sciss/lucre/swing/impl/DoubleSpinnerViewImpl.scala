@@ -2,7 +2,7 @@
  *  DoubleSpinnerViewImpl.scala
  *  (LucreSwing)
  *
- *  Copyright (c) 2014-2015 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2014-2016 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -106,7 +106,7 @@ object DoubleSpinnerViewImpl {
 
   private abstract class OptionalImpl[S <: Sys[S]](maxWidth: Int)
                                                   (implicit cursor: stm.Cursor[S], undoManager: UndoManager)
-    extends OptionalNumberSpinnerViewImpl[S, Double](maxWidth) with DoubleSpinnerView.Optional[S] {
+    extends OptionalNumberSpinnerViewImpl[S, Double](maxWidth, false) with DoubleSpinnerView.Optional[S] {
 
     final protected def parseModelValue(v: Any): Option[Option[Double]] = v match {
       case Some(d: Double)  => Some(Some(d))

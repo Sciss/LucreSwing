@@ -2,7 +2,7 @@
  *  package.scala
  *  (LucreSwing)
  *
- *  Copyright (c) 2014-2015 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2014-2016 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *

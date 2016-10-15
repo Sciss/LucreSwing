@@ -1,29 +1,24 @@
-name               := "LucreSwing"
-
-version            := "1.4.0"
-
-organization       := "de.sciss"
-
-scalaVersion       := "2.11.8"
-crossScalaVersions := Seq("2.11.8", "2.10.6")
-
-description        := "Swing support for Lucre, and common views"
-
-homepage           := Some(url("https://github.com/Sciss/" + name.value))
- 
-licenses           := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt"))
+name                 := "LucreSwing"
+version              := "1.4.1"
+lazy val mimaVersion  = "1.4.0"   // used for migration-manager
+organization         := "de.sciss"
+scalaVersion         := "2.11.8"
+crossScalaVersions   := Seq("2.11.8", "2.10.6")
+description          := "Swing support for Lucre, and common views"
+homepage             := Some(url(s"https://github.com/Sciss/${name.value}"))
+licenses             := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt"))
 
 // ---- dependencies ----
 
 lazy val lucreVersion     = "3.3.1"
 lazy val desktopVersion   = "0.7.2"
-lazy val widgetsVersion   = "1.10.0"
+lazy val widgetsVersion   = "1.10.1"
 lazy val treeTableVersion = "1.3.8"
 
 // ---- test-only ----
 
-lazy val fileUtilVersion  = "1.1.1"
-lazy val webLaFVersion    = "2.1.1"
+lazy val fileUtilVersion  = "1.1.2"
+lazy val subminVersion    = "0.2.1"
 
 resolvers += "Oracle Repository" at "http://download.oracle.com/maven" // required for lucrestm-bdb
 
@@ -34,10 +29,14 @@ libraryDependencies ++= Seq(
   "de.sciss" %% "treetable-scala"    % treeTableVersion, // TODO: should be going into a dedicated sub-project?
   "de.sciss" %% "lucre-bdb"          % lucreVersion    % "test",
   "de.sciss" %% "fileutil"           % fileUtilVersion % "test",
-  "de.sciss" %  "weblaf"             % webLaFVersion   % "test"
+  "de.sciss" %  "submin"             % subminVersion   % "test"
 )
 
-scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xfuture")
+scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xfuture", "-Xlint")
+
+// ---- compatibility ----
+
+mimaPreviousArtifacts := Set("de.sciss" %% s"${name.value.toLowerCase}" % mimaVersion)
 
 // ---- publishing ----
 
@@ -67,4 +66,3 @@ pomExtra := { val n = name.value
   </developer>
 </developers>
 }
-

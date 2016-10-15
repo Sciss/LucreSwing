@@ -2,7 +2,7 @@
  *  NumberSpinnerViewImpl.scala
  *  (LucreSwing)
  *
- *  Copyright (c) 2014-2015 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2014-2016 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -22,9 +22,10 @@ import javax.swing.JFormattedTextField.AbstractFormatter
 import javax.swing.text.DefaultFormatterFactory
 import javax.swing.{JSpinner, KeyStroke, SpinnerModel, SwingConstants}
 
+import de.sciss.audiowidgets
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Sys, Disposable}
+import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.swingplus.Spinner
 
 import scala.swing.event.{FocusLost, KeyTyped, ValueChanged}
@@ -183,38 +184,56 @@ abstract class DefinedNumberSpinnerViewImpl[S <: Sys[S], A](protected val maxWid
     }
 }
 
-abstract class OptionalNumberSpinnerViewImpl[S <: Sys[S], A](protected val maxWidth: Int)
+abstract class OptionalNumberSpinnerViewImpl[S <: Sys[S], A](protected val maxWidth: Int, isInteger: Boolean)
                                                             (implicit protected val cursor: stm.Cursor[S],
                                                              protected val undoManager: UndoManager)
   extends NumberSpinnerViewImpl[S, Option[A]] {
+
+  def this(maxWidth: Int)(implicit cursor: stm.Cursor[S], undoManager: UndoManager) =
+    this(maxWidth, false)
 
   protected def default: Option[A]
 
   override protected def model: NumericOptionSpinnerModel[A]
 
   override protected def mkSpinner: Spinner = {
-    val res = super.mkSpinner
-    val ftf = res.peer.getEditor.asInstanceOf[JSpinner.DefaultEditor].getTextField
-    val fgNorm = ftf.getForeground
+    val res     = super.mkSpinner
+    val ftf     = res.peer.getEditor.asInstanceOf[JSpinner.DefaultEditor].getTextField
+    val fgNorm  = ftf.getForeground
+    val fgDef   = if (audiowidgets.Util.isDarkSkin) new Color(0x5E * 2/3, 0x97 * 2/3, 0xFF) else Color.blue
     val fmt: AbstractFormatter = new AbstractFormatter {
-      private val dec = NumberFormat.getNumberInstance(Locale.US)
-      dec.setMaximumFractionDigits(5)
-      dec.setGroupingUsed(false)
+      private val dec = if (isInteger) {
+        val res = NumberFormat.getIntegerInstance(Locale.US)
+        res.setGroupingUsed(false)
+        res
+      } else {
+        val res = NumberFormat.getNumberInstance(Locale.US)
+        res.setMaximumFractionDigits(5)
+        res.setGroupingUsed(false)
+        res
+      }
 
       def valueToString(value: Any): String = {
         value match {
           case Some(d: Double) =>
             ftf.setForeground(fgNorm)
             dec.format(d)
+          case Some(i: Int) =>
+            ftf.setForeground(fgNorm)
+            dec.format(i)
           case _ =>
-            ftf.setForeground(Color.blue)
+            ftf.setForeground(fgDef)
             default.fold("")(dec.format)
         }
       }
 
       def stringToValue(text: String): AnyRef = {
         val t = text.trim
-        if (t.isEmpty) None else Some(dec.parse(t).doubleValue())
+        if (t.isEmpty) None else {
+          val num   = dec.parse(t)
+          val value = if (isInteger) num.intValue() else num.doubleValue()
+          Some(value)
+        }
       }
     }
     val factory = new DefaultFormatterFactory(fmt, fmt, fmt)

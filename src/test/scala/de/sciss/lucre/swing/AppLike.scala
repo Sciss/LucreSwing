@@ -1,16 +1,13 @@
 package de.sciss.lucre.swing
 
-import javax.swing.UIManager
-
-import de.sciss.desktop.Desktop
 import de.sciss.desktop.impl.UndoManagerImpl
 import de.sciss.file.File
 import de.sciss.lucre.expr
 import de.sciss.lucre.stm.Durable
 import de.sciss.lucre.stm.store.BerkeleyDB
+import de.sciss.submin.Submin
 
 import scala.swing.{Component, Frame, MainFrame, Menu, MenuBar, MenuItem, SimpleSwingApplication}
-import scala.util.control.NonFatal
 
 trait AppLike extends SimpleSwingApplication {
   type S = Durable
@@ -20,19 +17,7 @@ trait AppLike extends SimpleSwingApplication {
 
   override def main(args: Array[String]): Unit = {
     expr.init()
-
-    try {
-      val webClassName = "com.alee.laf.WebLookAndFeel"
-      UIManager.installLookAndFeel("Web Look And Feel", webClassName)
-      UIManager.setLookAndFeel(webClassName)
-    } catch {
-      case NonFatal(_) =>
-        val lafs    = UIManager.getInstalledLookAndFeels
-        val gtkOpt  = if (Desktop.isLinux) lafs.find(_.getName contains "GTK+") else None
-        gtkOpt.foreach { info =>
-        UIManager.setLookAndFeel(info.getClassName)
-      }
-    }
+    Submin.install(true)
     super.main(args)
   }
 
@@ -47,9 +32,9 @@ trait AppLike extends SimpleSwingApplication {
     }
 
     val res = new MainFrame {
-      title = "LucreSwing"
-      contents = mkView()
-      menuBar = mb
+      title     = "LucreSwing"
+      contents  = mkView()
+      menuBar   = mb
       pack().centerOnScreen()
       open()
     }
