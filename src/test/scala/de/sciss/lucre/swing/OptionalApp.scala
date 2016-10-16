@@ -6,7 +6,7 @@ import de.sciss.swingplus.GroupPanel
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.event.ButtonClicked
-import scala.swing.{Alignment, Button, Component, FlowPanel, Label, ToggleButton}
+import scala.swing.{Alignment, Button, Component, Label, ToggleButton}
 
 object OptionalApp extends AppLike {
   // de.sciss.lucre.event.showLog = true

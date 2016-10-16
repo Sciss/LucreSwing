@@ -1,5 +1,5 @@
 name                 := "LucreSwing"
-version              := "1.4.1"
+version              := "1.4.2"
 lazy val mimaVersion  = "1.4.0"   // used for migration-manager
 organization         := "de.sciss"
 scalaVersion         := "2.11.8"

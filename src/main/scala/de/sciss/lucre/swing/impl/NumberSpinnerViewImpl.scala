@@ -231,7 +231,9 @@ abstract class OptionalNumberSpinnerViewImpl[S <: Sys[S], A](protected val maxWi
         val t = text.trim
         if (t.isEmpty) None else {
           val num   = dec.parse(t)
-          val value = if (isInteger) num.intValue() else num.doubleValue()
+          // N.B.!! Scala will widen `num.intValue()` to `Double`
+          // in an attempt to give a smart upper bound, unless we explicitly type `: Any`!
+          val value: Any = if (isInteger) num.intValue() else num.doubleValue()
           Some(value)
         }
       }
