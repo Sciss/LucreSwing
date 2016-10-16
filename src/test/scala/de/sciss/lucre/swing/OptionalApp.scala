@@ -83,7 +83,7 @@ object OptionalApp extends AppLike {
         Par(v1.component, v2.component)
       } : _* )
       vertical = Seq(
-        Par(viewsDouble.map(v => GroupPanel.Element(v.component)): _*), // can't use implicit conversion in Scala 2.10
-        Par(viewsInt   .map(v => GroupPanel.Element(v.component)): _*))
+        Par(Baseline)(viewsDouble.map(v => GroupPanel.Element(v.component)): _*), // can't use implicit conversion in Scala 2.10
+        Par(Baseline)(viewsInt   .map(v => GroupPanel.Element(v.component)): _*))
     }
 }
