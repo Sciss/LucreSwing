@@ -1,19 +1,24 @@
-name                 := "LucreSwing"
-version              := "1.4.3-SNAPSHOT"
-lazy val mimaVersion  = "1.4.0"   // used for migration-manager
+lazy val baseName  = "LucreSwing"
+lazy val baseNameL = baseName.toLowerCase
+
+lazy val projectVersion = "1.4.3"
+lazy val mimaVersion    = "1.4.0"
+
+name                 := baseName
+version              := projectVersion
 organization         := "de.sciss"
 scalaVersion         := "2.11.8"
-crossScalaVersions   := Seq("2.11.8", "2.10.6")
+crossScalaVersions   := Seq("2.12.1", "2.11.8", "2.10.6")
 description          := "Swing support for Lucre, and common views"
 homepage             := Some(url(s"https://github.com/Sciss/${name.value}"))
 licenses             := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt"))
 
 // ---- dependencies ----
 
-lazy val lucreVersion     = "3.3.1"
-lazy val desktopVersion   = "0.7.2"
-lazy val widgetsVersion   = "1.10.1"
-lazy val treeTableVersion = "1.3.8"
+lazy val lucreVersion     = "3.3.2"
+lazy val desktopVersion   = "0.7.3"
+lazy val widgetsVersion   = "1.10.2"
+lazy val treeTableVersion = "1.3.9"
 
 // ---- test-only ----
 
@@ -36,7 +41,7 @@ scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-encoding", "ut
 
 // ---- compatibility ----
 
-mimaPreviousArtifacts := Set("de.sciss" %% s"${name.value.toLowerCase}" % mimaVersion)
+mimaPreviousArtifacts := Set("de.sciss" %% baseNameL % mimaVersion)
 
 // ---- publishing ----
 
