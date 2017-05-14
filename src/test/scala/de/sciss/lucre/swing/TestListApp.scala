@@ -1,7 +1,7 @@
 package de.sciss.lucre.swing
 
 import de.sciss.lucre.expr
-import de.sciss.lucre.expr.{Expr, StringObj}
+import de.sciss.lucre.expr.StringObj
 import de.sciss.model.Change
 
 import scala.concurrent.stm.{Ref, Txn}

@@ -12,8 +12,8 @@ object TestExprApp extends AppLike {
   private val rows = 5
 
   private lazy val views: Vec[View[S]] = system.step { implicit tx =>
-    implicit val doubleEx  = DoubleObj
-    implicit val booleanEx = BooleanObj
+//    implicit val doubleEx  = DoubleObj
+//    implicit val booleanEx = BooleanObj
 
     val exprD1  = DoubleObj .newVar[S](DoubleObj .newConst( 0.0 ))
     val exprI1  = IntObj    .newVar[S](IntObj    .newConst( 0   ))

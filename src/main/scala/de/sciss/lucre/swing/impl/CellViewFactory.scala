@@ -2,7 +2,7 @@
  *  ExprViewFactory.scala
  *  (LucreSwing)
  *
- *  Copyright (c) 2014-2016 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2014-2017 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -16,15 +16,14 @@ package impl
 
 import javax.swing.undo.UndoableEdit
 
-import de.sciss.lucre.{event => evt}
 import de.sciss.lucre.expr.{Expr, Type}
-import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.lucre.swing.edit.{EditCellView, EditExprMap}
+import de.sciss.lucre.{stm, event => evt}
 import de.sciss.model.Change
 
 import scala.concurrent.stm.Ref
-import scala.language.{existentials, higherKinds}
+import scala.language.higherKinds
 
 object CellViewFactory {
   trait View[A] {

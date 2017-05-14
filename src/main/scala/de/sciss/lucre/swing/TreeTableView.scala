@@ -2,7 +2,7 @@
  *  TreeTableView.scala
  *  (LucreSwing)
  *
- *  Copyright (c) 2014-2016 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2014-2017 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -15,11 +15,9 @@ package de.sciss.lucre.swing
 
 import javax.swing.CellEditor
 
-import de.sciss.lucre.event.Observable
-import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.stm.{Disposable, Identifiable}
+import de.sciss.lucre.stm
+import de.sciss.lucre.stm.{Disposable, Identifiable, Sys}
 import de.sciss.lucre.swing.impl.{TreeTableViewImpl => Impl}
-import de.sciss.lucre.{event => evt, stm}
 import de.sciss.model.Model
 import de.sciss.serial.Serializer
 import de.sciss.treetable.{TreeTable, TreeTableCellRenderer}

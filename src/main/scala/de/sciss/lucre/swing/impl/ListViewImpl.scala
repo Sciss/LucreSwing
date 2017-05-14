@@ -2,7 +2,7 @@
  *  ListViewImpl.scala
  *  (LucreSwing)
  *
- *  Copyright (c) 2014-2016 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2014-2017 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -15,9 +15,8 @@ package de.sciss.lucre
 package swing
 package impl
 
-import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.expr.List
-import de.sciss.lucre.stm.Cursor
+import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.ListView.Handler
 import de.sciss.model.impl.ModelImpl
 import de.sciss.serial.Serializer
@@ -30,7 +29,7 @@ import scala.swing.{Component, ScrollPane}
 
 object ListViewImpl {
   def empty[S <: Sys[S], Elem, U, Data](handler: Handler[S, Elem, U, Data])
-                                       (implicit tx: S#Tx, cursor: Cursor[S],
+                                       (implicit tx: S#Tx,
                                         serializer: Serializer[S#Tx, S#Acc, List[S, Elem]]): ListView[S, Elem, U] = {
     val view = new Impl[S, Elem, U, Data](handler)
     deferTx {
@@ -40,7 +39,7 @@ object ListViewImpl {
   }
 
   def apply[S <: Sys[S], Elem, U, Data](list: List[S, Elem], handler: Handler[S, Elem, U, Data])
-                                       (implicit tx: S#Tx, cursor: Cursor[S],
+                                       (implicit tx: S#Tx,
                                         serializer: Serializer[S#Tx, S#Acc, List[S, Elem]]): ListView[S, Elem, U] = {
     val view = empty[S, Elem, U, Data](handler)
     view.list_=(Some(list))
@@ -48,8 +47,7 @@ object ListViewImpl {
   }
 
   private final class Impl[S <: Sys[S], Elem, U, Data](handler: Handler[S, Elem, U, Data])
-                                                      (implicit cursor: Cursor[S],
-                                                       listSer: Serializer[S#Tx, S#Acc, List[S, Elem]])
+                                                      (implicit listSer: Serializer[S#Tx, S#Acc, List[S, Elem]])
     extends ListView[S, Elem, U] with ComponentHolder[Component] with ModelImpl[ListView.Update] {
     impl =>
 
@@ -57,7 +55,7 @@ object ListViewImpl {
     private val mList   = swingplus.ListView.Model.empty[Data]
     private val current = Ref(Option.empty[Observation[S, List[S, Elem]]])
 
-    def view = ggList
+    def view: swingplus.ListView[Data] = ggList
 
     def list(implicit tx: S#Tx): Option[List[S, Elem]] = current.get(tx.peer).map(_.value())
 

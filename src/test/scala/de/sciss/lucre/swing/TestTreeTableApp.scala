@@ -305,13 +305,13 @@ class TestTreeTableApp[T <: Sys[T]](system: T)(implicit val cursor: stm.Cursor[T
 
   // lazy val h = new Handler[T](view)
 
-  def newBranch[S <: Sys[S]]()(implicit tx: S#Tx) = {
+  def newBranch[S <: Sys[S]]()(implicit tx: S#Tx): Branch[S] = {
     val li    = expr.List.Modifiable[S, Node]
     val tgt   = evt.Targets[S]
     new Branch[S](tgt, li).connect()
   }
 
-  def newLeaf[S <: Sys[S]]()(implicit tx: S#Tx) = {
+  def newLeaf[S <: Sys[S]]()(implicit tx: S#Tx): Leaf[S] = {
     val ex    = IntObj.newVar[S](IntObj.newConst((math.random * 100).toInt))
     val tgt   = evt.Targets[S]
     new Leaf(tgt, ex).connect()

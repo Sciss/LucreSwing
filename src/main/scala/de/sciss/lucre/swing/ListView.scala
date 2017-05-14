@@ -2,7 +2,7 @@
  *  ListView.scala
  *  (LucreSwing)
  *
- *  Copyright (c) 2014-2016 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2014-2017 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -13,9 +13,8 @@
 
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.expr.List
-import de.sciss.lucre.stm.{Cursor, Disposable}
+import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.lucre.swing.impl.{ListViewImpl => Impl}
 import de.sciss.model.Model
 import de.sciss.serial.Serializer
@@ -31,7 +30,7 @@ object ListView {
       * @param dataFun    the function which generates a string representation of a list element
       * @param updateFun  the function which generates a string from an element update
       */
-    def apply[S <: Sys[S], Elem, U](dataFun: S#Tx => Elem => String)
+    def apply[S <: Sys[S], Elem, U](dataFun  : S#Tx =>  Elem     =>        String )
                                    (updateFun: S#Tx => (Elem, U) => Option[String])
     : Handler[S, Elem, U, String] = new Handler[S, Elem, U, String] {
 
@@ -57,12 +56,11 @@ object ListView {
   }
 
   def apply[S <: Sys[S], Elem, U, Data](list: List[S, Elem], handler: Handler[S, Elem, U, Data])
-                                       (implicit tx: S#Tx, cursor: Cursor[S],
-                                        serializer: Serializer[S#Tx, S#Acc, List[S, Elem]])
+                                       (implicit tx: S#Tx, serializer: Serializer[S#Tx, S#Acc, List[S, Elem]])
   : ListView[S, Elem, U] = Impl(list, handler)
 
   def empty[S <: Sys[S], Elem, U, Data](handler: Handler[S, Elem, U, Data])
-                                       (implicit tx: S#Tx, cursor: Cursor[S],
+                                       (implicit tx: S#Tx,
                                         serializer: Serializer[S#Tx, S#Acc, List[S, Elem]])
   : ListView[S, Elem, U] = Impl.empty(handler)
 

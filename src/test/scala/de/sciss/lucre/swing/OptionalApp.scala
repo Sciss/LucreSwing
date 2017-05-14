@@ -15,7 +15,7 @@ object OptionalApp extends AppLike {
 
   private lazy val viewsDouble: Vec[View[S]] = system.step { implicit tx =>
     implicit val doubleEx   = DoubleObj
-    implicit val intEx      = IntObj
+//    implicit val intEx      = IntObj
 
     def label (text: String)                  = View.wrap[S](new Label(s"$text:", null, Alignment.Trailing))
     def button(text: String)(action: => Unit) = View.wrap[S](Button(text)(action))
@@ -46,7 +46,7 @@ object OptionalApp extends AppLike {
   }
 
   private lazy val viewsInt: Vec[View[S]] = system.step { implicit tx =>
-    implicit val doubleEx   = DoubleObj
+//    implicit val doubleEx   = DoubleObj
     implicit val intEx      = IntObj
 
     def label (text: String)                  = View.wrap[S](new Label(s"$text:", null, Alignment.Trailing))
