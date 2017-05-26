@@ -13,10 +13,34 @@
 
 package de.sciss.lucre.swing
 
-import de.sciss.desktop
-import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.stm.Disposable
+import javax.swing.{RootPaneContainer, SwingUtilities}
 
+import de.sciss.desktop
+import de.sciss.lucre.stm.{Disposable, Sys}
+
+import scala.swing.Component
+
+object Window {
+  private[lucre] final val Property = "de.sciss.lucre.swing.Window"
+
+  def attach[S <: Sys[S]](dw: desktop.Window, l: Window[S]): Unit = {
+    requireEDT()
+    val rp = dw.component.peer.getRootPane
+    rp.putClientProperty(Property, l)
+  }
+
+  def find[S <: Sys[S]](view: View[S]): Option[Window[S]] = findFor(view.component)
+
+  def findFor[S <: Sys[S]](component: Component): Option[Window[S]] = {
+    requireEDT()
+    val rpc = SwingUtilities.getAncestorOfClass(classOf[RootPaneContainer], component.peer)
+    if (rpc == null) return None
+    val rp  = rpc.asInstanceOf[RootPaneContainer].getRootPane
+    val w   = rp.getClientProperty(Property)
+    if (w == null) return None
+    Some(w.asInstanceOf[Window[S]])
+  }
+}
 trait Window[S <: Sys[S]] extends Disposable[S#Tx] {
   def window: desktop.Window
   def view: View[S]

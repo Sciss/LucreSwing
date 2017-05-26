@@ -15,9 +15,10 @@ package de.sciss.lucre
 package swing
 package impl
 
-import de.sciss.lucre.{event => evt}
 import de.sciss.lucre.expr.Type
+import de.sciss.lucre.stm.TxnLike.peer
 import de.sciss.lucre.stm.{Disposable, Sys}
+import de.sciss.lucre.{event => evt}
 import de.sciss.model.Change
 import de.sciss.serial.Serializer
 
@@ -77,12 +78,12 @@ object CellViewImpl {
         //            if (opt.isDefined) fun(tx)(opt)
         case _ =>  // XXX TODO -- should we ask for expr.value ?
       }}
-      val v = valObs.swap(res)(tx.peer)
+      val v = valObs.swap(res)
       if (v != null) v.dispose()
     }
 
     private def valueRemoved()(implicit tx: S#Tx): Boolean = {
-      val v   = valObs.swap(null)(tx.peer)
+      val v   = valObs.swap(null)
       val res = v != null
       if (res) v.dispose()
       res
@@ -93,6 +94,28 @@ object CellViewImpl {
       mapObs.dispose()
     }
   }
+
+//  private[swing] final class CanUpdate[S <: Sys[S], A](init: CellView[S#Tx, A], tx0: S#Tx)
+//    extends CellView.CanUpdate[S, A] with Basic[S#Tx, A] /* with ObservableImpl[S, A] */ {
+//
+//    private[this] val reprRef = Ref(init)
+//    private[this] val reprObs = Ref(mkObs(init)(tx0))
+//
+//    private def mkObs(r: Repr)(implicit tx: S#Tx): Disposable[S#Tx] =
+//      r.react { implicit tx => upd =>
+//        fire(upd)
+//      }
+//
+//    def repr(implicit tx: S#Tx): Repr = reprRef()
+//
+//    def repr_=(value: Repr)(implicit tx: S#Tx): Unit = {
+//      reprRef() = value
+//      val oldObs = reprObs.swap(mkObs(value))
+//      oldObs.dispose()
+//    }
+//
+//    def apply()(implicit tx: S#Tx): A = reprRef().apply()
+//  }
 
   private[swing] final class ExprMap[S <: Sys[S], K, A, Ex[~ <: Sys[~]] <: expr.Expr[~, A] /* , U */](
       protected val h: stm.Source[S#Tx, evt.Map[S, K, Ex]],

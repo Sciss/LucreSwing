@@ -67,6 +67,16 @@ object CellView {
 
     implicit def serializer: Serializer[S#Tx, S#Acc, Repr]
   }
+
+//  object CanUpdate {
+//    def apply[S <: Sys[S], A](init: CellView[S#Tx, A])(implicit tx: S#Tx): CanUpdate[S, A] =
+//      new Impl.CanUpdate[S, A](init, tx)
+//  }
+//  trait CanUpdate[S <: Sys[S], A] extends CellView[S#Tx, A] {
+//    type Repr = CellView[S#Tx, A]
+//
+//    def repr_=(repr: Repr)(implicit tx: S#Tx): Unit
+//  }
 }
 trait CellView[Tx, +A] extends Observable[Tx, A] with stm.Source[Tx, A] {
   def map[B](f: A => B): CellView[Tx, B]
