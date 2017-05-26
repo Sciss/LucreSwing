@@ -35,7 +35,7 @@ object IntRangeSliderViewImpl {
     res
   }
 
-  private sealed trait ExprState { def isDefined: Boolean; def isEmpty = !isDefined }
+  private sealed trait ExprState { def isDefined: Boolean; def isEmpty: Boolean = !isDefined }
   private case object ExprNone  extends ExprState { val isDefined = false }
   private case object ExprRead  extends ExprState { val isDefined = true  }
   private case object ExprWrite extends ExprState { val isDefined = true  }

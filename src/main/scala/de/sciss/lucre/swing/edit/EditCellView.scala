@@ -47,6 +47,6 @@ object EditCellView {
 
     def perform()(implicit tx: S#Tx): Unit = cell.repr = cell.lift(now)
 
-    override def getPresentationName = name
+    override def getPresentationName: String = name
   }
 }

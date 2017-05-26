@@ -68,6 +68,6 @@ object EditMutableMap {
 
     def perform()(implicit tx: S#Tx): Unit = perform(nowH)
 
-    override def getPresentationName = name
+    override def getPresentationName: String = name
   }
 }

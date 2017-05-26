@@ -66,10 +66,11 @@ object DirtyBorder {
 
     val isBorderOpaque = false
     
-    private val fill = Color.gray
+    private[this] val fill = Color.gray
 
-    private var _vis = false
-    def visible = _vis
+    private[this] var _vis = false
+
+    def visible: Boolean = _vis
     def visible_=(value: Boolean): Unit = if (_vis != value) {
       _vis = value
       component.repaint()

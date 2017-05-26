@@ -57,9 +57,9 @@ object TreeTableViewImpl {
 
       // ---- impl ----
 
-      final var children    = Vec.empty[NodeViewImpl[S, Node, Branch, Data]]
-      final def isLeaf      = false
-      final def numChildren = children.size
+      final var children    : Vec[NodeViewImpl[S, Node, Branch, Data]] = Vector.empty
+      final def isLeaf      : Boolean = false
+      final def numChildren : Int     = children.size
     }
 
     class BranchImpl[S <: Sys[S], Node, Branch, Data](val parentImpl: BranchOrRoot[S, Node, Branch, Data],
@@ -124,9 +124,9 @@ object TreeTableViewImpl {
     val _handler  = handler
     val _root     = root
     new Impl[S, Node, Branch, Data] {
-      val mapViews    = tx.newInMemoryIDMap[VNode]      // node IDs to renderers
-      val mapBranches = tx.newInMemoryIDMap[VBranchL]   // node IDs to renderers
-      val handler     = _handler
+      val mapViews    : IdentifierMap[S#ID, S#Tx, VNode   ] = tx.newInMemoryIDMap   // node IDs to renderers
+      val mapBranches : IdentifierMap[S#ID, S#Tx, VBranchL] = tx.newInMemoryIDMap   // node IDs to renderers
+      val handler     : Handler[S, Node, Branch, Data]      = _handler
       val rootView    = new NodeViewImpl.Root[S, Node, Branch, Data](tx.newHandle(_root),
         _handler.observe(_root, processUpdateFun))
       mapBranches.put(_root.id, rootView)
@@ -172,7 +172,7 @@ object TreeTableViewImpl {
 
     def nodeView(node: Node)(implicit tx: S#Tx): Option[NodeView] = mapViews.get(node.id)
 
-    protected final val processUpdateFun = (tx: S#Tx) => (upd: Update) => processUpdate(upd)(tx)
+    protected final val processUpdateFun: S#Tx => Update => Unit = tx => upd => processUpdate(upd)(tx)
 
     private object treeModel extends AbstractTreeModel[VNodeL] {
       lazy val root: VNodeL = rootView // ! must be lazy
@@ -260,7 +260,7 @@ object TreeTableViewImpl {
       }
 
     def selection: List[VNode] = t.selection.paths.collect {
-      case init :+ (last: VNode) => last
+      case _ /* init */ :+ (last: VNode) => last
     } (breakOut)
 
     def markInsertion()(implicit tx: S#Tx): Unit = didInsert.update(true)(tx.peer)
@@ -612,7 +612,7 @@ object TreeTableViewImpl {
 
       t.listenTo(t.selection)
       t.reactions += {
-        case e: TreeTableSelectionChanged[_, _] =>  // this crappy untyped event doesn't help us at all
+        case _: TreeTableSelectionChanged[_, _] =>  // this crappy untyped event doesn't help us at all
           dispatch(TreeTableView.SelectionChanged)
         // println(s"selection: $e")
         // dispatch(BranchView.SelectionChanged(view, selection))

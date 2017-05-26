@@ -45,7 +45,7 @@ object View {
   private final class Wrap[S <: Sys[S]] extends View[S] with ComponentHolder[Component] {
     def guiInit(c: Component): Unit = component = c
 
-    def dispose()(implicit tx: S#Tx) = ()
+    def dispose()(implicit tx: S#Tx): Unit = ()
   }
 }
 trait View[S <: Sys[S]] extends Disposable[S#Tx] {

@@ -20,7 +20,7 @@ import java.text.NumberFormat
 import java.util.Locale
 import javax.swing.JFormattedTextField.AbstractFormatter
 import javax.swing.text.DefaultFormatterFactory
-import javax.swing.{JSpinner, KeyStroke, SpinnerModel, SwingConstants}
+import javax.swing.{JFormattedTextField, JSpinner, KeyStroke, SpinnerModel, SwingConstants}
 
 import de.sciss.audiowidgets
 import de.sciss.desktop.UndoManager
@@ -130,7 +130,7 @@ trait NumberSpinnerViewImpl[S <: Sys[S], A] // (implicit cursor: stm.Cursor[S], 
     val obsOpt = sp.peer.getEditor match {
       case e: JSpinner.DefaultEditor =>
         val ggText: TextComponent = new TextComponent {
-          override lazy val peer = e.getTextField
+          override lazy val peer: JFormattedTextField = e.getTextField
         }
         Some(new TextObserver(sp, ggText))
 

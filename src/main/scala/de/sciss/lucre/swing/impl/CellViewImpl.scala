@@ -187,7 +187,7 @@ object CellViewImpl {
   private[swing] sealed trait NoVar[Tx, A] extends Basic[Tx, A] {
     type Repr = Unit
 
-    final def repr(implicit tx: Tx) = ()
+    final def repr(implicit tx: Tx): Unit = ()
   }
 
   private[swing] final class MapImpl[Tx, A, B](in: CellView[Tx, A], f: A => B)

@@ -86,7 +86,7 @@ object BooleanCheckBoxViewImpl extends CellViewFactory[Boolean] {
                                            val undoManager: UndoManager)
     extends BasicImpl[S, Boolean] {
 
-    protected final def definedValue = value
+    protected final def definedValue: Boolean = value
     protected final def definedValue_=(b: Boolean): Unit = value = b
   }
 
@@ -94,7 +94,7 @@ object BooleanCheckBoxViewImpl extends CellViewFactory[Boolean] {
                                           (implicit val cursor: stm.Cursor[S], val undoManager: UndoManager)
     extends BasicImpl[S, Option[Boolean]] {
 
-    protected final def definedValue = value.getOrElse(default)
+    protected final def definedValue: Boolean = value.getOrElse(default)
     protected final def definedValue_=(b: Boolean): Unit = value = Some(b)
   }
 }

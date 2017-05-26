@@ -66,6 +66,6 @@ object EditVar {
       expr()    = nowH()
     }
 
-    override def getPresentationName = name
+    override def getPresentationName: String = name
   }
 }

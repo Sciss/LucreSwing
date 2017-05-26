@@ -65,7 +65,7 @@ object ListViewImpl {
         log(s"ListView ${impl.hashCode.toHexString} react")
         upd.changes.foreach {
           case List.Added(  idx, elem)  => val item = handler.data(elem); deferTx(impl.insertItem(idx, item))
-          case List.Removed(idx, elem)  => deferTx(impl.removeItemAt(idx))
+          case List.Removed(idx, _   )  => deferTx(impl.removeItemAt(idx))
 // ELEM
 //          case List.Element(elem, eu )  =>
 //            val idx = upd.list.indexOf(elem)
