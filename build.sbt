@@ -1,8 +1,8 @@
 lazy val baseName  = "LucreSwing"
 lazy val baseNameL = baseName.toLowerCase
 
-lazy val projectVersion = "1.6.0-SNAPSHOT"
-lazy val mimaVersion    = "1.5.0"
+lazy val projectVersion = "1.6.0"
+lazy val mimaVersion    = "1.6.0"
 
 name                 := baseName
 version              := projectVersion
@@ -16,8 +16,8 @@ licenses             := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgp
 // ---- dependencies ----
 
 lazy val lucreVersion     = "3.4.1"
-lazy val desktopVersion   = "0.8.0-SNAPSHOT"
-lazy val widgetsVersion   = "1.11.0-SNAPSHOT"
+lazy val desktopVersion   = "0.8.0"
+lazy val widgetsVersion   = "1.11.0"
 lazy val treeTableVersion = "1.3.9"
 lazy val modelVersion     = "0.3.4"
 
