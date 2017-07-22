@@ -1,7 +1,7 @@
 lazy val baseName  = "LucreSwing"
 lazy val baseNameL = baseName.toLowerCase
 
-lazy val projectVersion = "1.5.1"
+lazy val projectVersion = "1.6.0-SNAPSHOT"
 lazy val mimaVersion    = "1.5.0"
 
 name                 := baseName
@@ -15,10 +15,11 @@ licenses             := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgp
 
 // ---- dependencies ----
 
-lazy val lucreVersion     = "3.4.0"
-lazy val desktopVersion   = "0.7.3"
-lazy val widgetsVersion   = "1.10.2"
+lazy val lucreVersion     = "3.4.1"
+lazy val desktopVersion   = "0.8.0-SNAPSHOT"
+lazy val widgetsVersion   = "1.11.0-SNAPSHOT"
 lazy val treeTableVersion = "1.3.9"
+lazy val modelVersion     = "0.3.4"
 
 // ---- test-only ----
 
@@ -32,6 +33,7 @@ libraryDependencies ++= Seq(
   "de.sciss" %% "desktop"            % desktopVersion,
   "de.sciss" %% "audiowidgets-swing" % widgetsVersion,   // TODO: should be possible to just depend on the range slider
   "de.sciss" %% "treetable-scala"    % treeTableVersion, // TODO: should be going into a dedicated sub-project?
+  "de.sciss" %% "model"              % modelVersion,
   "de.sciss" %% "lucre-bdb"          % lucreVersion    % "test",
   "de.sciss" %% "fileutil"           % fileUtilVersion % "test",
   "de.sciss" %  "submin"             % subminVersion   % "test"
