@@ -1,6 +1,5 @@
-6# LucreSwing
+# LucreSwing
 
-[![Flattr this](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=sciss&url=https%3A%2F%2Fgithub.com%2FSciss%2FLucreSwing&title=LucreSwing%20Library&language=Scala&tags=github&category=software)
 [![Build Status](https://travis-ci.org/Sciss/LucreSwing.svg?branch=master)](https://travis-ci.org/Sciss/LucreSwing)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.sciss/lucreswing_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.sciss/lucreswing_2.11)
 
