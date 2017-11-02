@@ -1,30 +1,30 @@
 lazy val baseName  = "LucreSwing"
 lazy val baseNameL = baseName.toLowerCase
 
-lazy val projectVersion = "1.6.0"
-lazy val mimaVersion    = "1.6.0"
+lazy val projectVersion = "1.7.0-SNAPSHOT"
+lazy val mimaVersion    = "1.7.0"
 
 name                 := baseName
 version              := projectVersion
 organization         := "de.sciss"
-scalaVersion         := "2.12.2"
-crossScalaVersions   := Seq("2.12.2", "2.11.11", "2.10.6")
+scalaVersion         := "2.12.4"
+crossScalaVersions   := Seq("2.12.4", "2.11.11", "2.10.6")
 description          := "Swing support for Lucre, and common views"
 homepage             := Some(url(s"https://github.com/Sciss/${name.value}"))
 licenses             := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt"))
 
 // ---- dependencies ----
 
-lazy val lucreVersion     = "3.4.1"
+lazy val lucreVersion     = "3.5.0-SNAPSHOT"
 lazy val desktopVersion   = "0.8.0"
-lazy val widgetsVersion   = "1.11.0"
+lazy val widgetsVersion   = "1.11.1"
 lazy val treeTableVersion = "1.3.9"
 lazy val modelVersion     = "0.3.4"
 
 // ---- test-only ----
 
-lazy val fileUtilVersion  = "1.1.2"
-lazy val subminVersion    = "0.2.1"
+lazy val fileUtilVersion  = "1.1.2"  // sbt chokes on 1.1.3
+lazy val subminVersion    = "0.2.2"
 
 resolvers += "Oracle Repository" at "http://download.oracle.com/maven" // required for lucrestm-bdb
 
