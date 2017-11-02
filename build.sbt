@@ -1,21 +1,21 @@
 lazy val baseName  = "LucreSwing"
 lazy val baseNameL = baseName.toLowerCase
 
-lazy val projectVersion = "1.7.0-SNAPSHOT"
+lazy val projectVersion = "1.7.0"
 lazy val mimaVersion    = "1.7.0"
 
 name                 := baseName
 version              := projectVersion
 organization         := "de.sciss"
 scalaVersion         := "2.12.4"
-crossScalaVersions   := Seq("2.12.4", "2.11.11", "2.10.6")
+crossScalaVersions   := Seq("2.12.4", "2.11.11")
 description          := "Swing support for Lucre, and common views"
 homepage             := Some(url(s"https://github.com/Sciss/${name.value}"))
 licenses             := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt"))
 
 // ---- dependencies ----
 
-lazy val lucreVersion     = "3.5.0-SNAPSHOT"
+lazy val lucreVersion     = "3.5.0"
 lazy val desktopVersion   = "0.8.0"
 lazy val widgetsVersion   = "1.11.1"
 lazy val treeTableVersion = "1.3.9"

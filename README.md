@@ -9,13 +9,13 @@ LucreSwing is a Scala library which bridges between Swing (through the [Desktop]
 
 ## requirements / building
 
-This project compiles against Scala 2.12, 2.11, 2.10 using sbt 0.13.
+This project compiles against Scala 2.12, 2.11 using sbt.
 
 To use the library in your project:
 
     "de.sciss" %% "lucreswing" % v
 
-The current version `v` is `"1.6.0"`.
+The current version `v` is `"1.7.0"`.
 
 ## contributing
 
