@@ -2,7 +2,7 @@
  *  TreeTableViewImpl.scala
  *  (LucreSwing)
  *
- *  Copyright (c) 2014-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2014-2018 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -116,7 +116,7 @@ object TreeTableViewImpl {
     final def parent(implicit tx: S#Tx): Branch = parentImpl.branchH()
   }
 
-  def apply[S <: Sys[S], Node <: Identifiable[S#ID], Branch <: Node, Data](
+  def apply[S <: Sys[S], Node <: Identifiable[S#Id], Branch <: Node, Data](
        root: Branch,
        handler: Handler[S, Node, Branch, Data])(implicit tx: S#Tx, nodeSerializer: Serializer[S#Tx, S#Acc, Node],
                                                    branchSerializer: Serializer[S#Tx, S#Acc, Branch])
@@ -124,8 +124,8 @@ object TreeTableViewImpl {
     val _handler  = handler
     val _root     = root
     new Impl[S, Node, Branch, Data] {
-      val mapViews    : IdentifierMap[S#ID, S#Tx, VNode   ] = tx.newInMemoryIDMap   // node IDs to renderers
-      val mapBranches : IdentifierMap[S#ID, S#Tx, VBranchL] = tx.newInMemoryIDMap   // node IDs to renderers
+      val mapViews    : IdentifierMap[S#Id, S#Tx, VNode   ] = tx.newInMemoryIdMap   // node Ids to renderers
+      val mapBranches : IdentifierMap[S#Id, S#Tx, VBranchL] = tx.newInMemoryIdMap   // node Ids to renderers
       val handler     : Handler[S, Node, Branch, Data]      = _handler
       val rootView    = new NodeViewImpl.Root[S, Node, Branch, Data](tx.newHandle(_root),
         _handler.observe(_root, processUpdateFun))
@@ -143,7 +143,7 @@ object TreeTableViewImpl {
     }
   }
 
-  private abstract class Impl[S <: Sys[S], Node <: Identifiable[S#ID], Branch <: Node, Data](
+  private abstract class Impl[S <: Sys[S], Node <: Identifiable[S#Id], Branch <: Node, Data](
       implicit nodeSerializer: Serializer[S#Tx, S#Acc, Node], branchSerializer: Serializer[S#Tx, S#Acc, Branch])
     extends ComponentHolder[Component] with TreeTableView[S, Node, Branch, Data] with ModelImpl[TreeTableView.Update] {
     view =>
@@ -161,8 +161,8 @@ object TreeTableViewImpl {
     type Update = ModelUpdate[Node, Branch]
 
     protected def rootView    : VRoot
-    protected def mapViews    : IdentifierMap[S#ID, S#Tx, VNode   ]
-    protected def mapBranches : IdentifierMap[S#ID, S#Tx, VBranchL]
+    protected def mapViews    : IdentifierMap[S#Id, S#Tx, VNode   ]
+    protected def mapBranches : IdentifierMap[S#Id, S#Tx, VBranchL]
     // protected def observer    : Disposable[S#Tx]
     protected def handler     : Handler[S, Node, Branch, Data]
 
@@ -297,7 +297,7 @@ object TreeTableViewImpl {
       val edit = didInsert.swap(false)(tx.peer)
       if (DEBUG) println(s"elemAdded($parent, $idx $elem); marked? $edit")
 
-      def addView(id: S#ID, v: VNode): Unit = {
+      def addView(id: S#Id, v: VNode): Unit = {
         mapViews.put(id, v)
 
         if (refresh) {
@@ -333,7 +333,7 @@ object TreeTableViewImpl {
 
       val data  = handler.data(elem)
       // println(s"Data = $data")
-      val id    = elem.id // handler.nodeID(elem)
+      val id    = elem.id // handler.nodeId(elem)
       val src   = tx.newHandle(elem)(nodeSerializer)
 
       val observer = handler.observe(elem, processUpdateFun)
@@ -364,7 +364,7 @@ object TreeTableViewImpl {
       if (DEBUG) println(s"elemRemoved($parent, $idx)")
 
       // parent.observer.dispose()
-      val id = elem.id // handler.nodeID(elem)
+      val id = elem.id // handler.nodeId(elem)
       handler.branchOption(elem).foreach { branch =>
         val it  = handler.children(branch)
         val bid = branch.id
@@ -423,8 +423,8 @@ object TreeTableViewImpl {
       // val mUpd0 = handler.mapUpdate(/* view0.modelData(), */ update0 /* , view0.renderData */)
 
       def withParentView(parent: Branch)(fun: VBranchL => Unit): Unit = {
-        val parentID = parent.id // handler.nodeID(parent)
-        mapBranches.get(parentID).fold(warnNoView(parent))(fun.apply)
+        val parentId = parent.id // handler.nodeId(parent)
+        mapBranches.get(parentId).fold(warnNoView(parent))(fun.apply)
       }
 
       mUpd0 match /* .foreach */ {
@@ -435,8 +435,8 @@ object TreeTableViewImpl {
           withParentView(parent)(elemRemoved(_, idx, child))
 
         case TreeTableView.NodeChanged(node) =>
-          val nodeID = node.id // handler.nodeID(node)
-          mapViews.get(nodeID).fold(warnNoView(node)) { view =>
+          val nodeId = node.id // handler.nodeId(node)
+          mapViews.get(nodeId).fold(warnNoView(node)) { view =>
             deferTx {
               treeModel.elemUpdated(view)
             }

@@ -2,7 +2,7 @@
  *  TreeTableView.scala
  *  (LucreSwing)
  *
- *  Copyright (c) 2014-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2014-2018 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -40,7 +40,7 @@ object TreeTableView {
     //    /** The `Node` type must have an identifier. It is used to map between nodes
     //      * and their views. This method queries the identifier of a given node.
     //      */
-    //    def nodeID(node: Node): S#ID
+    //    def nodeId(node: Node): S#Id
 
     /** Queries the opaque rendering data for a given node. The data can be used by the renderer. */
     def data(node: Node)(implicit tx: S#Tx): Data
@@ -78,7 +78,7 @@ object TreeTableView {
 //    def mapUpdate(/* node: Node, */ update: U /* , data: Data */)(implicit tx: S#Tx): Vec[ModelUpdate[Node, Branch]]
   }
 
-  def apply[S <: Sys[S], Node <: Identifiable[S#ID], Branch <: Node, Data](
+  def apply[S <: Sys[S], Node <: Identifiable[S#Id], Branch <: Node, Data](
         root: Branch, handler: Handler[S, Node, Branch, Data])(
         implicit tx: S#Tx, nodeSerializer: Serializer[S#Tx, S#Acc, Node],
       branchSerializer: Serializer[S#Tx, S#Acc, Branch]): TreeTableView[S, Node, Branch, Data] =

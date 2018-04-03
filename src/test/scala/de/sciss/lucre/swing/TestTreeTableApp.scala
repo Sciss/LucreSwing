@@ -24,7 +24,7 @@ object TestTreeTableApp extends AppLike {
 }
 class TestTreeTableApp[T <: Sys[T]](system: T)(implicit val cursor: stm.Cursor[T]) { app =>
   object Node extends Obj.Type {
-    final val typeID = 0x10000000
+    final val typeId = 0x10000000
 
     object Update {
       case class Branch[S <: Sys[S]](branch: app.Branch[S], peer: expr.List.Update[S, Node[S]]) extends Update[S]
@@ -186,7 +186,7 @@ class TestTreeTableApp[T <: Sys[T]](system: T)(implicit val cursor: stm.Cursor[T
 
     var view: TreeTableView[S, Node[S], Branch[S], Data] = _
 
-    def nodeID(node: Node[S]): S#ID = node.id
+    def nodeId(node: Node[S]): S#Id = node.id
 
     def children(b: Branch[S])(implicit tx: S#Tx): Iterator[Node[S]] = b.children.iterator
 
