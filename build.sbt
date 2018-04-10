@@ -18,13 +18,13 @@ licenses             := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgp
 lazy val deps = new {
   val main = new {
     val lucre     = "3.6.0-SNAPSHOT"
-    val desktop   = "0.8.0"
-    val widgets   = "1.11.1"
-    val treeTable = "1.3.9"
+    val desktop   = "0.9.0-SNAPSHOT"
+    val widgets   = "1.12.0-SNAPSHOT"
+    val treeTable = "1.4.0-SNAPSHOT"
     val model     = "0.3.4"
   }
   val test = new {
-    val fileUtil  = "1.1.2"  // sbt chokes on 1.1.3
+    val fileUtil  = "1.1.3"
     val submin    = "0.2.2"
   }
 }
