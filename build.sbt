@@ -1,14 +1,14 @@
 lazy val baseName  = "LucreSwing"
 lazy val baseNameL = baseName.toLowerCase
 
-lazy val projectVersion = "1.8.0-SNAPSHOT"
+lazy val projectVersion = "1.8.0"
 lazy val mimaVersion    = "1.8.0"
 
 // ---- dependencies ----
 
 lazy val deps = new {
   val main = new {
-    val lucre     = "3.6.0-SNAPSHOT"
+    val lucre     = "3.6.0"
     val desktop   = "0.9.0"
     val widgets   = "1.12.0"
     val treeTable = "1.4.0"
