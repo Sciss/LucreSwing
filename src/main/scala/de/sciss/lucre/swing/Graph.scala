@@ -2,8 +2,10 @@ package de.sciss.lucre.swing
 
 import java.util
 
+import de.sciss.lucre.expr.impl.ExElem
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
+import de.sciss.serial.{DataInput, DataOutput, ImmutableSerializer}
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 
@@ -61,6 +63,54 @@ object Graph {
       val m1 = if (m0 != null) m0 else Map.empty[String, Any]
       val m2 = m1 + (key -> value)
       properties.put(w, m2)
+    }
+  }
+
+  implicit object serializer extends ImmutableSerializer[Graph] {
+    private final val SER_VERSION = 0x5778  // "Wx"
+
+    def write(g: Graph, out: DataOutput): Unit = {
+      out.writeShort(SER_VERSION)
+      val wx = g.widgets
+      out.writeInt(wx.size)
+      var ref = null: ExElem.RefMapOut
+      wx.foreach { conf =>
+        ref = ExElem.write(conf.w, out, ref)
+        val m = conf.properties
+        out.writeInt(m.size)
+        m.foreach { case (key, v) =>
+          out.writeUTF(key)
+          ref = ExElem.write(v, out, ref)
+        }
+      }
+    }
+
+    def read(in: DataInput): Graph = {
+      val cookie = in.readShort()
+      require(cookie == SER_VERSION, s"Unexpected cookie $cookie")
+      val sz = in.readInt()
+      val wxb = Vec.newBuilder[ConfiguredWidget]
+      wxb.sizeHint(sz)
+      var i = 0
+      val ref = new ExElem.RefMapIn
+      while (i < sz) {
+        val w = ExElem.read(in, ref).asInstanceOf[Widget]
+        val mSz = in.readInt()
+        val mb = Map.newBuilder[String, Any]
+        mb.sizeHint(mSz)
+        var j = 0
+        while (j < mSz) {
+          val k = in.readUTF()
+          val v = ExElem.read(in, ref)
+          mb += k -> v
+          j += 1
+        }
+        val properties = mb.result()
+        val configured = ConfiguredWidget(w, properties)
+        wxb += configured
+        i += 1
+      }
+      new Graph(wxb.result())
     }
   }
 }

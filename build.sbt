@@ -17,6 +17,7 @@ lazy val deps = new {
   val test = new {
     val fileUtil  = "1.1.3"
     val submin    = "0.2.2"
+    val scalaTest = "3.0.5"
   }
 }
 
@@ -32,14 +33,15 @@ lazy val root = project.withId(baseNameL).in(file("."))
     licenses             := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt")),
     resolvers += "Oracle Repository" at "http://download.oracle.com/maven", // required for lucrestm-bdb
     libraryDependencies ++= Seq(
-      "de.sciss" %% "lucre-expr"         % deps.main.lucre,
-      "de.sciss" %% "desktop"            % deps.main.desktop,
-      "de.sciss" %% "audiowidgets-swing" % deps.main.widgets,   // TODO: should be possible to just depend on the range slider
-      "de.sciss" %% "treetable-scala"    % deps.main.treeTable, // TODO: should be going into a dedicated sub-project?
-      "de.sciss" %% "model"              % deps.main.model,
-      "de.sciss" %% "lucre-bdb"          % deps.main.lucre    % "test",
-      "de.sciss" %% "fileutil"           % deps.test.fileUtil % "test",
-      "de.sciss" %  "submin"             % deps.test.submin   % "test"
+      "de.sciss"      %% "lucre-expr"         % deps.main.lucre,
+      "de.sciss"      %% "desktop"            % deps.main.desktop,
+      "de.sciss"      %% "audiowidgets-swing" % deps.main.widgets,   // TODO: should be possible to just depend on the range slider
+      "de.sciss"      %% "treetable-scala"    % deps.main.treeTable, // TODO: should be going into a dedicated sub-project?
+      "de.sciss"      %% "model"              % deps.main.model,
+      "de.sciss"      %% "lucre-bdb"          % deps.main.lucre     % Test,
+      "de.sciss"      %% "fileutil"           % deps.test.fileUtil  % Test,
+      "de.sciss"      %  "submin"             % deps.test.submin    % Test,
+      "org.scalatest" %% "scalatest"          % deps.test.scalaTest % Test
     ),
     scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xfuture", "-Xlint"),
     // ---- compatibility ----
