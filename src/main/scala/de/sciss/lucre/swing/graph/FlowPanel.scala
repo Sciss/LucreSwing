@@ -18,8 +18,6 @@ object FlowPanel {
 
     type C = scala.swing.FlowPanel
 
-//    private[this] var obs: Disposable[S#Tx] = _
-
     def init()(implicit tx: S#Tx): this.type = {
       deferTx {
         val vec = contents.map(_.component)
@@ -28,8 +26,7 @@ object FlowPanel {
       this
     }
 
-    def dispose()(implicit tx: S#Tx): Unit =
-      () // obs.dispose()
+    def dispose()(implicit tx: S#Tx): Unit = ()
   }
 
   private final case class Impl(contents: Seq[Widget]) extends FlowPanel {

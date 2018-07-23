@@ -70,13 +70,6 @@ object Slider {
     extends IExpr[S, Int]
       with IGenerator[S, Change[Int]] {
 
-//    private[this] val reactions: Reactions = new Reactions.Impl {
-//      override def finalize(): Unit = {
-//        println("Oh noes!")
-//        super.finalize()
-//      }
-//    }
-
     private[this] val listener = new ChangeListener {
       def stateChanged(e: ChangeEvent): Unit = {
         val sl      = ws.component
@@ -109,21 +102,6 @@ object Slider {
         val sl = ws.component
         guiValue = sl.value
         sl.peer.addChangeListener(listener)
-//        sl.subscribe(reactions)
-//        reactions += {
-//          case ValueChanged(_) =>
-//            val before  = guiValue
-//            val now     = sl.value
-//            val ch      = Change(before, now)
-//            println(s"HERE: $ch")
-//            if (ch.isSignificant) {
-//              guiValue    = now
-//              cursor.step { implicit tx =>
-//                txValue.set(now)(tx.peer)
-//                fire(ch)
-//              }
-//            }
-//        }
       }
       this
     }
@@ -131,7 +109,6 @@ object Slider {
     def dispose()(implicit tx: S#Tx): Unit = {
       deferTx {
         val sl = ws.component
-//        sl.unsubscribe(reactions)
         sl.peer.removeChangeListener(listener)
       }
     }
