@@ -20,8 +20,8 @@ object GraphTest extends AppLike {
       FlowPanel(sl, lb)
     }
 
-    type     S = InMemory
-    val sys: S = InMemory()
+    type              S = InMemory
+    implicit val sys: S = InMemory()
 
     val view = sys.step { implicit tx =>
       g.expand[S]

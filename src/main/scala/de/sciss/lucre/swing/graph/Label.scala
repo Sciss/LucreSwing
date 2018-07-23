@@ -30,6 +30,8 @@ object Label {
   private final class Expanded[S <: Sys[S]](text: IExpr[S, String]) extends View[S]
     with ComponentHolder[scala.swing.Label] {
 
+    type C = scala.swing.Label
+
     private[this] var obs: Disposable[S#Tx] = _
 
     def init()(implicit tx: S#Tx): this.type = {
@@ -52,7 +54,7 @@ object Label {
   private final case class Impl(text0: Ex[String]) extends Label {
     override def productPrefix: String = s"Label$$Impl"
 
-    protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View[S] = {
+    protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] = {
       val textEx = text0.expand[S]
       new Expanded[S](textEx).init()
     }
@@ -61,5 +63,7 @@ object Label {
   }
 }
 trait Label extends Widget {
+  type C = scala.swing.Label
+
   def text: Ex[String]
 }

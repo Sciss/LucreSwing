@@ -43,6 +43,8 @@ object StringFieldViewImpl extends CellViewFactory[String] {
                                        (implicit cursor: stm.Cursor[S], undoManager: UndoManager)
     extends StringFieldView[S] with CellViewEditor[S, String, TextField] {
 
+    override type C = scala.swing.TextField
+
     protected def observer: Disposable[S#Tx]
 
     protected def committer: Option[CellViewFactory.Committer[S, String]]

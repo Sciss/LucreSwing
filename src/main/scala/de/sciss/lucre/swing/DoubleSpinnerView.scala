@@ -27,7 +27,7 @@ object DoubleSpinnerView {
 
   def apply[S <: Sys[S]](expr: DoubleObj[S], name: String, width: Int = 160)
                         (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): DoubleSpinnerView[S] = {
-    implicit val tpe = DoubleObj
+    implicit val tpe: DoubleObj.type = DoubleObj
     Impl(CellView.expr[S, Double, DoubleObj](expr), name = name, width = width)
   }
 
@@ -44,5 +44,5 @@ object DoubleSpinnerView {
   }
 }
 trait DoubleSpinnerView[S <: Sys[S]] extends View[S] {
-  override def component: Spinner
+  type C = Spinner
 }

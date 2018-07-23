@@ -80,6 +80,8 @@ object IntSpinnerViewImpl extends CellViewFactory[Int] {
                                           (implicit cursor: stm.Cursor[S], undoManager: UndoManager)
     extends DefinedNumberSpinnerViewImpl[S, Int](maxWidth) with IntSpinnerView[S] {
 
+    override type C = Spinner
+
     // final protected val tpe = expr.Int
 
     protected def parseModelValue(v: Any): Option[Int] = v match {
@@ -108,6 +110,8 @@ object IntSpinnerViewImpl extends CellViewFactory[Int] {
   private abstract class OptionalImpl[S <: Sys[S]](maxWidth: Int)
                                                   (implicit cursor: stm.Cursor[S], undoManager: UndoManager)
     extends OptionalNumberSpinnerViewImpl[S, Int](maxWidth, true) with IntSpinnerView.Optional[S] {
+
+    override type C = Spinner
 
     final protected def parseModelValue(v: Any): Option[Option[Int]] = v match {
       case Some(d: Int)  => Some(Some(d))

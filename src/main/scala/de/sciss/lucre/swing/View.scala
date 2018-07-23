@@ -22,6 +22,8 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 import scala.swing.Component
 
 object View {
+  type T[S <: Sys[S], C1 <: Component] = View[S] { type C = C1 }
+
   trait Cursor[S <: Sys[S]] extends View[S] {
     implicit def cursor: stm.Cursor[S]
   }
@@ -34,20 +36,24 @@ object View {
     def file: java.io.File
   }
 
-  def wrap[S <: Sys[S]](component: => Component)(implicit tx: S#Tx): View[S] = {
-    val res = new Wrap[S]
+  def wrap[S <: Sys[S], C <: Component](component: => C)(implicit tx: S#Tx): View.T[S, C] = {
+    val res = new Wrap[S, C]
     deferTx {
       res.guiInit(component)
     }
     res
   }
 
-  private final class Wrap[S <: Sys[S]] extends View[S] with ComponentHolder[Component] {
-    def guiInit(c: Component): Unit = component = c
+  private final class Wrap[S <: Sys[S], C1 <: Component] extends View[S] with ComponentHolder[C1] {
+    type C = C1
+
+    def guiInit(c: C1): Unit = component = c
 
     def dispose()(implicit tx: S#Tx): Unit = ()
   }
 }
 trait View[S <: Sys[S]] extends Disposable[S#Tx] {
-  def component: Component
+  type C <: Component
+
+  def component: C
 }

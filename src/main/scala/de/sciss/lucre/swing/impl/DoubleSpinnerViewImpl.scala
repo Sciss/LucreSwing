@@ -80,6 +80,8 @@ object DoubleSpinnerViewImpl {
                                           (implicit cursor: stm.Cursor[S], undoManager: UndoManager)
     extends DefinedNumberSpinnerViewImpl[S, Double](maxWidth) with DoubleSpinnerView[S] {
 
+    override type C = Spinner
+
     // final protected val tpe = expr.Double
 
     final protected def parseModelValue(v: Any): Option[Double] = v match {
@@ -107,6 +109,8 @@ object DoubleSpinnerViewImpl {
   private abstract class OptionalImpl[S <: Sys[S]](maxWidth: Int)
                                                   (implicit cursor: stm.Cursor[S], undoManager: UndoManager)
     extends OptionalNumberSpinnerViewImpl[S, Double](maxWidth, false) with DoubleSpinnerView.Optional[S] {
+
+    override type C = Spinner
 
     final protected def parseModelValue(v: Any): Option[Option[Double]] = v match {
       case Some(d: Double)  => Some(Some(d))

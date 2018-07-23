@@ -19,13 +19,11 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.impl.{BooleanCheckBoxViewImpl => Impl}
 
-import scala.swing.CheckBox
-
 object BooleanCheckBoxView {
   /** Creates a new view from an expression. The check box's label will initially be set to `name`. */
   def apply[S <: Sys[S]](expr: BooleanObj[S], name: String)
                         (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): BooleanCheckBoxView[S] = {
-    implicit val tpe = BooleanObj
+    implicit val tpe: BooleanObj.type = BooleanObj
     Impl(CellView.expr[S, Boolean, BooleanObj](expr), name = name)
   }
 
@@ -38,5 +36,5 @@ object BooleanCheckBoxView {
     Impl.optional(cell, name = name, default = default)
 }
 trait BooleanCheckBoxView[S <: Sys[S]] extends View[S] {
-  override def component: CheckBox
+  type C = scala.swing.CheckBox
 }

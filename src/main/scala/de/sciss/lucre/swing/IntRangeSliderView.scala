@@ -34,7 +34,7 @@ object IntRangeSliderView {
     Impl(model0 = model0, name = name, width = width)
 }
 trait IntRangeSliderView[S <: Sys[S]] extends View[S] {
-  override def component: DualRangeSlider
+  type C = DualRangeSlider
 
   /** Gets the expression associated with the single value slider (if any). */
   def value                                (implicit tx: S#Tx): Option[IntObj[S]]

@@ -1,7 +1,7 @@
 package de.sciss.lucre.swing
 package graph
 
-import de.sciss.lucre.stm.{Disposable, Sys}
+import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.impl.ComponentHolder
 
 object FlowPanel {
@@ -14,28 +14,33 @@ object FlowPanel {
   }
 
   private final class Expanded[S <: Sys[S]](contents: Seq[View[S]]) extends View[S]
-    with ComponentHolder[scala.swing.Label] {
+    with ComponentHolder[scala.swing.FlowPanel] {
 
-    private[this] var obs: Disposable[S#Tx] = _
+    type C = scala.swing.FlowPanel
+
+//    private[this] var obs: Disposable[S#Tx] = _
 
     def init()(implicit tx: S#Tx): this.type = {
-      ???
+      deferTx {
+        val vec = contents.map(_.component)
+        component = new scala.swing.FlowPanel(vec: _*)
+      }
       this
     }
 
     def dispose()(implicit tx: S#Tx): Unit =
-      obs.dispose()
+      () // obs.dispose()
   }
 
   private final case class Impl(contents: Seq[Widget]) extends FlowPanel {
     override def productPrefix: String = s"FlowPanel$$Impl"
 
-    protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View[S] = {
+    protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] = {
       val contentsV = contents.map(_.expand[S])
       new Expanded[S](contentsV).init()
     }
   }
 }
 trait FlowPanel extends Widget {
-
+  type C = scala.swing.FlowPanel
 }

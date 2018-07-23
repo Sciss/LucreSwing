@@ -25,6 +25,8 @@ import scala.swing.{Component, TextComponent}
 trait CellViewEditor[S <: Sys[S], A, Comp <: Component]
   extends View[S] with ComponentHolder[Comp] with CellViewFactory.View[A] {
 
+  type C = Comp
+
   // ---- abstract ----
 
   // the current ephemeral (but committed) value of the view. sub classes should

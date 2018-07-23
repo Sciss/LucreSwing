@@ -16,6 +16,8 @@ package swing
 package impl
 
 trait ComponentHolder[C] {
+//  type C = C1
+
   private var comp = Option.empty[C]
 
   final protected def component_=(c: C): Unit = {

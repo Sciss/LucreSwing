@@ -52,6 +52,8 @@ object BooleanCheckBoxViewImpl extends CellViewFactory[Boolean] {
   private abstract class BasicImpl[S <: Sys[S], B]
     extends BooleanCheckBoxView[S] with CellViewEditor[S, B, CheckBox] with View.Editable[S] {
 
+    override type C = scala.swing.CheckBox
+
     protected def editName: String
 
     protected def committer: Option[CellViewFactory.Committer[S, B]]

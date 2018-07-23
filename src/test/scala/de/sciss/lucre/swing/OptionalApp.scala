@@ -14,11 +14,11 @@ object OptionalApp extends AppLike {
   // private val rows = 1
 
   private lazy val viewsDouble: Vec[View[S]] = system.step { implicit tx =>
-    implicit val doubleEx   = DoubleObj
+    implicit val doubleEx: DoubleObj.type = DoubleObj
 //    implicit val intEx      = IntObj
 
-    def label (text: String)                  = View.wrap[S](new Label(s"$text:", null, Alignment.Trailing))
-    def button(text: String)(action: => Unit) = View.wrap[S](Button(text)(action))
+    def label (text: String): View.T[S, Label] = View.wrap(new Label(s"$text:", null, Alignment.Trailing))
+    def button(text: String)(action: => Unit): View.T[S, Button] = View.wrap(Button(text)(action))
 
     val exDouble1       = DoubleObj.newVar[S](DoubleObj.newConst(0.0))
     val mapDouble       = evt.Map.Modifiable[S, String, DoubleObj]
@@ -41,16 +41,16 @@ object OptionalApp extends AppLike {
     }
 
     Vec(
-      label("Double"), vDouble1, vDouble2, butPutDouble, butRemoveDouble, View.wrap[S](togDefaultDouble)
+      label("Double"), vDouble1, vDouble2, butPutDouble, butRemoveDouble, View.wrap(togDefaultDouble)
     )
   }
 
   private lazy val viewsInt: Vec[View[S]] = system.step { implicit tx =>
 //    implicit val doubleEx   = DoubleObj
-    implicit val intEx      = IntObj
+    implicit val intEx: IntObj.type = IntObj
 
-    def label (text: String)                  = View.wrap[S](new Label(s"$text:", null, Alignment.Trailing))
-    def button(text: String)(action: => Unit) = View.wrap[S](Button(text)(action))
+    def label (text: String): View.T[S, Label] = View.wrap(new Label(s"$text:", null, Alignment.Trailing))
+    def button(text: String)(action: => Unit): View.T[S, Button] = View.wrap(Button(text)(action))
 
     val exInt1       = IntObj.newVar[S](IntObj.newConst(0))
     val mapInt       = evt.Map.Modifiable[S, String, IntObj]
@@ -73,7 +73,7 @@ object OptionalApp extends AppLike {
     }
 
     Vec(
-      label("Int"), vInt1, vInt2, butPutInt, butRemoveInt, View.wrap[S](togDefaultInt)
+      label("Int"), vInt1, vInt2, butPutInt, butRemoveInt, View.wrap(togDefaultInt)
     )
   }
 

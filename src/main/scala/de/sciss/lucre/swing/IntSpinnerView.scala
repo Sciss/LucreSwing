@@ -23,7 +23,7 @@ import de.sciss.swingplus.Spinner
 object IntSpinnerView {
   def apply[S <: Sys[S]](expr: IntObj[S], name: String, width: Int = 160)
                         (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): IntSpinnerView[S] = {
-    implicit val tpe = IntObj
+    implicit val tpe: IntObj.type = IntObj
     Impl(CellView.expr[S, Int, IntObj](expr), name = name, width = width)
   }
 
@@ -44,5 +44,5 @@ object IntSpinnerView {
   }
 }
 trait IntSpinnerView[S <: Sys[S]] extends View[S] {
-  override def component: Spinner
+  type C = Spinner
 }

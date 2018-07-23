@@ -35,7 +35,7 @@ object TestExprApp extends AppLike {
     vI4.rangeLo = Some(exprI1)
     vI4.rangeHi = Some(exprI2)
 
-    def label(text: String) = View.wrap[S](new Label(s"$text:", null, Alignment.Trailing))
+    def label(text: String): View.T[S, Label] = View.wrap(new Label(s"$text:", null, Alignment.Trailing))
 
     Vec(
       label("Double"), vD1, vD2,

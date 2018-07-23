@@ -19,12 +19,10 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.impl.{StringFieldViewImpl => Impl}
 
-import scala.swing.TextField
-
 object StringFieldView {
   def apply[S <: Sys[S]](expr: StringObj[S], name: String, columns: Int = 16)
                         (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): StringFieldView[S] = {
-    implicit val tpe = StringObj
+    implicit val tpe: StringObj.type = StringObj
     Impl(CellView.expr[S, String, StringObj](expr), name = name, columns = columns)
   }
 
@@ -33,5 +31,5 @@ object StringFieldView {
     Impl(cell, name = name, columns = columns)
 }
 trait StringFieldView[S <: Sys[S]] extends View[S] {
-  override def component: TextField
+  type C = scala.swing.TextField
 }

@@ -2,6 +2,7 @@ package de.sciss.lucre.swing
 
 import java.util
 
+import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 
 import scala.collection.immutable.{IndexedSeq => Vec}
@@ -70,7 +71,7 @@ final case class Graph(widgets: Vec[ConfiguredWidget]) {
 //  def isEmpty : Boolean  = sources.isEmpty
 //  def nonEmpty: Boolean  = !isEmpty
 
-  def expand[S <: Sys[S]](implicit tx: S#Tx): View[S] = {
+  def expand[S <: Sys[S]](implicit tx: S#Tx, cursor: stm.Cursor[S]): View[S] = {
     implicit val b: Widget.Builder[S] = Widget.Builder(this)
     widgets.last.w.expand[S]
   }
