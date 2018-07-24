@@ -52,7 +52,7 @@ object Label {
   }
 
   private final case class Impl(text0: Ex[String]) extends Label {
-    override def productPrefix: String = s"Label$$Impl"
+    override def productPrefix: String = "Label" // serialization
 
     protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] = {
       val textEx = text0.expand[S]

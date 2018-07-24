@@ -158,7 +158,7 @@ object Slider {
   }
 
   private final case class Impl() extends Slider {
-    override def productPrefix: String = "Slider"   // serialization
+    override def productPrefix = "Slider"   // serialization
 
     protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] =
       new Expanded[S](this).init()

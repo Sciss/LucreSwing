@@ -17,7 +17,7 @@ object GraphTest extends AppLike {
       }
       val txt = sl.value.toStr
       val lb = Label(txt)
-      FlowPanel(sl, lb)
+      FlowPanel(sl, Separator(), lb)
     }
 
     type              S = InMemory

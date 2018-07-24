@@ -30,7 +30,7 @@ object FlowPanel {
   }
 
   private final case class Impl(contents: Seq[Widget]) extends FlowPanel {
-    override def productPrefix: String = s"FlowPanel$$Impl"
+    override def productPrefix = "FlowPanel" // s"FlowPanel$$Impl" // serialization
 
     protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] = {
       val contentsV = contents.map(_.expand[S])
