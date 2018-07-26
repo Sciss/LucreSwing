@@ -14,7 +14,7 @@
 package de.sciss.lucre.swing
 package graph
 
-import de.sciss.lucre.expr.{Ex, IExpr}
+import de.sciss.lucre.expr.Ex
 import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.lucre.swing.impl.ComponentHolder
 
@@ -27,14 +27,15 @@ object Label {
     w
   }
 
-  private final class Expanded[S <: Sys[S]](text: IExpr[S, String]) extends View[S]
+  private final class Expanded[S <: Sys[S]](w: Label) extends View[S]
     with ComponentHolder[scala.swing.Label] {
 
     type C = scala.swing.Label
 
     private[this] var obs: Disposable[S#Tx] = _
 
-    def init()(implicit tx: S#Tx): this.type = {
+    def init()(implicit tx: S#Tx, b: Widget.Builder[S]): this.type = {
+      val text  = w.text.expand[S]
       val text0 = text.value
       deferTx {
         component = new scala.swing.Label(text0)
@@ -55,8 +56,7 @@ object Label {
     override def productPrefix: String = "Label" // serialization
 
     protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] = {
-      val textEx = text0.expand[S]
-      new Expanded[S](textEx).init()
+      new Expanded[S](this).init()
     }
 
     def text: Ex[String] = text0

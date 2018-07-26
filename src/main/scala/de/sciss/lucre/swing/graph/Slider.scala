@@ -21,6 +21,7 @@ import de.sciss.lucre.expr.graph.Constant
 import de.sciss.lucre.expr.{Ex, IExpr}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.model.Change
 import javax.swing.event.{ChangeEvent, ChangeListener}
@@ -36,33 +37,30 @@ object Slider {
     w
   }
 
-  private final class Expanded[S <: Sys[S]](w: Widget) extends View[S]
-    with ComponentHolder[scala.swing.Slider] {
+  private final class Expanded[S <: Sys[S]](protected val w: Slider) extends View[S]
+    with ComponentHolder[scala.swing.Slider] with ComponentExpandedImpl[S] {
 
     type C = scala.swing.Slider
 
-    def init()(implicit tx: S#Tx, b: Widget.Builder[S]): this.type = {
+    override def init()(implicit tx: S#Tx, b: Widget.Builder[S]): this.type = {
       val minOpt    = b.getProperty[Ex[Int]](w, keyMin  ).map(_.expand[S].value)
       val maxOpt    = b.getProperty[Ex[Int]](w, keyMax  ).map(_.expand[S].value)
       val valueOpt  = b.getProperty[Ex[Int]](w, keyValue).map(_.expand[S].value)
 
       deferTx {
-        val sl = new scala.swing.Slider
-        minOpt  .foreach(sl.min   = _)
-        maxOpt  .foreach(sl.max   = _)
-        valueOpt.foreach(sl.value = _)
-        component = sl
+        val c = new scala.swing.Slider
+        minOpt  .foreach(c.min   = _)
+        maxOpt  .foreach(c.max   = _)
+        valueOpt.foreach(c.value = _)
+        component = c
       }
-//      obs = text.changed.react { implicit tx => ch =>
-//        deferTx {
-//          component.text = ch.now
-//        }
-//      }
-      this
+
+      super.init()
     }
 
-    def dispose()(implicit tx: S#Tx): Unit =
-      () // obs.dispose()
+    override def dispose()(implicit tx: S#Tx): Unit = {
+      super.dispose()
+    }
   }
 
   private final class ValueExpanded[S <: Sys[S]](ws: View.T[S, scala.swing.Slider], value0: Int)
@@ -72,11 +70,10 @@ object Slider {
 
     private[this] val listener = new ChangeListener {
       def stateChanged(e: ChangeEvent): Unit = {
-        val sl      = ws.component
+        val c       = ws.component
         val before  = guiValue
-        val now     = sl.value
+        val now     = c.value
         val ch      = Change(before, now)
-//        println(s"HERE: $ch")
         if (ch.isSignificant) {
           guiValue    = now
           cursor.step { implicit tx =>
@@ -99,17 +96,17 @@ object Slider {
 
     def init()(implicit tx: S#Tx): this.type = {
       deferTx {
-        val sl = ws.component
-        guiValue = sl.value
-        sl.peer.addChangeListener(listener)
+        val c = ws.component
+        guiValue = c.value
+        c.peer.addChangeListener(listener)
       }
       this
     }
 
     def dispose()(implicit tx: S#Tx): Unit = {
       deferTx {
-        val sl = ws.component
-        sl.peer.removeChangeListener(listener)
+        val c = ws.component
+        c.peer.removeChangeListener(listener)
       }
     }
   }
@@ -161,7 +158,7 @@ object Slider {
     def aux: List[Aux] = Nil
   }
 
-  private final case class Impl() extends Slider {
+  private final case class Impl() extends Slider with ComponentImpl {
     override def productPrefix = "Slider"   // serialization
 
     protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] =
@@ -189,7 +186,7 @@ object Slider {
     }
   }
 }
-trait Slider extends Widget {
+trait Slider extends Component {
   type C = scala.swing.Slider
 
   var min   : Ex[Int]

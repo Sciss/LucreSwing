@@ -1,3 +1,16 @@
+/*
+ *  Widget.scala
+ *  (LucreSwing)
+ *
+ *  Copyright (c) 2014-2018 Hanns Holger Rutz. All rights reserved.
+ *
+ *	This software is published under the GNU Lesser General Public License v2.1+
+ *
+ *
+ *	For further information, please contact Hanns Holger Rutz at
+ *	contact@sciss.de
+ */
+
 package de.sciss.lucre.swing
 
 import java.util
@@ -6,8 +19,6 @@ import de.sciss.lucre.expr.Ex
 import de.sciss.lucre.expr.impl.ContextMixin
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Base, Sys}
-
-import scala.swing.Component
 
 object Widget {
   object Builder {
@@ -69,7 +80,7 @@ object Widget {
 //  }
 }
 trait Widget extends Product {
-  type C <: Component
+  type C <: scala.swing.Component
 
   // this acts now as a fast unique reference
   @transient final private[this] lazy val ref = new AnyRef

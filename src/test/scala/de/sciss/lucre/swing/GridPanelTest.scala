@@ -10,7 +10,7 @@ object GridPanelTest extends AppLike {
     import ExOps._
     import graph._
     val g = Graph {
-      val contents = (1 to 3).flatMap { i =>
+      val contents0 = (1 to 3).flatMap { i =>
         val sl = Slider()
         sl.min    = 1
         sl.max    = 10
@@ -18,9 +18,12 @@ object GridPanelTest extends AppLike {
         val lb    = Label(s"Slider $i:")
         lb :: sl :: Nil
       }
+      val cb        = CheckBox("Disabled")
+      val slE       = Slider()
+      slE.enabled   = !cb.selected
+      val contents  = contents0 ++ List(cb, slE)
 
       val p = GridPanel(contents: _*)
-//      p.rows    = 3
       p.columns = 2
       p
     }
