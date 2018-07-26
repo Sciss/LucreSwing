@@ -1,5 +1,5 @@
 /*
- *  Separator.scala
+ *  Empty.scala
  *  (LucreSwing)
  *
  *  Copyright (c) 2014-2018 Hanns Holger Rutz. All rights reserved.
@@ -17,23 +17,21 @@ package graph
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.impl.ComponentHolder
 
-object Separator {
-  def apply(): Separator = Impl()
+import scala.swing.Dimension
 
-//  def mk(text: Ex[String])(configure: Separator => Unit): Separator = {
-//    val w = apply()
-//    configure(w)
-//    w
-//  }
+object Empty {
+  def apply(): Empty = instance
+
+  private[graph] val instance: Empty = Impl()
 
   private final class Expanded[S <: Sys[S]] extends View[S]
-    with ComponentHolder[scala.swing.Separator] {
+    with ComponentHolder[scala.swing.Component] {
 
-    type C = scala.swing.Separator
+    type C = scala.swing.Component
 
     def init()(implicit tx: S#Tx): this.type = {
       deferTx {
-        component = new scala.swing.Separator
+        component = scala.swing.Swing.RigidBox(new Dimension(0, 0))
       }
       this
     }
@@ -41,14 +39,17 @@ object Separator {
     def dispose()(implicit tx: S#Tx): Unit = ()
   }
 
-  private final case class Impl() extends Separator {
-    override def productPrefix = "Separator"  // serialization
+  private final case class Impl() extends Empty {
+    override def productPrefix = "Empty"  // serialization
 
     protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] = {
       new Expanded[S].init()
     }
   }
 }
-trait Separator extends Widget {
-  type C = scala.swing.Separator
+/** This is a placeholder widget that can be eliminated in other places of the API,
+  * for example `BorderPanel` contents.
+  */
+trait Empty extends Widget {
+  type C = scala.swing.Component
 }

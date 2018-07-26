@@ -1,3 +1,16 @@
+/*
+ *  GridPanel.scala
+ *  (LucreSwing)
+ *
+ *  Copyright (c) 2014-2018 Hanns Holger Rutz. All rights reserved.
+ *
+ *	This software is published under the GNU Lesser General Public License v2.1+
+ *
+ *
+ *	For further information, please contact Hanns Holger Rutz at
+ *	contact@sciss.de
+ */
+
 package de.sciss.lucre.swing
 package graph
 
@@ -5,26 +18,27 @@ import de.sciss.lucre.aux.Aux
 import de.sciss.lucre.expr.graph.Constant
 import de.sciss.lucre.expr.{Ex, IExpr}
 import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
 
 object GridPanel {
   def apply(contents: Widget*): GridPanel = Impl(contents)
 
-  def mk(configure: GridPanel => Unit): GridPanel = {
-    val w = apply()
-    configure(w)
-    w
-  }
+//  def mk(configure: GridPanel => Unit): GridPanel = {
+//    val w = apply()
+//    configure(w)
+//    w
+//  }
   
   private final val keyRows     = "rows"
   private final val keyColumns  = "columns"
 
-  private final class Expanded[S <: Sys[S]](w: GridPanel) extends View[S]
-    with ComponentHolder[scala.swing.GridPanel] {
+  private final class Expanded[S <: Sys[S]](protected val w: GridPanel) extends View[S]
+    with ComponentHolder[scala.swing.GridPanel] with ComponentExpandedImpl[S] {
 
     type C = scala.swing.GridPanel
 
-    def init()(implicit tx: S#Tx, b: Widget.Builder[S]): this.type = {
+    override def init()(implicit tx: S#Tx, b: Widget.Builder[S]): this.type = {
       val rows0     = b.getProperty[Ex[Int]](w, keyRows    ).fold(defaultRows    )(_.expand[S].value)
       val columns   = b.getProperty[Ex[Int]](w, keyColumns ).fold(defaultColumns )(_.expand[S].value)
       val rows      = if (rows0 == 0 && columns == 0) 1 else 0  // not allowed to have both zero
@@ -35,10 +49,10 @@ object GridPanel {
         p.contents ++= vec
         component = p
       }
-      this
+      super.init()
     }
 
-    def dispose()(implicit tx: S#Tx): Unit = ()
+//    def dispose()(implicit tx: S#Tx): Unit = super.dispose()
   }
 
   private final val defaultRows     = 0 // 1
@@ -68,7 +82,7 @@ object GridPanel {
     def aux: List[Aux] = Nil
   }
 
-  private final case class Impl(contents: Seq[Widget]) extends GridPanel {
+  private final case class Impl(contents: Seq[Widget]) extends GridPanel with ComponentImpl {
     override def productPrefix = "GridPanel" // s"GridPanel$$Impl" // serialization
 
     protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] = {
@@ -90,10 +104,8 @@ object GridPanel {
     }
   }
 }
-trait GridPanel extends Widget {
+trait GridPanel extends Panel {
   type C = scala.swing.GridPanel
-
-  def contents: Seq[Widget]
 
   var rows    : Ex[Int]
   var columns : Ex[Int]

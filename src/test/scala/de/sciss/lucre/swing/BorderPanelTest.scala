@@ -5,18 +5,17 @@ import de.sciss.lucre.stm.InMemory
 
 import scala.swing.Component
 
-object GraphTest extends AppLike {
+object BorderPanelTest extends AppLike {
   protected def mkView(): Component = {
     import ExOps._
     import graph._
     val g = Graph {
-      val sl    = Slider()
-      sl.min    = 1
-      sl.max    = 10
-      sl.value  = 1
-      val txt   = sl.value.toStr
-      val lb    = Label(txt)
-      FlowPanel(sl, Separator(), lb)
+      val lbN = Label("North" )
+      val lbE = Label("East"  )
+      val txt = TextField(10)
+      txt.text = "Center"
+      val lbS = Label(txt.text)
+      BorderPanel(north = lbN, east = lbE, center = txt, south = lbS)
     }
 
     type              S = InMemory

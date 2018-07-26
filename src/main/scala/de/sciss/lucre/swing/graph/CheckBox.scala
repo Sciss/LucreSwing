@@ -23,6 +23,7 @@ import de.sciss.lucre.expr.ExOps._
 import de.sciss.lucre.expr.{Ex, IExpr}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.model.Change
 
@@ -32,18 +33,18 @@ object CheckBox {
 
   def apply(text: Ex[String] = ""): CheckBox = Impl(text)
 
-  def mk(configure: CheckBox => Unit): CheckBox = {
-    val w = apply()
-    configure(w)
-    w
-  }
+//  def mk(configure: CheckBox => Unit): CheckBox = {
+//    val w = apply()
+//    configure(w)
+//    w
+//  }
 
-  private final class Expanded[S <: Sys[S]](w: CheckBox) extends View[S]
-    with ComponentHolder[scala.swing.CheckBox] {
+  private final class Expanded[S <: Sys[S]](protected val w: CheckBox) extends View[S]
+    with ComponentHolder[scala.swing.CheckBox] with ComponentExpandedImpl[S] {
 
     type C = scala.swing.CheckBox
 
-    def init()(implicit tx: S#Tx, b: Widget.Builder[S]): this.type = {
+    override def init()(implicit tx: S#Tx, b: Widget.Builder[S]): this.type = {
       val text      = w.text.expand[S]
       val text0     = text.value
       val text1     = if (text0.isEmpty) null else text0
@@ -53,10 +54,10 @@ object CheckBox {
         if (selected) c.selected = true
         component = c
       }
-      this
+      super.init()
     }
 
-    def dispose()(implicit tx: S#Tx): Unit = ()
+//    def dispose()(implicit tx: S#Tx): Unit = super.dispose()
   }
 
   private final class SelectedExpanded[S <: Sys[S]](ws: View.T[S, scala.swing.CheckBox], value0: Boolean)
@@ -125,7 +126,7 @@ object CheckBox {
     def aux: List[Aux] = Nil
   }
 
-  private final case class Impl(text0: Ex[String]) extends CheckBox {
+  private final case class Impl(text0: Ex[String]) extends CheckBox with ComponentImpl {
     override def productPrefix = "CheckBox"   // serialization
 
     protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] =
@@ -141,7 +142,7 @@ object CheckBox {
     def text: Ex[String] = text0
   }
 }
-trait CheckBox extends Widget {
+trait CheckBox extends Component {
   type C = scala.swing.CheckBox
 
   def text: Ex[String]

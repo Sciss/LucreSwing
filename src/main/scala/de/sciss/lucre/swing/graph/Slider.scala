@@ -31,11 +31,11 @@ import scala.concurrent.stm.Ref
 object Slider {
   def apply(): Slider = Impl()
 
-  def mk(configure: Slider => Unit): Slider = {
-    val w = apply()
-    configure(w)
-    w
-  }
+//  def mk(configure: Slider => Unit): Slider = {
+//    val w = apply()
+//    configure(w)
+//    w
+//  }
 
   private final class Expanded[S <: Sys[S]](protected val w: Slider) extends View[S]
     with ComponentHolder[scala.swing.Slider] with ComponentExpandedImpl[S] {
@@ -58,9 +58,7 @@ object Slider {
       super.init()
     }
 
-    override def dispose()(implicit tx: S#Tx): Unit = {
-      super.dispose()
-    }
+//    override def dispose()(implicit tx: S#Tx): Unit = super.dispose()
   }
 
   private final class ValueExpanded[S <: Sys[S]](ws: View.T[S, scala.swing.Slider], value0: Int)

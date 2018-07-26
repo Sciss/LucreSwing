@@ -9,14 +9,15 @@ class SerializationSpec extends FlatSpec with Matchers {
     import ExOps._
     import graph._
     val gIn = Graph {
-      val sl    = Slider.mk { w =>
-        w.min   = 1
-        w.max   = 10
-        w.value = 1
-      }
-      val txt = (sl.value.dbAmp * 2.0).toStr
-      val lb = Label(txt)
-      FlowPanel(sl, lb)
+      val sl    = Slider()
+      sl.min    = 1
+      sl.max    = 10
+      sl.value  = 1
+      val txt   = (sl.value.dbAmp * 2.0).toStr
+      val lb    = Label(txt)
+      val flow  = FlowPanel(sl, lb)
+      val bp    = BorderPanel(north = flow, center = CheckBox("Checking one two"))
+      bp
     }
 
     val out = DataOutput()
