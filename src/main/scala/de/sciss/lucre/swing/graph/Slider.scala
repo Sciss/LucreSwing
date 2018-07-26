@@ -41,10 +41,10 @@ object Slider {
 
     type C = scala.swing.Slider
 
-    def init()(implicit b: Widget.Builder[S], tx: S#Tx): this.type = {
-      val minOpt    = b.getProperty[Ex[Int]](w, "min"  ).map(_.expand[S].value)
-      val maxOpt    = b.getProperty[Ex[Int]](w, "max"  ).map(_.expand[S].value)
-      val valueOpt  = b.getProperty[Ex[Int]](w, "value").map(_.expand[S].value)
+    def init()(implicit tx: S#Tx, b: Widget.Builder[S]): this.type = {
+      val minOpt    = b.getProperty[Ex[Int]](w, keyMin  ).map(_.expand[S].value)
+      val maxOpt    = b.getProperty[Ex[Int]](w, keyMax  ).map(_.expand[S].value)
+      val valueOpt  = b.getProperty[Ex[Int]](w, keyValue).map(_.expand[S].value)
 
       deferTx {
         val sl = new scala.swing.Slider
@@ -114,9 +114,13 @@ object Slider {
     }
   }
 
-  private def defaultValue  =  50
-  private def defaultMin    =   0
-  private def defaultMax    = 100
+  private final val defaultValue  =  50
+  private final val defaultMin    =   0
+  private final val defaultMax    = 100
+  
+  private final val keyValue      = "value"
+  private final val keyMin        = "min"
+  private final val keyMax        = "max"
 
   final case class Value(w: Slider) extends Ex[Int] {
     override def productPrefix: String = s"Slider$$Value" // serialization
@@ -125,7 +129,7 @@ object Slider {
       case b: Widget.Builder[S] =>
         import b.{cursor, targets}
         val ws        = w.expand[S](b, tx)
-        val valueOpt  = b.getProperty[Ex[Int]](w, "value")
+        val valueOpt  = b.getProperty[Ex[Int]](w, keyValue)
         val value0    = valueOpt.fold[Int](defaultValue)(_.expand[S].value)
         new ValueExpanded[S](ws, value0).init()
     }
@@ -138,7 +142,7 @@ object Slider {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = ctx match {
       case b: Widget.Builder[S] =>
-        val valueOpt = b.getProperty[Ex[Int]](w, "min")
+        val valueOpt = b.getProperty[Ex[Int]](w, keyMin)
         valueOpt.getOrElse(Constant(defaultMin)).expand[S]
     }
 
@@ -150,7 +154,7 @@ object Slider {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = ctx match {
       case b: Widget.Builder[S] =>
-        val valueOpt = b.getProperty[Ex[Int]](w, "max")
+        val valueOpt = b.getProperty[Ex[Int]](w, keyMax)
         valueOpt.getOrElse(Constant(defaultMax)).expand[S]
     }
 
@@ -167,21 +171,21 @@ object Slider {
 
     def min_=(x: Ex[Int]): Unit = {
       val b = Graph.builder
-      b.putProperty(this, "min", x)
+      b.putProperty(this, keyMin, x)
     }
 
     def max: Ex[Int] = Max(this)
 
     def max_=(x: Ex[Int]): Unit = {
       val b = Graph.builder
-      b.putProperty(this, "max", x)
+      b.putProperty(this, keyMax, x)
     }
 
     def value: Ex[Int] = Value(this)
 
     def value_=(x: Ex[Int]): Unit = {
       val b = Graph.builder
-      b.putProperty(this, "value", x)
+      b.putProperty(this, keyValue, x)
     }
   }
 }
