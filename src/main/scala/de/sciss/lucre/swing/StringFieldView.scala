@@ -14,7 +14,7 @@
 package de.sciss.lucre.swing
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.expr.StringObj
+import de.sciss.lucre.expr.{CellView, StringObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.impl.{StringFieldViewImpl => Impl}

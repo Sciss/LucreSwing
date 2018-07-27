@@ -16,8 +16,8 @@ package swing
 package impl
 
 import javax.swing.{JSpinner, SpinnerNumberModel}
-
 import de.sciss.desktop.UndoManager
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm.Disposable
 import de.sciss.swingplus.Spinner
@@ -26,7 +26,7 @@ object IntSpinnerViewImpl extends CellViewFactory[Int] {
   def apply[S <: Sys[S]](cell: CellView[S#Tx, Int], name: String, width: Int)
                         (implicit tx: S#Tx, cursor: stm.Cursor[S],
                          undoManager: UndoManager): IntSpinnerView[S] = {
-    val res = new Impl[S](maxWidth = width) {
+    val res: Impl[S] = new Impl[S](maxWidth = width) {
       impl =>
       protected var (value, committer)          = CellViewFactory.mkCommitter(cell, name)(tx, cursor)
       protected val observer: Disposable[S#Tx]  = CellViewFactory.mkObserver (cell, impl)
@@ -39,7 +39,7 @@ object IntSpinnerViewImpl extends CellViewFactory[Int] {
   def optional[S <: Sys[S]](_cell: CellView[S#Tx, Option[Int]], name: String, width: Int, default0: Option[Int])
                            (implicit tx: S#Tx, cursor: stm.Cursor[S],
                             undoManager: UndoManager): IntSpinnerView.Optional[S] = {
-    val res = new OptionalImpl[S](maxWidth = width) {
+    val res: OptionalImpl[S] = new OptionalImpl[S](maxWidth = width) {
       impl =>
 
       protected var (value, committer)          = CellViewFactory.mkCommitter(_cell, name)(tx, cursor)

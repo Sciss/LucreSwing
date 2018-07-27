@@ -4,7 +4,7 @@ import java.util
 
 import de.sciss.lucre.expr.impl.ExElem
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.stm.{Obj, Sys}
 import de.sciss.serial.{DataInput, DataOutput, ImmutableSerializer}
 
 import scala.collection.immutable.{IndexedSeq => Vec}
@@ -121,8 +121,8 @@ final case class Graph(widgets: Vec[ConfiguredWidget]) {
 //  def isEmpty : Boolean  = sources.isEmpty
 //  def nonEmpty: Boolean  = !isEmpty
 
-  def expand[S <: Sys[S]](implicit tx: S#Tx, cursor: stm.Cursor[S]): View[S] = {
-    implicit val b: Widget.Builder[S] = Widget.Builder(this)
+  def expand[S <: Sys[S]](self: Option[Obj[S]] = None)(implicit tx: S#Tx, cursor: stm.Cursor[S]): View[S] = {
+    implicit val b: Widget.Builder[S] = Widget.Builder(this, self.map(tx.newHandle(_)))
     widgets.last.w.expand[S]
   }
 }

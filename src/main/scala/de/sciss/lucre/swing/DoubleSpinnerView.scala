@@ -14,7 +14,7 @@
 package de.sciss.lucre.swing
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.expr.DoubleObj
+import de.sciss.lucre.expr.{CellView, DoubleObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.impl.{DoubleSpinnerViewImpl => Impl}

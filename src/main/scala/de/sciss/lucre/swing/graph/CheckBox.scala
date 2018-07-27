@@ -93,17 +93,17 @@ object CheckBox {
 
     def init()(implicit tx: S#Tx): this.type = {
       deferTx {
-        val sl = ws.component
-        guiValue = sl.selected
-        sl.peer.addActionListener(listener)
+        val c = ws.component
+        guiValue = c.selected
+        c.peer.addActionListener(listener)
       }
       this
     }
 
     def dispose()(implicit tx: S#Tx): Unit = {
       deferTx {
-        val sl = ws.component
-        sl.peer.removeActionListener(listener)
+        val c = ws.component
+        c.peer.removeActionListener(listener)
       }
     }
   }
@@ -134,9 +134,9 @@ object CheckBox {
 
     def selected: Ex[Boolean] = Selected(this)
 
-    def selected_=(x: Ex[Boolean]): Unit = {
+    def selected_=(value: Ex[Boolean]): Unit = {
       val b = Graph.builder
-      b.putProperty(this, keySelected, x)
+      b.putProperty(this, keySelected, value)
     }
 
     def text: Ex[String] = text0

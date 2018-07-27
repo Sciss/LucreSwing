@@ -16,8 +16,8 @@ package swing
 package impl
 
 import javax.swing.{JSpinner, SpinnerNumberModel}
-
 import de.sciss.desktop.UndoManager
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm.Disposable
 import de.sciss.swingplus.Spinner

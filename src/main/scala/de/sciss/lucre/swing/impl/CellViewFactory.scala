@@ -15,8 +15,7 @@ package de.sciss.lucre.swing
 package impl
 
 import javax.swing.undo.UndoableEdit
-
-import de.sciss.lucre.expr.{Expr, Type}
+import de.sciss.lucre.expr.{CellView, Expr, Type}
 import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.lucre.swing.edit.{EditCellView, EditExprMap}
 import de.sciss.lucre.{stm, event => evt}

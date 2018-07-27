@@ -43,8 +43,10 @@ object TextField {
 
   private final val keyText         = "text"
   private final val keyColumns      = "columns"
+  private final val keyEditable     = "editable"
   private final val defaultText     = ""
   private final val defaultColumns  = 0
+  private final val defaultEditable = true
 
   final case class Text(w: TextField) extends Ex[String] {
     override def productPrefix: String = s"TextField$$Text" // serialization
@@ -133,6 +135,18 @@ object TextField {
     def aux: List[Aux] = Nil
   }
 
+  final case class Editable(w: TextField) extends Ex[Boolean] {
+    override def productPrefix: String = s"TextField$$Editable" // serialization
+
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = ctx match {
+      case b: Widget.Builder[S] =>
+        val valueOpt = b.getProperty[Ex[Boolean]](w, keyEditable)
+        valueOpt.getOrElse(Constant(defaultEditable)).expand[S]
+    }
+
+    def aux: List[Aux] = Nil
+  }
+
   private final class Expanded[S <: Sys[S]](protected val w: TextField) extends View[S]
     with ComponentHolder[scala.swing.TextField] with ComponentExpandedImpl[S] {
 
@@ -141,12 +155,15 @@ object TextField {
 //    private[this] var obs: Disposable[S#Tx] = _
 
     override def init()(implicit tx: S#Tx, b: Widget.Builder[S]): this.type = {
-      val textOpt = b.getProperty[Ex[String]](w, keyText).map(_.expand[S].value)
-      val text0   = textOpt.orNull
-      val columns = b.getProperty[Ex[Int]](w, keyColumns).fold(defaultColumns)(_.expand[S].value)
+      val textOpt   = b.getProperty[Ex[String]](w, keyText).map(_.expand[S].value)
+      val text0     = textOpt.orNull
+      val columns   = b.getProperty[Ex[Int    ]](w, keyColumns  ).fold(defaultColumns )(_.expand[S].value)
+      val editable  = b.getProperty[Ex[Boolean]](w, keyEditable ).fold(defaultEditable)(_.expand[S].value)
 
       deferTx {
-        component = new scala.swing.TextField(text0, columns)
+        val c = new scala.swing.TextField(text0, columns)
+        if (editable != defaultEditable) c.editable = editable
+        component = c
       }
 //      obs = text.changed.react { implicit tx => ch =>
 //        deferTx {
@@ -182,6 +199,13 @@ object TextField {
       val b = Graph.builder
       b.putProperty(this, keyColumns, value)
     }
+
+    def editable: Ex[Boolean] = Editable(this)
+
+    def editable_=(value: Ex[Boolean]): Unit = {
+      val b = Graph.builder
+      b.putProperty(this, keyEditable, value)
+    }
   }
 }
 trait TextField extends Component {
@@ -190,4 +214,6 @@ trait TextField extends Component {
   var columns: Ex[Int]
 
   var text: Ex[String]
+
+  var editable: Ex[Boolean]
 }

@@ -5,18 +5,19 @@ import de.sciss.lucre.stm.InMemory
 
 import scala.swing.Component
 
-object GraphTest extends AppLike {
+object WidgetCouplingTest extends AppLike {
   protected def mkView(): Component = {
     import ExOps._
     import graph._
     val g = Graph {
-      val sl    = Slider()
-      sl.min    = 1
-      sl.max    = 10
-      sl.value  = 1
-      val txt   = sl.value.toStr
-      val lb    = Label(txt)
-      FlowPanel(sl, Separator(), lb)
+      val items = List("alpha", "beta", "gamma")
+      val c1    = ComboBox[String](items)
+      val c2    = ComboBox[String](items)
+      c2.index  = c1.index
+      BorderPanel(
+        center = FlowPanel(c1, Label("->"), c2),
+        north = Label("TODO: Index is not reactive yet")
+      )
     }
 
     type              S = InMemory

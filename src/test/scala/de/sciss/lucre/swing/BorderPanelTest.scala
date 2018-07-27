@@ -22,7 +22,7 @@ object BorderPanelTest extends AppLike {
     implicit val sys: S = InMemory()
 
     val view = sys.step { implicit tx =>
-      g.expand[S]
+      g.expand[S]()
     }
     view.component
   }

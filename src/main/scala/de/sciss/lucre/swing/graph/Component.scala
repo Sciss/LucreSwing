@@ -25,18 +25,48 @@ object Component {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = ctx match {
       case b: Widget.Builder[S] =>
-        val valueOpt  = b.getProperty[Ex[Boolean]](w, keyEnabled)
+        val valueOpt = b.getProperty[Ex[Boolean]](w, keyEnabled)
         valueOpt.fold(Constant(defaultEnabled).expand[S])(_.expand[S])
     }
 
     def aux: List[Aux] = Nil
   }
 
-  private[graph] final val keyEnabled     = "enabled"
-  private[graph] final val defaultEnabled = true
+  final case class Focusable(w: Component) extends Ex[Boolean] {
+    override def productPrefix: String = s"Component$$Focusable" // serialization
+
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = ctx match {
+      case b: Widget.Builder[S] =>
+        val valueOpt = b.getProperty[Ex[Boolean]](w, keyFocusable)
+        valueOpt.fold(Constant(defaultFocusable).expand[S])(_.expand[S])
+    }
+
+    def aux: List[Aux] = Nil
+  }
+
+  final case class Tooltip(w: Component) extends Ex[String] {
+    override def productPrefix: String = s"Component$$Tooltip" // serialization
+
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, String] = ctx match {
+      case b: Widget.Builder[S] =>
+        val valueOpt = b.getProperty[Ex[String]](w, keyTooltip)
+        valueOpt.fold(Constant(defaultTooltip).expand[S])(_.expand[S])
+    }
+
+    def aux: List[Aux] = Nil
+  }
+
+  private[graph] final val keyEnabled       = "enabled"
+  private[graph] final val keyFocusable     = "focusable"
+  private[graph] final val keyTooltip       = "tooltip"
+  private[graph] final val defaultEnabled   = true
+  private[graph] final val defaultFocusable = true
+  private[graph] final val defaultTooltip   = ""
 }
 trait Component extends Widget {
   // type C <: scala.swing.Component
 
-  var enabled: Ex[Boolean]
+  var enabled   : Ex[Boolean]
+  var focusable : Ex[Boolean]
+  var tooltip   : Ex[String ]
 }

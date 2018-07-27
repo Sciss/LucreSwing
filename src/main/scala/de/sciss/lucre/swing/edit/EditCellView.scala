@@ -16,16 +16,17 @@ package swing
 package edit
 
 import de.sciss.lucre
+import de.sciss.lucre.expr.CellView
 import lucre.stm.Sys
 import lucre.stm
-import javax.swing.undo.{UndoableEdit, AbstractUndoableEdit}
+import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 object EditCellView {
   def apply[S <: Sys[S], A](name: String, cell: CellView.Var[S, A], value: A)
                            (implicit tx: S#Tx, cursor: stm.Cursor[S]): UndoableEdit = {
     import cell.serializer
     val beforeH = tx.newHandle(cell.repr)
-    val res     = new Impl[S, A, cell.Repr](name, cell)(beforeH = beforeH, now = value)
+    val res     = new Impl[S, A, cell.Repr](name, cell)(beforeH = beforeH, now = value) // IntelliJ highlight bug
     res.perform()
     res
   }

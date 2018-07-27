@@ -1,6 +1,6 @@
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.expr.{DoubleObj, IntObj}
+import de.sciss.lucre.expr.{CellView, DoubleObj, IntObj}
 import de.sciss.lucre.{event => evt}
 import de.sciss.swingplus.GroupPanel
 

@@ -16,9 +16,10 @@ package swing
 package impl
 
 import java.awt.event.KeyEvent
-import javax.swing.KeyStroke
 
+import javax.swing.KeyStroke
 import de.sciss.desktop.UndoManager
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm.Disposable
 
@@ -29,7 +30,7 @@ object StringFieldViewImpl extends CellViewFactory[String] {
   def apply[S <: Sys[S]](cell: CellView[S#Tx, String], name: String, columns: Int)
                         (implicit tx: S#Tx, cursor: stm.Cursor[S],
                          undoManager: UndoManager): StringFieldView[S] = {
-    val res = new Impl[S](editName = name, columns0 = columns) {
+    val res: Impl[S] = new Impl[S](editName = name, columns0 = columns) {
       impl =>
       protected var (value, committer)          = CellViewFactory.mkCommitter(cell, name)(tx, cursor)
       protected val observer: Disposable[S#Tx]  = CellViewFactory.mkObserver (cell, impl)

@@ -23,28 +23,33 @@ trait ComponentExpandedImpl[S <: Sys[S]] {
 
   protected def w: Component
 
-  private[this] var obs: Disposable[S#Tx] = _
+  private[this] var obs = List.empty[Disposable[S#Tx]]
 
-  def init()(implicit tx: S#Tx, b: Widget.Builder[S]): this.type = {
-    b.getProperty[Ex[Boolean]](w, Component.keyEnabled) match {
-      case Some(ex) /* if ex != Constant(Component.keyEnabled) */ =>
+  protected final def initProperty[A](key: String, default: A)(set: A => Unit)
+                                     (implicit tx: S#Tx, b: Widget.Builder[S]): Unit =
+    b.getProperty[Ex[A]](w, key) match {
+      case Some(ex) =>
         val expr    = ex.expand[S]
         val value0  = expr.value
-        if (value0 != Component.defaultEnabled) deferTx {
-          component.peer.setEnabled(value0)
+        if (value0 != default) deferTx {
+          set(value0)
         }
-        obs = expr.changed.react { implicit tx => upd =>
+        obs ::= expr.changed.react { implicit tx => upd =>
           deferTx {
-            component.peer.setEnabled(upd.now)
+            set(upd.now)
           }
         }
 
       case _ =>
     }
+
+  def init()(implicit tx: S#Tx, b: Widget.Builder[S]): this.type = {
+    initProperty(Component.keyEnabled   , Component.defaultEnabled  )(component.enabled   = _)
+    initProperty(Component.keyFocusable , Component.defaultFocusable)(component.focusable = _)
+    initProperty(Component.keyTooltip   , Component.defaultTooltip  )(component.tooltip   = _)
     this
   }
 
-  def dispose()(implicit tx: S#Tx): Unit = {
-    if (obs != null) obs.dispose()
-  }
+  def dispose()(implicit tx: S#Tx): Unit =
+    obs.foreach(_.dispose())
 }
