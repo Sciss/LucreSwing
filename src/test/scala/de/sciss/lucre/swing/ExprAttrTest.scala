@@ -9,9 +9,12 @@ object ExprAttrTest extends AppLike {
   protected def mkView(): Component = {
     import ExOps._
     import graph._
+
+    val key = "dice"
+
     val g = Graph {
-      val attr1 = "dice".attr[Int]
-      val attr2 = "dice".attr[Int](-1)
+      val attr1 = key.attr[Int]
+      val attr2 = key.attr[Int](-1)
       FlowPanel(Label(attr1.toStr), Label(attr2.toStr))
     }
 
@@ -31,13 +34,13 @@ object ExprAttrTest extends AppLike {
         sys.step { implicit tx =>
           val value = IntObj.newConst[S](i)
           val attr  = selfH().attr
-          attr.put("dice", value)
+          attr.put(key, value)
         }
       },
       scala.swing.Button("Clear") {
         sys.step { implicit tx =>
-          val attr  = selfH().attr
-          attr.remove("dice")
+          val attr = selfH().attr
+          attr.remove(key)
         }
       }
     )
