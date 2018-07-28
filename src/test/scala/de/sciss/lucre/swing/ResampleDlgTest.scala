@@ -30,6 +30,10 @@ object ResampleDlgTest extends AppLike {
       val ggGain          = DoubleField()
       ggGain.value()      = -0.20
       ggGain.max          = 1000.0
+//      val ggGain          = IntField()
+//      ggGain.value()      = -20
+//      ggGain.min          = -1000
+//      ggGain.max          = 1000
       ggGain.unit         = "dB"
 //      ggGain.spec         = ParamSpec(...)
       val ggGainType      = ComboBox(List("normalized", "immediate"))
