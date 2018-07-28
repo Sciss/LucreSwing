@@ -15,6 +15,7 @@ object ResampleDlgTest extends AppLike {
       val lbIn            = Label("Input file:")
       val ggIn            = PathField()
       ggIn.mode           = PathField.Open
+//      ggIn.value <--> "in".attr[File](new File(""))
       val ggInfo          = TextField(20)
       ggInfo.editable     = false
       ggInfo.focusable    = false

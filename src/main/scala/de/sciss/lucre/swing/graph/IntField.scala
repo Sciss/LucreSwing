@@ -169,7 +169,7 @@ object IntField {
 
   private def defaultPrototype[S <: Sys[S]](w: IntField, b: Widget.Builder[S]): Ex[ISeq[Int]] = {
     val seq0 = b.getProperty[Ex[Int]](w, keyValue).toList
-    ExSeq(w.min :: w.max :: seq0)
+    ExSeq(w.min :: w.max :: seq0: _*)
   }
 
   final case class Prototype(w: IntField) extends Ex[ISeq[Int]] {

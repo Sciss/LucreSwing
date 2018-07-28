@@ -10,7 +10,7 @@ lazy val deps = new {
   val main = new {
     val lucre     = "3.9.0-SNAPSHOT"
     val desktop   = "0.9.2"
-    val widgets   = "1.12.1-SNAPSHOT"
+    val widgets   = "1.12.1"
     val treeTable = "1.4.0"
     val model     = "0.3.4"
   }
