@@ -27,10 +27,11 @@ object ResampleDlgTest extends AppLike {
       ggSmpFmt.index()    = 1
 //      ggSmpFmt.valueOption = Some("24-bit int")
       val lbGain          = Label("Gain:")
-//      val ggGain          = NumberField()
+      val ggGain          = DoubleField()
+      ggGain.value()      = -0.20
+      ggGain.max          = 1000.0
+      ggGain.unit         = "dB"
 //      ggGain.spec         = ParamSpec(...)
-//      ggGain.value        = -0.20
-//      ggGain.unit         = "dB"
       val ggGainType      = ComboBox(List("normalized", "immediate"))
       val sepSRC          = Label("———— Sample Rate Conversion ————") // Titled-Border
       val lbNewRate       = Label("New rate:")
@@ -59,7 +60,7 @@ object ResampleDlgTest extends AppLike {
       val lineIn    = FlowPanel(lbIn, ggIn)
       val lineOut   = FlowPanel(lbOut, ggOut)
       val lineFmt   = FlowPanel(ggFileType, ggSmpFmt)
-      val lineGain  = FlowPanel(lbGain, ggGainType)
+      val lineGain  = FlowPanel(lbGain, ggGain, ggGainType)
       val lineRate  = FlowPanel(lbNewRate, ggModRate)
       val lineRate2 = FlowPanel(lbDistinctRight, ggDistinctRight)
       val lineMode  = FlowPanel(ggChangePch, lbFltLen, ggFltLen, ggInterp)
