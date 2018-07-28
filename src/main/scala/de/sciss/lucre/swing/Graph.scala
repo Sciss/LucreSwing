@@ -1,18 +1,33 @@
+/*
+ *  Graph.scala
+ *  (LucreSwing)
+ *
+ *  Copyright (c) 2014-2018 Hanns Holger Rutz. All rights reserved.
+ *
+ *	This software is published under the GNU Lesser General Public License v2.1+
+ *
+ *
+ *	For further information, please contact Hanns Holger Rutz at
+ *	contact@sciss.de
+ */
+
 package de.sciss.lucre.swing
 
 import java.util
 
 import de.sciss.lucre.expr.impl.ExElem
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Obj, Sys}
+import de.sciss.lucre.stm.{Disposable, Obj, Sys}
 import de.sciss.serial.{DataInput, DataOutput, ImmutableSerializer}
 
-import scala.collection.immutable.{IndexedSeq => Vec}
+import scala.collection.immutable.{IndexedSeq => Vec, Seq => ISeq}
+import scala.swing.Component
 
 object Graph {
   trait Builder {
-    def addWidget(w: Widget): Unit
-    def putProperty(w: Widget, key: String, value: Any): Unit
+    def addControl  (c: Control): Unit
+    def addWidget   (w: Widget): Unit
+    def putProperty (w: Widget, key: String, value: Any): Unit
   }
 
   /** This is analogous to `SynthGraph.Builder` in ScalaCollider. */
@@ -23,7 +38,8 @@ object Graph {
   }
 
   private[this] object BuilderDummy extends Builder {
-    def addWidget(x: Widget): Unit = ()
+    def addControl(c: Control ): Unit = ()
+    def addWidget (x: Widget  ): Unit = ()
 
     def putProperty(w: Widget, key: String, value: Any): Unit = ()
   }
@@ -41,22 +57,25 @@ object Graph {
   }
 
   private[this] final class BuilderImpl extends Builder {
-    private[this] val widgets     = Vec.newBuilder[Widget]
+    private[this] val widgets     = Vec.newBuilder[Widget ]
+    private[this] val controls    = Vec.newBuilder[Control]
     private[this] val properties  = new util.IdentityHashMap[Widget, Map[String, Any]]()
 
     override def toString = s"lucre.swing.Graph.Builder@${hashCode.toHexString}"
 
     def build(): Graph = {
-      val vec = widgets.result()
-      val configured = vec.map { w =>
+      val vecW = widgets  .result()
+      val vecC = controls .result()
+      val configured = vecW.map { w =>
         val m0 = properties.get(w)
         val m1 = if (m0 != null) m0 else Map.empty[String, Any]
         ConfiguredWidget(w, m1)
       }
-      new Graph(configured)
+      new Graph(configured, vecC)
     }
 
-    def addWidget(g: Widget): Unit = widgets += g
+    def addWidget (g: Widget ): Unit = widgets  += g
+    def addControl(c: Control): Unit = controls += c
 
     def putProperty(w: Widget, key: String, value: Any): Unit = {
       val m0 = properties.get(w)
@@ -71,9 +90,9 @@ object Graph {
 
     def write(g: Graph, out: DataOutput): Unit = {
       out.writeShort(SER_VERSION)
+      var ref = null: ExElem.RefMapOut
       val wx = g.widgets
       out.writeInt(wx.size)
-      var ref = null: ExElem.RefMapOut
       wx.foreach { conf =>
         ref = ExElem.write(conf.w, out, ref)
         val m = conf.properties
@@ -83,17 +102,22 @@ object Graph {
           ref = ExElem.write(v, out, ref)
         }
       }
+      val cx = g.controls
+      out.writeInt(cx.size)
+      cx.foreach { ctl =>
+        ref = ExElem.write(ctl, out, ref)
+      }
     }
 
     def read(in: DataInput): Graph = {
       val cookie = in.readShort()
       require(cookie == SER_VERSION, s"Unexpected cookie $cookie")
-      val sz = in.readInt()
+      val szW = in.readInt()
       val wxb = Vec.newBuilder[ConfiguredWidget]
-      wxb.sizeHint(sz)
+      wxb.sizeHint(szW)
       var i = 0
       val ref = new ExElem.RefMapIn
-      while (i < sz) {
+      while (i < szW) {
         val w = ExElem.read(in, ref).asInstanceOf[Widget]
         val mSz = in.readInt()
         val mb = Map.newBuilder[String, Any]
@@ -110,20 +134,46 @@ object Graph {
         wxb += configured
         i += 1
       }
-      new Graph(wxb.result())
+      val szC = in.readInt()
+      val cxb = Vec.newBuilder[Control]
+      cxb.sizeHint(szC)
+      i = 0
+      while (i < szC) {
+        val ctl = ExElem.read(in, ref).asInstanceOf[Control]
+        cxb += ctl
+        i += 1
+      }
+      new Graph(wxb.result(), cxb.result())
+    }
+  }
+
+//  trait Expanded[S <: Sys[S]] extends Disposable[S#Tx] {
+//    def view: View[S]
+//  }
+
+  private final class ExpandedImpl[S <: Sys[S]](val view: View[S], controls: ISeq[Disposable[S#Tx]])
+    extends View[S] {
+
+    type C = scala.swing.Component
+
+    def component: Component = view.component
+
+    def dispose()(implicit tx: S#Tx): Unit = {
+      view.dispose()
+      controls.foreach(_.dispose())
     }
   }
 }
 
 final case class ConfiguredWidget(w: Widget, properties: Map[String, Any])
 
-final case class Graph(widgets: Vec[ConfiguredWidget]) {
-//  def isEmpty : Boolean  = sources.isEmpty
-//  def nonEmpty: Boolean  = !isEmpty
-
+final case class Graph(widgets: Vec[ConfiguredWidget], controls: Vec[Control]) {
   def expand[S <: Sys[S]](self: Option[Obj[S]] = None)(implicit tx: S#Tx, cursor: stm.Cursor[S]): View[S] = {
     implicit val b: Widget.Builder[S] = Widget.Builder(this, self.map(tx.newHandle(_)))
-    widgets.last.w.expand[S]
+    val view: View[S] = widgets.last.w.expand[S]
+    if (controls.isEmpty) view else {
+      val disp = controls.map(_.expand[S])
+      new Graph.ExpandedImpl(view, disp)
+    }
   }
 }
-
