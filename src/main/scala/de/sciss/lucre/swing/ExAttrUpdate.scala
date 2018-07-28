@@ -14,7 +14,7 @@
 package de.sciss.lucre.swing
 
 import de.sciss.lucre.aux.Aux
-import de.sciss.lucre.expr.{CellView, Ex, ExAttrBridge, IExpr}
+import de.sciss.lucre.expr.{CellView, Ex, ExAttr, IExpr}
 import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.lucre.swing
 
@@ -31,14 +31,14 @@ object ExAttrUpdate {
       obs.dispose()
   }
 }
-final case class ExAttrUpdate[A](source: Ex[A], key: String)(implicit br: ExAttrBridge[A])
+final case class ExAttrUpdate[A](source: Ex[A], key: String)(implicit bridge: ExAttr.Bridge[A])
   extends Control {
 
   protected def mkControl[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): Disposable[S#Tx] =
     b.selfOption.fold(Disposable.empty[S#Tx]) { self =>
-      val attrView = br.cellView[S](self, key)
+      val attrView = bridge.cellView[S](self, key)
       new swing.ExAttrUpdate.Expanded[S, A](source.expand[S], attrView, tx)
     }
 
-  def aux: scala.List[Aux] = br :: Nil
+  def aux: scala.List[Aux] = bridge :: Nil
 }

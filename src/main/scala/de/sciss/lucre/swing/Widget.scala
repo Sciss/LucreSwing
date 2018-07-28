@@ -16,7 +16,7 @@ package de.sciss.lucre.swing
 import java.util
 
 import de.sciss.lucre.expr.impl.ContextMixin
-import de.sciss.lucre.expr.{Ex, ExAttrBridge, ExAttrLike, ExAttrWithDefault}
+import de.sciss.lucre.expr.{Ex, ExAttr}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Obj, Sys}
 
@@ -55,15 +55,15 @@ object Widget {
     def apply(): Ex[A]
     def update(value: Ex[A]): Unit
 
-    def <--> (attr: ExAttrWithDefault[A])(implicit br: ExAttrBridge[A]): Unit = {
+    def <--> (attr: ExAttr.WithDefault[A]): Unit = {
       this <--- attr
       this ---> attr
     }
 
-    import WidgetOps._
-
-    def ---> (attr: ExAttrLike[A])(implicit br: ExAttrBridge[A]): Unit =
+    def ---> (attr: ExAttr.Like[A]): Unit = {
+      import WidgetOps._
       apply() ---> attr
+    }
 
     def ---> (m: Model[A]): Unit =
       m <--- this

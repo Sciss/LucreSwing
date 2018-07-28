@@ -13,7 +13,7 @@
 
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.expr.{Ex, ExAttrBridge, ExAttrLike}
+import de.sciss.lucre.expr.{Ex, ExAttr}
 
 import scala.language.implicitConversions
 
@@ -21,5 +21,5 @@ object WidgetOps {
   implicit def exWidgetOps[A](x: Ex[A]): ExWidgetOps[A] = new ExWidgetOps(x)
 }
 final class ExWidgetOps[A](private val x: Ex[A]) extends AnyVal {
-  def ---> (attr: ExAttrLike[A])(implicit br: ExAttrBridge[A]): Unit = ExAttrUpdate(x, attr.key)
+  def ---> (attr: ExAttr.Like[A]): Unit = ExAttrUpdate(x, attr.key)(attr.bridge)
 }
