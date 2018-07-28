@@ -55,7 +55,7 @@ object PathField {
   private final val defaultMode     = 0
 
   final case class Value(w: PathField) extends Ex[File] {
-    override def productPrefix: String = s"PathField$$Path" // serialization
+    override def productPrefix: String = s"PathField$$Value" // serialization
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, File] = ctx match {
       case b: Widget.Builder[S] =>
