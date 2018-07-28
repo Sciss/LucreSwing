@@ -20,6 +20,7 @@ import de.sciss.lucre.event.{IEvent, IPull, ITargets}
 import de.sciss.lucre.expr.{Ex, IExpr}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.swing.Widget.Model
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.model.Change
@@ -204,24 +205,28 @@ object ComboBox {
     def aux: List[Aux] = Nil
   }
 
-  private final case class Impl[A](items: Ex[ISeq[A]]) extends ComboBox[A] with ComponentImpl {
+  private final case class Impl[A](items: Ex[ISeq[A]]) extends ComboBox[A] with ComponentImpl { w =>
     override def productPrefix = "ComboBox"   // serialization
 
     protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] =
       new Expanded[S, A](this).init()
 
-    def index: Ex[Int] = Index(this)
+    object index extends Model[Int] {
+      def apply(): Ex[Int] = Index(w)
 
-    def index_=(value: Ex[Int]): Unit = {
-      val b = Graph.builder
-      b.putProperty(this, keyIndex, value)
+      def update(value: Ex[Int]): Unit = {
+        val b = Graph.builder
+        b.putProperty(w, keyIndex, value)
+      }
     }
 
-    def valueOption: Ex[Option[A]] = ValueOption(this)
+    object valueOption extends Model[Option[A]] {
+      def apply(): Ex[Option[A]] = ValueOption(w)
 
-    def valueOption_=(value: Ex[Option[A]]): Unit = {
-      val b = Graph.builder
-      b.putProperty(this, keyValueOption, value)
+      def update(value: Ex[Option[A]]): Unit = {
+        val b = Graph.builder
+        b.putProperty(w, keyValueOption, value)
+      }
     }
   }
 }
@@ -231,8 +236,8 @@ trait ComboBox[A] extends Component {
   def items: Ex[ISeq[A]]
 
   /** Index of selected item or `-1` */
-  var index: Ex[Int]
+  def index: Model[Int]
 
   /** Some selected item or `None` */
-  var valueOption: Ex[Option[A]]
+  def valueOption: Model[Option[A]]
 }

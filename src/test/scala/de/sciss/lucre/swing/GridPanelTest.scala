@@ -11,16 +11,16 @@ object GridPanelTest extends AppLike {
     import graph._
     val g = Graph {
       val contents0 = (1 to 3).flatMap { i =>
-        val sl = Slider()
-        sl.min    = 1
-        sl.max    = 10
-        sl.value  = i * 3
-        val lb    = Label(s"Slider $i:")
+        val sl      = Slider()
+        sl.min      = 1
+        sl.max      = 10
+        sl.value()  = i * 3
+        val lb      = Label(s"Slider $i:")
         lb :: sl :: Nil
       }
       val cb        = CheckBox("Disabled")
       val slE       = Slider()
-      slE.enabled   = !cb.selected
+      slE.enabled   = !cb.selected()
       val contents  = contents0 ++ List(cb, slE)
 
       val p = GridPanel(contents: _*)

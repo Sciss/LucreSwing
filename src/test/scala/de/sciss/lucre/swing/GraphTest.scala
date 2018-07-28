@@ -10,12 +10,12 @@ object GraphTest extends AppLike {
     import ExOps._
     import graph._
     val g = Graph {
-      val sl    = Slider()
-      sl.min    = 1
-      sl.max    = 10
-      sl.value  = 1
-      val txt   = sl.value.toStr
-      val lb    = Label(txt)
+      val sl      = Slider()
+      sl.min      = 1
+      sl.max      = 10
+      sl.value()  = 1
+      val txt     = sl.value().toStr
+      val lb      = Label(txt)
       FlowPanel(sl, Separator(), lb)
     }
 

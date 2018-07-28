@@ -24,7 +24,7 @@ object ResampleDlgTest extends AppLike {
       ggOut.mode          = PathField.Save
       val ggFileType      = ComboBox(List("AIFF", "Snd", "IRCAM", "WAVE", "Wav64"))
       val ggSmpFmt        = ComboBox(List("16-bit int", "24-bit int", "32-bit float", "32-bit int"))
-      ggSmpFmt.index      = 1
+      ggSmpFmt.index()    = 1
 //      ggSmpFmt.valueOption = Some("24-bit int")
       val lbGain          = Label("Gain:")
 //      val ggGain          = NumberField()
@@ -43,10 +43,10 @@ object ResampleDlgTest extends AppLike {
       ggDistinctRight.enabled = false
       val ggChangePch     = CheckBox("Change Pitch/Speed")
       ggChangePch.tooltip = "If checked, changes the output file's nominal sample rate"
-      ggChangePch.selected  = true
+      ggChangePch.selected() = true
       val lbFltLen        = Label("FIR length:")
       val ggFltLen        = ComboBox(List("Short", "Medium", "Long"))
-      ggFltLen.index      = 1
+      ggFltLen.index()    = 1
       val ggInterp        = CheckBox("Interpolate")
       ggInterp.tooltip    = "Increase resolution by interpolating the FIR table"
       val ggProg          = ProgressBar()

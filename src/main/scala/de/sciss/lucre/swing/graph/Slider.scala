@@ -21,6 +21,7 @@ import de.sciss.lucre.expr.graph.Constant
 import de.sciss.lucre.expr.{Ex, IExpr}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.swing.Widget.Model
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.model.Change
@@ -156,7 +157,7 @@ object Slider {
     def aux: List[Aux] = Nil
   }
 
-  private final case class Impl() extends Slider with ComponentImpl {
+  private final case class Impl() extends Slider with ComponentImpl { w =>
     override def productPrefix = "Slider"   // serialization
 
     protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] =
@@ -176,12 +177,19 @@ object Slider {
       b.putProperty(this, keyMax, x)
     }
 
-    def value: Ex[Int] = Value(this)
+    object value extends Model[Int] {
+      def apply(): Ex[Int] = Value(w)
 
-    def value_=(x: Ex[Int]): Unit = {
-      val b = Graph.builder
-      b.putProperty(this, keyValue, x)
+      def update(x: Ex[Int]): Unit = {
+        val b = Graph.builder
+        b.putProperty(w, keyValue, x)
+      }
     }
+
+//    def value_=(x: Ex[Int]): Unit = {
+//      val b = Graph.builder
+//      b.putProperty(this, keyValue, x)
+//    }
   }
 }
 trait Slider extends Component {
@@ -189,5 +197,6 @@ trait Slider extends Component {
 
   var min   : Ex[Int]
   var max   : Ex[Int]
-  var value : Ex[Int]
+
+  def value : Model[Int]
 }

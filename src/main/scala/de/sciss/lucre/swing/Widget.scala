@@ -15,7 +15,7 @@ package de.sciss.lucre.swing
 
 import java.util
 
-import de.sciss.lucre.expr.Ex
+import de.sciss.lucre.expr.{Ex, ExAttrLike, ExAttrWithDefault, Type}
 import de.sciss.lucre.expr.impl.ContextMixin
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Obj, Sys}
@@ -49,6 +49,30 @@ object Widget {
     implicit def cursor: stm.Cursor[S]
 
     def getProperty[A](w: Widget, key: String): Option[A]
+  }
+
+  trait Model[A] {
+    def apply(): Ex[A]
+    def update(value: Ex[A]): Unit
+
+    def <--> (attr: ExAttrWithDefault[A])(implicit tpe: Type.Aux[A]): Unit = {
+      this <--- attr
+      this ---> attr
+    }
+
+    import WidgetOps._
+
+    def ---> (attr: ExAttrLike[A])(implicit tpe: Type.Aux[A]): Unit =
+      apply() ---> attr
+
+    def ---> (m: Model[A]): Unit =
+      m <--- this
+
+    def <--- (value: Ex[A]): Unit =
+      update(value)
+
+    def <--- (m: Model[A]): Unit =
+      update(m())
   }
 }
 trait Widget extends Product {

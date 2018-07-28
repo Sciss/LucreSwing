@@ -23,6 +23,7 @@ import de.sciss.lucre.expr.graph.Constant
 import de.sciss.lucre.expr.{Ex, IExpr}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.swing.Widget.Model
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.model.Change
@@ -179,18 +180,20 @@ object TextField {
 //    }
   }
 
-  private final case class Impl() extends TextField with ComponentImpl {
+  private final case class Impl() extends TextField with ComponentImpl { w =>
     override def productPrefix: String = "TextField" // serialization
 
     protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] = {
       new Expanded[S](this).init()
     }
 
-    def text: Ex[String] = Text(this)
+    object text extends Model[String] {
+      def apply(): Ex[String] = Text(w)
 
-    def text_=(value: Ex[String]): Unit = {
-      val b = Graph.builder
-      b.putProperty(this, keyText, value)
+      def update(value: Ex[String]): Unit = {
+        val b = Graph.builder
+        b.putProperty(w, keyText, value)
+      }
     }
 
     def columns: Ex[Int] = Columns(this)
@@ -213,7 +216,7 @@ trait TextField extends Component {
 
   var columns: Ex[Int]
 
-  var text: Ex[String]
+  def text: Model[String]
 
   var editable: Ex[Boolean]
 }

@@ -23,6 +23,7 @@ import de.sciss.lucre.expr.ExOps._
 import de.sciss.lucre.expr.{Ex, IExpr}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.swing.Widget.Model
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.model.Change
@@ -126,18 +127,25 @@ object CheckBox {
     def aux: List[Aux] = Nil
   }
 
-  private final case class Impl(text0: Ex[String]) extends CheckBox with ComponentImpl {
+  private final case class Impl(text0: Ex[String]) extends CheckBox with ComponentImpl { w =>
     override def productPrefix = "CheckBox"   // serialization
 
     protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] =
       new Expanded[S](this).init()
 
-    def selected: Ex[Boolean] = Selected(this)
+    object selected extends Model[Boolean] {
+      def apply(): Ex[Boolean] = Selected(w)
 
-    def selected_=(value: Ex[Boolean]): Unit = {
-      val b = Graph.builder
-      b.putProperty(this, keySelected, value)
+      def update(value: Ex[Boolean]): Unit = {
+        val b = Graph.builder
+        b.putProperty(w, keySelected, value)
+      }
     }
+
+//    def selected_=(value: Ex[Boolean]): Unit = {
+//      val b = Graph.builder
+//      b.putProperty(this, keySelected, value)
+//    }
 
     def text: Ex[String] = text0
   }
@@ -147,5 +155,5 @@ trait CheckBox extends Component {
 
   def text: Ex[String]
 
-  var selected: Ex[Boolean]
+  def selected: Model[Boolean]
 }

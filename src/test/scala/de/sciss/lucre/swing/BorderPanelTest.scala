@@ -13,8 +13,8 @@ object BorderPanelTest extends AppLike {
       val lbN = Label("North" )
       val lbE = Label("East"  )
       val txt = TextField(10)
-      txt.text = "Center"
-      val lbS = Label(txt.text)
+      txt.text() = "Center"
+      val lbS = Label(txt.text())
       BorderPanel(north = lbN, east = lbE, center = txt, south = lbS)
     }
 

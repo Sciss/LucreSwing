@@ -24,6 +24,7 @@ import de.sciss.lucre.expr.graph.Constant
 import de.sciss.lucre.expr.{Ex, IExpr}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.swing.Widget.Model
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.model.Change
@@ -53,7 +54,7 @@ object PathField {
   private final val defaultValue    = new File("")
   private final val defaultMode     = 0
 
-  final case class Path(w: PathField) extends Ex[File] {
+  final case class Value(w: PathField) extends Ex[File] {
     override def productPrefix: String = s"PathField$$Path" // serialization
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, File] = ctx match {
@@ -62,14 +63,14 @@ object PathField {
         val ws        = w.expand[S](b, tx)
         val valueOpt  = b.getProperty[Ex[File]](w, keyValue)
         val value0    = valueOpt.fold[File](defaultValue)(_.expand[S].value)
-        new PathExpanded[S](ws, value0).init()
+        new ValueExpanded[S](ws, value0).init()
     }
 
     def aux: List[Aux] = Nil
   }
 
-  private final class PathExpanded[S <: Sys[S]](ws: View.T[S, de.sciss.desktop.PathField], value0: File)
-                                               (implicit protected val targets: ITargets[S], cursor: stm.Cursor[S])
+  private final class ValueExpanded[S <: Sys[S]](ws: View.T[S, de.sciss.desktop.PathField], value0: File)
+                                                (implicit protected val targets: ITargets[S], cursor: stm.Cursor[S])
     extends IExpr[S, File]
       with IGenerator[S, Change[File]] {
 
@@ -177,18 +178,20 @@ object PathField {
     }
   }
 
-  private final case class Impl() extends PathField with ComponentImpl {
+  private final case class Impl() extends PathField with ComponentImpl { w =>
     override def productPrefix: String = "PathField" // serialization
 
     protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] = {
       new Expanded[S](this).init()
     }
 
-    def value: Ex[File] = Path(this)
+    object value extends Model[File] {
+      def apply(): Ex[File] = Value(w)
 
-    def value_=(value: Ex[File]): Unit = {
-      val b = Graph.builder
-      b.putProperty(this, keyValue, value)
+      def update(value: Ex[File]): Unit = {
+        val b = Graph.builder
+        b.putProperty(w, keyValue, value)
+      }
     }
 
     def title: Ex[String] = Title(this)
@@ -211,5 +214,6 @@ trait PathField extends Component {
 
   var title : Ex[String]
   var mode  : Ex[Int]
-  var value : Ex[File]
+
+  def value : Model[File]
 }

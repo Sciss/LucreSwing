@@ -10,12 +10,15 @@ object ExprAttrTest extends AppLike {
     import ExOps._
     import graph._
 
-    val key = "dice"
+    val keyDice   = "dice"
+    val keySlider = "slider"
 
     val g = Graph {
-      val attr1 = key.attr[Int]
-      val attr2 = key.attr[Int](-1)
-      FlowPanel(Label(attr1.toStr), Label(attr2.toStr))
+      val attr1 = keyDice.attr[Int]
+      val attr2 = keyDice.attr[Int](-1)
+      val sl    = Slider()
+      sl.value <--> keySlider.attr(0)
+      FlowPanel(Label(attr1.toStr), Label(attr2.toStr), sl)
     }
 
     type              S = InMemory
@@ -34,13 +37,13 @@ object ExprAttrTest extends AppLike {
         sys.step { implicit tx =>
           val value = IntObj.newConst[S](i)
           val attr  = selfH().attr
-          attr.put(key, value)
+          attr.put(keyDice, value)
         }
       },
       scala.swing.Button("Clear") {
         sys.step { implicit tx =>
           val attr = selfH().attr
-          attr.remove(key)
+          attr.remove(keyDice)
         }
       }
     )
