@@ -1,5 +1,6 @@
 package de.sciss.lucre.swing
 
+import de.sciss.lucre.expr
 import de.sciss.lucre.expr.ExOps
 import de.sciss.lucre.stm.InMemory
 
@@ -8,6 +9,7 @@ import scala.swing.Component
 object ResampleDlgTest extends AppLike {
   protected def mkView(): Component = {
     import ExOps._
+    import expr.graph._
     import graph._
     val g = Graph {
 //      val sepWave         = TitledSeparator("Waveform I/O")
@@ -56,11 +58,11 @@ object ResampleDlgTest extends AppLike {
       val ggInterp        = CheckBox("Interpolate")
       ggInterp.tooltip    = "Increase resolution by interpolating the FIR table"
       val ggProg          = ProgressBar()
-//      ggProg.max          = 300
       val ggCancel        = Button(" X ")
       ggCancel.enabled    = false
       val ggRender        = Button(" Render ")
-//      ggRender.action     = "render".attr
+
+      ggRender.clicked ---> Println("TODO: Render")
 
       val lineIn    = FlowPanel(lbIn, ggIn)
       val lineOut   = FlowPanel(lbOut, ggOut)
