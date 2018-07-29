@@ -16,15 +16,13 @@ package graph
 
 import de.sciss.desktop.FileDialog
 import de.sciss.file.File
-import de.sciss.lucre.aux.Aux
 import de.sciss.lucre.event.impl.IGenerator
 import de.sciss.lucre.event.{IEvent, IPull, ITargets}
 import de.sciss.lucre.expr.ExOps._
 import de.sciss.lucre.expr.graph.Constant
-import de.sciss.lucre.expr.{Ex, IExpr}
+import de.sciss.lucre.expr.{Ex, IExpr, Model}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.swing.Widget.Model
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.model.Change
@@ -33,9 +31,6 @@ import scala.concurrent.stm.Ref
 import scala.swing.event.ValueChanged
 
 object PathField {
-  //  def apply(text    : Ex[String ]): PathField = this(text, 0)
-  //  def apply(columns : Ex[Int    ]): PathField = this("", columns)
-
   def apply(): PathField = Impl()
 
   def apply(mode: Ex[Int]): PathField = {
@@ -57,16 +52,13 @@ object PathField {
   final case class Value(w: PathField) extends Ex[File] {
     override def productPrefix: String = s"PathField$$Value" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, File] = ctx match {
-      case b: Widget.Builder[S] =>
-        import b.{cursor, targets}
-        val ws        = w.expand[S](b, tx)
-        val valueOpt  = b.getProperty[Ex[File]](w, keyValue)
-        val value0    = valueOpt.fold[File](defaultValue)(_.expand[S].value)
-        new ValueExpanded[S](ws, value0).init()
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, File] = {
+      import ctx.{cursor, targets}
+      val ws        = w.expand[S]
+      val valueOpt  = ctx.getProperty[Ex[File]](w, keyValue)
+      val value0    = valueOpt.fold[File](defaultValue)(_.expand[S].value)
+      new ValueExpanded[S](ws, value0).init()
     }
-
-    def aux: List[Aux] = Nil
   }
 
   private final class ValueExpanded[S <: Sys[S]](ws: View.T[S, de.sciss.desktop.PathField], value0: File)
@@ -131,25 +123,19 @@ object PathField {
   final case class Title(w: PathField) extends Ex[String] {
     override def productPrefix: String = s"PathField$$Title" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, String] = ctx match {
-      case b: Widget.Builder[S] =>
-        val valueOpt = b.getProperty[Ex[String]](w, keyTitle)
-        valueOpt.getOrElse(defaultTitle(w.mode)).expand[S]
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, String] = {
+      val valueOpt = ctx.getProperty[Ex[String]](w, keyTitle)
+      valueOpt.getOrElse(defaultTitle(w.mode)).expand[S]
     }
-
-    def aux: List[Aux] = Nil
   }
 
   final case class Mode(w: PathField) extends Ex[Int] {
     override def productPrefix: String = s"PathField$$Mode" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = ctx match {
-      case b: Widget.Builder[S] =>
-        val valueOpt = b.getProperty[Ex[Int]](w, keyMode)
-        valueOpt.getOrElse(Constant(defaultMode)).expand[S]
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+      val valueOpt = ctx.getProperty[Ex[Int]](w, keyMode)
+      valueOpt.getOrElse(Constant(defaultMode)).expand[S]
     }
-
-    def aux: List[Aux] = Nil
   }
 
   private final class Expanded[S <: Sys[S]](protected val w: PathField) extends View[S]
@@ -157,10 +143,10 @@ object PathField {
 
     type C = de.sciss.desktop.PathField
 
-    override def init()(implicit tx: S#Tx, b: Widget.Builder[S]): this.type = {
-      val valueOpt  = b.getProperty[Ex[File   ]](w, keyValue).map(_.expand[S].value)
-      val titleOpt  = b.getProperty[Ex[String ]](w, keyTitle).map(_.expand[S].value)
-      val mode      = b.getProperty[Ex[Int    ]](w, keyMode ).fold(defaultMode)(_.expand[S].value) match {
+    override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+      val valueOpt  = ctx.getProperty[Ex[File   ]](w, keyValue).map(_.expand[S].value)
+      val titleOpt  = ctx.getProperty[Ex[String ]](w, keyTitle).map(_.expand[S].value)
+      val mode      = ctx.getProperty[Ex[Int    ]](w, keyMode ).fold(defaultMode)(_.expand[S].value) match {
         case 0 => FileDialog.Open
         case 1 => FileDialog.Save
         case 2 => FileDialog.Folder
@@ -181,9 +167,8 @@ object PathField {
   private final case class Impl() extends PathField with ComponentImpl { w =>
     override def productPrefix: String = "PathField" // serialization
 
-    protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] = {
+    protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).init()
-    }
 
     object value extends Model[File] {
       def apply(): Ex[File] = Value(w)

@@ -18,14 +18,12 @@ import java.text.{NumberFormat, ParseException}
 import java.util.Locale
 
 import de.sciss.audiowidgets.{ParamFormat, UnitView, ParamField => Peer}
-import de.sciss.lucre.aux.Aux
 import de.sciss.lucre.event.impl.IGenerator
 import de.sciss.lucre.event.{IEvent, IPull, ITargets}
 import de.sciss.lucre.expr.graph.Constant
-import de.sciss.lucre.expr.{Ex, ExSeq, IExpr}
+import de.sciss.lucre.expr.{Ex, ExSeq, IExpr, Model}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.swing.Widget.Model
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.model.Change
@@ -58,16 +56,13 @@ object IntField {
   final case class Value(w: IntField) extends Ex[Int] {
     override def productPrefix: String = s"IntField$$Value" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = ctx match {
-      case b: Widget.Builder[S] =>
-        import b.{cursor, targets}
-        val ws        = w.expand[S](b, tx)
-        val valueOpt  = b.getProperty[Ex[Int]](w, keyValue)
-        val value0    = valueOpt.fold[Int](defaultValue)(_.expand[S].value)
-        new ValueExpanded[S](ws, value0).init()
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+      import ctx.{cursor, targets}
+      val ws        = w.expand[S]
+      val valueOpt  = ctx.getProperty[Ex[Int]](w, keyValue)
+      val value0    = valueOpt.fold[Int](defaultValue)(_.expand[S].value)
+      new ValueExpanded[S](ws, value0).init()
     }
-
-    def aux: List[Aux] = Nil
   }
 
   private final class ValueExpanded[S <: Sys[S]](ws: View.T[S, Peer[Int]], value0: Int)
@@ -122,78 +117,60 @@ object IntField {
   final case class Min(w: IntField) extends Ex[Int] {
     override def productPrefix: String = s"IntField$$Min" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = ctx match {
-      case b: Widget.Builder[S] =>
-        val valueOpt = b.getProperty[Ex[Int]](w, keyMin)
-        valueOpt.getOrElse(Constant(defaultMin)).expand[S]
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+      val valueOpt = ctx.getProperty[Ex[Int]](w, keyMin)
+      valueOpt.getOrElse(Constant(defaultMin)).expand[S]
     }
-
-    def aux: List[Aux] = Nil
   }
 
   final case class Max(w: IntField) extends Ex[Int] {
     override def productPrefix: String = s"IntField$$Max" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = ctx match {
-      case b: Widget.Builder[S] =>
-        val valueOpt = b.getProperty[Ex[Int]](w, keyMax)
-        valueOpt.getOrElse(Constant(defaultMax)).expand[S]
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+      val valueOpt = ctx.getProperty[Ex[Int]](w, keyMax)
+      valueOpt.getOrElse(Constant(defaultMax)).expand[S]
     }
-
-    def aux: List[Aux] = Nil
   }
 
   final case class Step(w: IntField) extends Ex[Int] {
     override def productPrefix: String = s"IntField$$Step" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = ctx match {
-      case b: Widget.Builder[S] =>
-        val valueOpt = b.getProperty[Ex[Int]](w, keyStep)
-        valueOpt.getOrElse(Constant(defaultStep)).expand[S]
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+      val valueOpt = ctx.getProperty[Ex[Int]](w, keyStep)
+      valueOpt.getOrElse(Constant(defaultStep)).expand[S]
     }
-
-    def aux: List[Aux] = Nil
   }
 
   final case class Unit(w: IntField) extends Ex[String] {
     override def productPrefix: String = s"IntField$$Unit" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, String] = ctx match {
-      case b: Widget.Builder[S] =>
-        val valueOpt = b.getProperty[Ex[String]](w, keyUnit)
-        valueOpt.getOrElse(Constant(defaultUnit)).expand[S]
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, String] = {
+      val valueOpt = ctx.getProperty[Ex[String]](w, keyUnit)
+      valueOpt.getOrElse(Constant(defaultUnit)).expand[S]
     }
-
-    def aux: List[Aux] = Nil
   }
 
-  private def defaultPrototype[S <: Sys[S]](w: IntField, b: Widget.Builder[S]): Ex[ISeq[Int]] = {
-    val seq0 = b.getProperty[Ex[Int]](w, keyValue).toList
+  private def defaultPrototype[S <: Sys[S]](w: IntField)(implicit ctx: Ex.Context[S]): Ex[ISeq[Int]] = {
+    val seq0 = ctx.getProperty[Ex[Int]](w, keyValue).toList
     ExSeq(w.min :: w.max :: seq0: _*)
   }
 
   final case class Prototype(w: IntField) extends Ex[ISeq[Int]] {
     override def productPrefix: String = s"IntField$$Prototype" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, ISeq[Int]] = ctx match {
-      case b: Widget.Builder[S] =>
-        val valueOpt = b.getProperty[Ex[ISeq[Int]]](w, keyPrototype)
-        valueOpt.getOrElse(defaultPrototype(w, b)).expand[S]
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, ISeq[Int]] = {
+      val valueOpt = ctx.getProperty[Ex[ISeq[Int]]](w, keyPrototype)
+      valueOpt.getOrElse(defaultPrototype(w)).expand[S]
     }
-
-    def aux: List[Aux] = Nil
   }
 
   final case class Editable(w: IntField) extends Ex[Boolean] {
     override def productPrefix: String = s"IntField$$Editable" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = ctx match {
-      case b: Widget.Builder[S] =>
-        val valueOpt = b.getProperty[Ex[Boolean]](w, keyEditable)
-        valueOpt.getOrElse(Constant(defaultEditable)).expand[S]
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = {
+      val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyEditable)
+      valueOpt.getOrElse(Constant(defaultEditable)).expand[S]
     }
-
-    def aux: List[Aux] = Nil
   }
 
   private final class Expanded[S <: Sys[S]](protected val w: IntField) extends View[S]
@@ -201,15 +178,15 @@ object IntField {
 
     type C = Peer[Int]
 
-    override def init()(implicit tx: S#Tx, b: Widget.Builder[S]): this.type = {
-      val value0    = b.getProperty[Ex[Int ]](w, keyValue    ).fold(defaultValue   )(_.expand[S].value)
-      val min       = b.getProperty[Ex[Int ]](w, keyMin      ).fold(defaultMin     )(_.expand[S].value)
-      val max       = b.getProperty[Ex[Int ]](w, keyMax      ).fold(defaultMax     )(_.expand[S].value)
-      val step      = b.getProperty[Ex[Int ]](w, keyStep     ).fold(defaultStep    )(_.expand[S].value)
-      val unitS     = b.getProperty[Ex[String ]](w, keyUnit     ).fold(defaultUnit    )(_.expand[S].value)
-      val editable  = b.getProperty[Ex[Boolean]](w, keyEditable ).fold(defaultEditable)(_.expand[S].value)
+    override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+      val value0    = ctx.getProperty[Ex[Int    ]](w, keyValue    ).fold(defaultValue   )(_.expand[S].value)
+      val min       = ctx.getProperty[Ex[Int    ]](w, keyMin      ).fold(defaultMin     )(_.expand[S].value)
+      val max       = ctx.getProperty[Ex[Int    ]](w, keyMax      ).fold(defaultMax     )(_.expand[S].value)
+      val step      = ctx.getProperty[Ex[Int    ]](w, keyStep     ).fold(defaultStep    )(_.expand[S].value)
+      val unitS     = ctx.getProperty[Ex[String ]](w, keyUnit     ).fold(defaultUnit    )(_.expand[S].value)
+      val editable  = ctx.getProperty[Ex[Boolean]](w, keyEditable ).fold(defaultEditable)(_.expand[S].value)
 
-      val prototype = b.getProperty[Ex[ISeq[Int]]](w, keyPrototype).getOrElse(defaultPrototype(w, b)).expand[S].value
+      val prototype = ctx.getProperty[Ex[ISeq[Int]]](w, keyPrototype).getOrElse(defaultPrototype(w)).expand[S].value
 
       deferTx {
         val fmt: ParamFormat[Int] = new ParamFormat[Int] {
@@ -257,7 +234,7 @@ object IntField {
   private final case class Impl() extends IntField with ComponentImpl { w =>
     override def productPrefix: String = "IntField" // serialization
 
-    protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] =
+    protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).init()
 
     object value extends Model[Int] {

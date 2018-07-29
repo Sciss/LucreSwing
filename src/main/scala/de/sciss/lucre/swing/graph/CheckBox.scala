@@ -16,14 +16,12 @@ package graph
 
 import java.awt.event.{ActionEvent, ActionListener}
 
-import de.sciss.lucre.aux.Aux
 import de.sciss.lucre.event.impl.IGenerator
 import de.sciss.lucre.event.{IEvent, IPull, ITargets}
 import de.sciss.lucre.expr.ExOps._
-import de.sciss.lucre.expr.{Ex, IExpr}
+import de.sciss.lucre.expr.{Ex, IExpr, Model}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.swing.Widget.Model
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.model.Change
@@ -34,22 +32,16 @@ object CheckBox {
 
   def apply(text: Ex[String] = ""): CheckBox = Impl(text)
 
-//  def mk(configure: CheckBox => Unit): CheckBox = {
-//    val w = apply()
-//    configure(w)
-//    w
-//  }
-
   private final class Expanded[S <: Sys[S]](protected val w: CheckBox) extends View[S]
     with ComponentHolder[scala.swing.CheckBox] with ComponentExpandedImpl[S] {
 
     type C = scala.swing.CheckBox
 
-    override def init()(implicit tx: S#Tx, b: Widget.Builder[S]): this.type = {
+    override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
       val text      = w.text.expand[S]
       val text0     = text.value
       val text1     = if (text0.isEmpty) null else text0
-      val selected  = b.getProperty[Ex[Boolean]](w, keySelected).exists(_.expand[S].value)
+      val selected  = ctx.getProperty[Ex[Boolean]](w, keySelected).exists(_.expand[S].value)
       deferTx {
         val c = new scala.swing.CheckBox(text1)
         if (selected) c.selected = true
@@ -57,8 +49,6 @@ object CheckBox {
       }
       super.init()
     }
-
-//    def dispose()(implicit tx: S#Tx): Unit = super.dispose()
   }
 
   private final class SelectedExpanded[S <: Sys[S]](ws: View.T[S, scala.swing.CheckBox], value0: Boolean)
@@ -115,22 +105,19 @@ object CheckBox {
   final case class Selected(w: CheckBox) extends Ex[Boolean] {
     override def productPrefix: String = s"CheckBox$$Selected" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = ctx match {
-      case b: Widget.Builder[S] =>
-        import b.{cursor, targets}
-        val ws          = w.expand[S](b, tx)
-        val selectedOpt = b.getProperty[Ex[Boolean]](w, keySelected)
-        val selected0   = selectedOpt.fold[Boolean](defaultSelected)(_.expand[S].value)
-        new SelectedExpanded[S](ws, selected0).init()
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = {
+      import ctx.{cursor, targets}
+      val ws          = w.expand[S]
+      val selectedOpt = ctx.getProperty[Ex[Boolean]](w, keySelected)
+      val selected0   = selectedOpt.fold[Boolean](defaultSelected)(_.expand[S].value)
+      new SelectedExpanded[S](ws, selected0).init()
     }
-
-    def aux: List[Aux] = Nil
   }
 
   private final case class Impl(text0: Ex[String]) extends CheckBox with ComponentImpl { w =>
     override def productPrefix = "CheckBox"   // serialization
 
-    protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] =
+    protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).init()
 
     object selected extends Model[Boolean] {
@@ -141,11 +128,6 @@ object CheckBox {
         b.putProperty(w, keySelected, value)
       }
     }
-
-//    def selected_=(value: Ex[Boolean]): Unit = {
-//      val b = Graph.builder
-//      b.putProperty(this, keySelected, value)
-//    }
 
     def text: Ex[String] = text0
   }

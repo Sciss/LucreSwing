@@ -14,7 +14,6 @@
 package de.sciss.lucre.swing
 package graph
 
-import de.sciss.lucre.aux.Aux
 import de.sciss.lucre.expr.graph.Constant
 import de.sciss.lucre.expr.{Ex, IExpr}
 import de.sciss.lucre.stm.Sys
@@ -23,37 +22,28 @@ object Component {
   final case class Enabled(w: Component) extends Ex[Boolean] {
     override def productPrefix: String = s"Component$$Enabled" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = ctx match {
-      case b: Widget.Builder[S] =>
-        val valueOpt = b.getProperty[Ex[Boolean]](w, keyEnabled)
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = {
+        val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyEnabled)
         valueOpt.fold(Constant(defaultEnabled).expand[S])(_.expand[S])
     }
-
-    def aux: List[Aux] = Nil
   }
 
   final case class Focusable(w: Component) extends Ex[Boolean] {
     override def productPrefix: String = s"Component$$Focusable" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = ctx match {
-      case b: Widget.Builder[S] =>
-        val valueOpt = b.getProperty[Ex[Boolean]](w, keyFocusable)
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = {
+        val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyFocusable)
         valueOpt.fold(Constant(defaultFocusable).expand[S])(_.expand[S])
     }
-
-    def aux: List[Aux] = Nil
   }
 
   final case class Tooltip(w: Component) extends Ex[String] {
     override def productPrefix: String = s"Component$$Tooltip" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, String] = ctx match {
-      case b: Widget.Builder[S] =>
-        val valueOpt = b.getProperty[Ex[String]](w, keyTooltip)
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, String] = {
+        val valueOpt = ctx.getProperty[Ex[String]](w, keyTooltip)
         valueOpt.fold(Constant(defaultTooltip).expand[S])(_.expand[S])
     }
-
-    def aux: List[Aux] = Nil
   }
 
   private[graph] final val keyEnabled       = "enabled"

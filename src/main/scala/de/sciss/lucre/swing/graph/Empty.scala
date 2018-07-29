@@ -14,6 +14,7 @@
 package de.sciss.lucre.swing
 package graph
 
+import de.sciss.lucre.expr.Ex
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.impl.ComponentHolder
 
@@ -42,9 +43,8 @@ object Empty {
   private final case class Impl() extends Empty {
     override def productPrefix = "Empty"  // serialization
 
-    protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] = {
+    protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S].init()
-    }
   }
 }
 /** This is a placeholder widget that can be eliminated in other places of the API,

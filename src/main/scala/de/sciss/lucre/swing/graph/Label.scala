@@ -22,12 +22,6 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 object Label {
   def apply(text: Ex[String]): Label = Impl(text)
 
-//  def mk(text: Ex[String])(configure: Label => Unit): Label = {
-//    val w = apply(text)
-//    configure(w)
-//    w
-//  }
-
   private final class Expanded[S <: Sys[S]](protected val w: Label) extends View[S]
     with ComponentHolder[scala.swing.Label] with ComponentExpandedImpl[S] {
 
@@ -35,7 +29,7 @@ object Label {
 
     private[this] var obs: Disposable[S#Tx] = _
 
-    override def init()(implicit tx: S#Tx, b: Widget.Builder[S]): this.type = {
+    override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
       val text  = w.text.expand[S]
       val text0 = text.value
       deferTx {
@@ -58,9 +52,8 @@ object Label {
   private final case class Impl(text0: Ex[String]) extends Label with ComponentImpl {
     override def productPrefix: String = "Label" // serialization
 
-    protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] = {
+    protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).init()
-    }
 
     def text: Ex[String] = text0
   }

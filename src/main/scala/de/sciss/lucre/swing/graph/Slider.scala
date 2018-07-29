@@ -14,14 +14,12 @@
 package de.sciss.lucre.swing
 package graph
 
-import de.sciss.lucre.aux.Aux
 import de.sciss.lucre.event.impl.IGenerator
 import de.sciss.lucre.event.{IEvent, IPull, ITargets}
 import de.sciss.lucre.expr.graph.Constant
-import de.sciss.lucre.expr.{Ex, IExpr}
+import de.sciss.lucre.expr.{Ex, IExpr, Model}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.swing.Widget.Model
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.model.Change
@@ -32,21 +30,15 @@ import scala.concurrent.stm.Ref
 object Slider {
   def apply(): Slider = Impl()
 
-//  def mk(configure: Slider => Unit): Slider = {
-//    val w = apply()
-//    configure(w)
-//    w
-//  }
-
   private final class Expanded[S <: Sys[S]](protected val w: Slider) extends View[S]
     with ComponentHolder[scala.swing.Slider] with ComponentExpandedImpl[S] {
 
     type C = scala.swing.Slider
 
-    override def init()(implicit tx: S#Tx, b: Widget.Builder[S]): this.type = {
-      val minOpt    = b.getProperty[Ex[Int]](w, keyMin  ).map(_.expand[S].value)
-      val maxOpt    = b.getProperty[Ex[Int]](w, keyMax  ).map(_.expand[S].value)
-      val valueOpt  = b.getProperty[Ex[Int]](w, keyValue).map(_.expand[S].value)
+    override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+      val minOpt    = ctx.getProperty[Ex[Int]](w, keyMin  ).map(_.expand[S].value)
+      val maxOpt    = ctx.getProperty[Ex[Int]](w, keyMax  ).map(_.expand[S].value)
+      val valueOpt  = ctx.getProperty[Ex[Int]](w, keyValue).map(_.expand[S].value)
 
       deferTx {
         val c = new scala.swing.Slider
@@ -121,46 +113,37 @@ object Slider {
   final case class Value(w: Slider) extends Ex[Int] {
     override def productPrefix: String = s"Slider$$Value" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = ctx match {
-      case b: Widget.Builder[S] =>
-        import b.{cursor, targets}
-        val ws        = w.expand[S](b, tx)
-        val valueOpt  = b.getProperty[Ex[Int]](w, keyValue)
-        val value0    = valueOpt.fold[Int](defaultValue)(_.expand[S].value)
-        new ValueExpanded[S](ws, value0).init()
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+      import ctx.{cursor, targets}
+      val ws        = w.expand[S]
+      val valueOpt  = ctx.getProperty[Ex[Int]](w, keyValue)
+      val value0    = valueOpt.fold[Int](defaultValue)(_.expand[S].value)
+      new ValueExpanded[S](ws, value0).init()
     }
-
-    def aux: List[Aux] = Nil
   }
 
   final case class Min(w: Slider) extends Ex[Int] {
     override def productPrefix: String = s"Slider$$Min" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = ctx match {
-      case b: Widget.Builder[S] =>
-        val valueOpt = b.getProperty[Ex[Int]](w, keyMin)
-        valueOpt.getOrElse(Constant(defaultMin)).expand[S]
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+      val valueOpt = ctx.getProperty[Ex[Int]](w, keyMin)
+      valueOpt.getOrElse(Constant(defaultMin)).expand[S]
     }
-
-    def aux: List[Aux] = Nil
   }
 
   final case class Max(w: Slider) extends Ex[Int] {
     override def productPrefix: String = s"Slider$$Max" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = ctx match {
-      case b: Widget.Builder[S] =>
-        val valueOpt = b.getProperty[Ex[Int]](w, keyMax)
-        valueOpt.getOrElse(Constant(defaultMax)).expand[S]
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+      val valueOpt = ctx.getProperty[Ex[Int]](w, keyMax)
+      valueOpt.getOrElse(Constant(defaultMax)).expand[S]
     }
-
-    def aux: List[Aux] = Nil
   }
 
   private final case class Impl() extends Slider with ComponentImpl { w =>
     override def productPrefix = "Slider"   // serialization
 
-    protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] =
+    protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).init()
 
     def min: Ex[Int] = Min(this)
@@ -185,11 +168,6 @@ object Slider {
         b.putProperty(w, keyValue, x)
       }
     }
-
-//    def value_=(x: Ex[Int]): Unit = {
-//      val b = Graph.builder
-//      b.putProperty(this, keyValue, x)
-//    }
   }
 }
 trait Slider extends Component {

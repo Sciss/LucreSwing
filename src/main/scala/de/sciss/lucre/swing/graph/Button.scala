@@ -29,34 +29,23 @@ object Button {
 
     type C = scala.swing.Button
 
-    override def init()(implicit tx: S#Tx, b: Widget.Builder[S]): this.type = {
+    override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
       val text      = w.text.expand[S]
       val text0     = text.value
       val text1     = if (text0.isEmpty) null else text0
-//      val selected  = b.getProperty[Ex[Boolean]](w, keySelected).exists(_.expand[S].value)
       deferTx {
         val c = new scala.swing.Button(text1)
-//        if (selected) c.selected = true
         component = c
       }
       super.init()
     }
-
-    //    def dispose()(implicit tx: S#Tx): Unit = super.dispose()
   }
 
   private final case class Impl(text0: Ex[String]) extends Button with ComponentImpl {
     override def productPrefix = "Button"   // serialization
 
-    protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] =
+    protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).init()
-
-//    def selected: Ex[Boolean] = Selected(this)
-//
-//    def selected_=(value: Ex[Boolean]): Unit = {
-//      val b = Graph.builder
-//      b.putProperty(this, keySelected, value)
-//    }
 
     def text: Ex[String] = text0
   }
@@ -65,6 +54,4 @@ trait Button extends Component {
   type C = scala.swing.Button
 
   def text: Ex[String]
-
-//  var selected: Ex[Boolean]
 }

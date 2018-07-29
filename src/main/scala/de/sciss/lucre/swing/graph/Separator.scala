@@ -14,17 +14,12 @@
 package de.sciss.lucre.swing
 package graph
 
+import de.sciss.lucre.expr.Ex
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.impl.ComponentHolder
 
 object Separator {
   def apply(): Separator = Impl()
-
-//  def mk(text: Ex[String])(configure: Separator => Unit): Separator = {
-//    val w = apply()
-//    configure(w)
-//    w
-//  }
 
   private final class Expanded[S <: Sys[S]] extends View[S]
     with ComponentHolder[scala.swing.Separator] {
@@ -44,9 +39,8 @@ object Separator {
   private final case class Impl() extends Separator {
     override def productPrefix = "Separator"  // serialization
 
-    protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] = {
+    protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S].init()
-    }
   }
 }
 trait Separator extends Widget {

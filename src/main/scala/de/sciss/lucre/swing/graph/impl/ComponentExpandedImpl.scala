@@ -26,8 +26,8 @@ trait ComponentExpandedImpl[S <: Sys[S]] {
   private[this] var obs = List.empty[Disposable[S#Tx]]
 
   protected final def initProperty[A](key: String, default: A)(set: A => Unit)
-                                     (implicit tx: S#Tx, b: Widget.Builder[S]): Unit =
-    b.getProperty[Ex[A]](w, key) match {
+                                     (implicit tx: S#Tx, ctx: Ex.Context[S]): Unit =
+    ctx.getProperty[Ex[A]](w, key) match {
       case Some(ex) =>
         val expr    = ex.expand[S]
         val value0  = expr.value
@@ -43,7 +43,7 @@ trait ComponentExpandedImpl[S <: Sys[S]] {
       case _ =>
     }
 
-  def init()(implicit tx: S#Tx, b: Widget.Builder[S]): this.type = {
+  def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
     initProperty(Component.keyEnabled   , Component.defaultEnabled  )(component.enabled   = _)
     initProperty(Component.keyFocusable , Component.defaultFocusable)(component.focusable = _)
     initProperty(Component.keyTooltip   , Component.defaultTooltip  )(component.tooltip   = _)

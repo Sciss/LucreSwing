@@ -20,10 +20,9 @@ import de.sciss.lucre.aux.Aux
 import de.sciss.lucre.event.impl.IGenerator
 import de.sciss.lucre.event.{IEvent, IPull, ITargets}
 import de.sciss.lucre.expr.graph.Constant
-import de.sciss.lucre.expr.{Ex, IExpr}
+import de.sciss.lucre.expr.{Ex, IExpr, Model}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.swing.Widget.Model
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.model.Change
@@ -31,8 +30,6 @@ import de.sciss.model.Change
 import scala.concurrent.stm.Ref
 
 object TextField {
-//  def apply(text    : Ex[String ]): TextField = this(text, 0)
-//  def apply(columns : Ex[Int    ]): TextField = this("", columns)
 
   def apply(): TextField = Impl()
 
@@ -52,13 +49,12 @@ object TextField {
   final case class Text(w: TextField) extends Ex[String] {
     override def productPrefix: String = s"TextField$$Text" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, String] = ctx match {
-      case b: Widget.Builder[S] =>
-        import b.{cursor, targets}
-        val ws        = w.expand[S](b, tx)
-        val valueOpt  = b.getProperty[Ex[String]](w, keyText)
-        val value0    = valueOpt.fold[String](defaultText)(_.expand[S].value)
-        new TextExpanded[S](ws, value0).init()
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, String] = {
+      import ctx.{cursor, targets}
+      val ws        = w.expand[S]
+      val valueOpt  = ctx.getProperty[Ex[String]](w, keyText)
+      val value0    = valueOpt.fold[String](defaultText)(_.expand[S].value)
+      new TextExpanded[S](ws, value0).init()
     }
 
     def aux: List[Aux] = Nil
@@ -127,10 +123,9 @@ object TextField {
   final case class Columns(w: TextField) extends Ex[Int] {
     override def productPrefix: String = s"TextField$$Columns" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = ctx match {
-      case b: Widget.Builder[S] =>
-        val valueOpt = b.getProperty[Ex[Int]](w, keyColumns)
-        valueOpt.getOrElse(Constant(defaultColumns)).expand[S]
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+      val valueOpt = ctx.getProperty[Ex[Int]](w, keyColumns)
+      valueOpt.getOrElse(Constant(defaultColumns)).expand[S]
     }
 
     def aux: List[Aux] = Nil
@@ -139,10 +134,9 @@ object TextField {
   final case class Editable(w: TextField) extends Ex[Boolean] {
     override def productPrefix: String = s"TextField$$Editable" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = ctx match {
-      case b: Widget.Builder[S] =>
-        val valueOpt = b.getProperty[Ex[Boolean]](w, keyEditable)
-        valueOpt.getOrElse(Constant(defaultEditable)).expand[S]
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = {
+      val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyEditable)
+      valueOpt.getOrElse(Constant(defaultEditable)).expand[S]
     }
 
     def aux: List[Aux] = Nil
@@ -153,39 +147,26 @@ object TextField {
 
     type C = scala.swing.TextField
 
-//    private[this] var obs: Disposable[S#Tx] = _
-
-    override def init()(implicit tx: S#Tx, b: Widget.Builder[S]): this.type = {
-      val textOpt   = b.getProperty[Ex[String]](w, keyText).map(_.expand[S].value)
+    override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+      val textOpt   = ctx.getProperty[Ex[String]](w, keyText).map(_.expand[S].value)
       val text0     = textOpt.orNull
-      val columns   = b.getProperty[Ex[Int    ]](w, keyColumns  ).fold(defaultColumns )(_.expand[S].value)
-      val editable  = b.getProperty[Ex[Boolean]](w, keyEditable ).fold(defaultEditable)(_.expand[S].value)
+      val columns   = ctx.getProperty[Ex[Int    ]](w, keyColumns  ).fold(defaultColumns )(_.expand[S].value)
+      val editable  = ctx.getProperty[Ex[Boolean]](w, keyEditable ).fold(defaultEditable)(_.expand[S].value)
 
       deferTx {
         val c = new scala.swing.TextField(text0, columns)
         if (editable != defaultEditable) c.editable = editable
         component = c
       }
-//      obs = text.changed.react { implicit tx => ch =>
-//        deferTx {
-//          component.text = ch.now
-//        }
-//      }
       super.init()
     }
-
-//    override def dispose()(implicit tx: S#Tx): Unit = {
-////      obs.dispose()
-//      super.dispose()
-//    }
   }
 
   private final case class Impl() extends TextField with ComponentImpl { w =>
     override def productPrefix: String = "TextField" // serialization
-
-    protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] = {
+    
+    protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).init()
-    }
 
     object text extends Model[String] {
       def apply(): Ex[String] = Text(w)

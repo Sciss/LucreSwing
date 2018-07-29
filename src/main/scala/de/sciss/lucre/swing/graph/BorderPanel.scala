@@ -16,6 +16,7 @@ package graph
 
 import java.awt.BorderLayout
 
+import de.sciss.lucre.expr.Ex
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
@@ -29,18 +30,12 @@ object BorderPanel {
            ): BorderPanel =
     Impl(north = north, south = south, west = west, east = east, center = center)
 
-//  def mk(configure: BorderPanel => Unit): BorderPanel = {
-//    val w = apply()
-//    configure(w)
-//    w
-//  }
-
   private final class Expanded[S <: Sys[S]](protected val w: BorderPanel) extends View[S]
     with ComponentHolder[scala.swing.BorderPanel] with ComponentExpandedImpl[S] {
 
     type C = scala.swing.BorderPanel
 
-    override def init()(implicit tx: S#Tx, b: Widget.Builder[S]): this.type = {
+    override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
       val north : View[S] = if (w.north   != Empty.instance) w.north  .expand[S] else null
       val south : View[S] = if (w.south   != Empty.instance) w.south  .expand[S] else null
       val west  : View[S] = if (w.west    != Empty.instance) w.west   .expand[S] else null
@@ -58,8 +53,6 @@ object BorderPanel {
       }
       super.init()
     }
-
-//    def dispose()(implicit tx: S#Tx): Unit = super.dispose()
   }
 
   private final case class Impl(north: Widget, south: Widget, west: Widget, east: Widget,
@@ -76,9 +69,8 @@ object BorderPanel {
       res
     }
 
-    protected def mkView[S <: Sys[S]](implicit b: Widget.Builder[S], tx: S#Tx): View.T[S, C] = {
+    protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).init()
-    }
   }
 }
 trait BorderPanel extends Panel {
