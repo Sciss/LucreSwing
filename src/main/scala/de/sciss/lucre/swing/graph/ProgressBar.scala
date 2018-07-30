@@ -29,21 +29,15 @@ object ProgressBar {
     type C = scala.swing.ProgressBar
 
     override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
-      val minOpt          = ctx.getProperty[Ex[Int    ]](w, keyMin          ).map(_.expand[S].value)
-      val maxOpt          = ctx.getProperty[Ex[Int    ]](w, keyMax          ).map(_.expand[S].value)
-      val valueOpt        = ctx.getProperty[Ex[Int    ]](w, keyValue        ).map(_.expand[S].value)
-      val labelOpt        = ctx.getProperty[Ex[String ]](w, keyLabel        ).map(_.expand[S].value)
-      val labelPaintedOpt = ctx.getProperty[Ex[Boolean]](w, keyLabelPainted ).map(_.expand[S].value)
-
       deferTx {
         val c = new scala.swing.ProgressBar
-        minOpt          .foreach(c.min          = _)
-        maxOpt          .foreach(c.max          = _)
-        valueOpt        .foreach(c.value        = _)
-        labelOpt        .foreach(c.label        = _)
-        labelPaintedOpt .foreach(c.labelPainted = _)
         component = c
       }
+      initProperty(keyMin         , defaultMin          )(component.min           = _)
+      initProperty(keyMax         , defaultMax          )(component.max           = _)
+      initProperty(keyValue       , defaultMin          )(component.value         = _)
+      initProperty(keyLabel       , defaultLabel        )(component.label         = _)
+      initProperty(keyLabelPainted, defaultLabelPainted )(component.labelPainted  = _)
 
       super.init()
     }

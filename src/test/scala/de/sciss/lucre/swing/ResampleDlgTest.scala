@@ -62,6 +62,10 @@ object ResampleDlgTest extends AppLike {
       ggCancel.enabled    = false
       val ggRender        = Button(" Render ")
 
+      val ggSimu  = Slider()
+      ggProg.value = ggSimu.value()
+      val lineSimu = ggSimu
+
       ggRender.clicked ---> Println("TODO: Render")
 
       val lineIn    = FlowPanel(lbIn, ggIn)
@@ -73,7 +77,8 @@ object ResampleDlgTest extends AppLike {
       val lineMode  = FlowPanel(ggChangePch, lbFltLen, ggFltLen, ggInterp)
       val lineProg  = FlowPanel(ggProg, ggCancel, ggRender)
       val p = GridPanel(
-        sepWave, lineIn, ggInfo, lineOut, lineFmt, lineGain, lineRate, lineRate2, sepSRC, lineMode, lineProg
+        sepWave, lineIn, ggInfo, lineOut, lineFmt, lineGain, lineRate, lineRate2, sepSRC, lineMode, lineProg,
+        lineSimu
       )
       p.columns = 1
       p
