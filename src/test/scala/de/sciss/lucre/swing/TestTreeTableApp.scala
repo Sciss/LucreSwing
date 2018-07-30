@@ -1,18 +1,17 @@
 package de.sciss.lucre.swing
 
-import javax.swing.event.{CellEditorListener, ChangeEvent}
-import javax.swing.{CellEditor, JComponent, JTextField}
-
 import de.sciss.lucre.event.{Pull, Targets}
 import de.sciss.lucre.expr.IntObj
 import de.sciss.lucre.stm.impl.ObjSerializer
-import de.sciss.lucre.stm.{Disposable, Elem, Obj, Sys, Copy}
+import de.sciss.lucre.stm.{Copy, Disposable, Elem, Obj, Sys}
 import de.sciss.lucre.swing.TreeTableView.ModelUpdate
-import de.sciss.lucre.{event => evt, stm, expr}
+import de.sciss.lucre.{stm, event => evt}
 import de.sciss.model.Change
 import de.sciss.serial.{DataInput, DataOutput, Serializer}
 import de.sciss.treetable.TreeTableCellRenderer.State
 import de.sciss.treetable.j.{DefaultTreeTableCellEditor, DefaultTreeTableCellRenderer}
+import javax.swing.event.{CellEditorListener, ChangeEvent}
+import javax.swing.{CellEditor, JComponent, JTextField}
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.{BorderPanel, Button, Component, FlowPanel}
@@ -27,7 +26,7 @@ class TestTreeTableApp[T <: Sys[T]](system: T)(implicit val cursor: stm.Cursor[T
     final val typeId = 0x10000000
 
     object Update {
-      case class Branch[S <: Sys[S]](branch: app.Branch[S], peer: expr.List.Update[S, Node[S]]) extends Update[S]
+      case class Branch[S <: Sys[S]](branch: app.Branch[S], peer: stm.List.Update[S, Node[S]]) extends Update[S]
       case class Leaf  [S <: Sys[S]](leaf  : app.Leaf  [S], peer: Change[Int]) extends Update[S]
     }
     trait Update[S <: Sys[S]]
@@ -45,7 +44,7 @@ class TestTreeTableApp[T <: Sys[T]](system: T)(implicit val cursor: stm.Cursor[T
       def read(in: DataInput, access: S#Acc, targets: evt.Targets[S])(implicit tx: S#Tx): Node[S] with evt.Node[S] =
         in.readByte() match {
           case 0 =>
-            val peer = expr.List.Modifiable.read[S, Node[S]](in, access)
+            val peer = stm.List.Modifiable.read[S, Node[S]](in, access)
             new Branch(targets, peer)
           case 1 =>
             val peer = IntObj.readVar[S](in, access)
@@ -72,7 +71,7 @@ class TestTreeTableApp[T <: Sys[T]](system: T)(implicit val cursor: stm.Cursor[T
 
   Node.init()
 
-  class Branch[S <: Sys[S]](val targets: evt.Targets[S], val children: expr.List.Modifiable[S, Node[S]])
+  class Branch[S <: Sys[S]](val targets: evt.Targets[S], val children: stm.List.Modifiable[S, Node[S]])
     extends Node[S]
     with evt.impl.SingleNode[S, Node.Update[S]]
     /* with evt.impl.MappingGenerator[S, Node.Update, expr.List.Update[S, Node], Node] */ { branch =>
@@ -92,7 +91,7 @@ class TestTreeTableApp[T <: Sys[T]](system: T)(implicit val cursor: stm.Cursor[T
     }
 
     def copy[Out <: Sys[Out]]()(implicit tx: S#Tx, txOut: Out#Tx, context: Copy[S, Out]): Elem[Out] = {
-      type ListAux[~ <: Sys[~]] = expr.List.Modifiable[~, Node[~]]
+      type ListAux[~ <: Sys[~]] = stm.List.Modifiable[~, Node[~]]
       new Branch[Out](Targets[Out], context[ListAux](children)) // .connect()
     }
 
@@ -166,7 +165,7 @@ class TestTreeTableApp[T <: Sys[T]](system: T)(implicit val cursor: stm.Cursor[T
     def read(in: DataInput, access: S#Acc, targets: evt.Targets[S])(implicit tx: S#Tx): Branch[S] with evt.Node[S] =
       in.readByte() match {
         case 0 =>
-          val peer = expr.List.Modifiable.read[S, Node[S]](in, access)
+          val peer = stm.List.Modifiable.read[S, Node[S]](in, access)
           new Branch[S](targets, peer)
       }
 
@@ -202,8 +201,8 @@ class TestTreeTableApp[T <: Sys[T]](system: T)(implicit val cursor: stm.Cursor[T
       upd match {
         case Node.Update.Branch(parent, peer) =>
           peer.changes.flatMap {
-            case expr.List.Added  (idx, elem) => Vec(TreeTableView.NodeAdded  (parent, idx, elem))
-            case expr.List.Removed(idx, elem) => Vec(TreeTableView.NodeRemoved(parent, idx, elem))
+            case stm.List.Added  (idx, elem) => Vec(TreeTableView.NodeAdded  (parent, idx, elem))
+            case stm.List.Removed(idx, elem) => Vec(TreeTableView.NodeRemoved(parent, idx, elem))
 // ELEM
 //            case expr.List.Element(elem, eUpd) =>
 //              mapUpdate(eUpd)
@@ -306,7 +305,7 @@ class TestTreeTableApp[T <: Sys[T]](system: T)(implicit val cursor: stm.Cursor[T
   // lazy val h = new Handler[T](view)
 
   def newBranch[S <: Sys[S]]()(implicit tx: S#Tx): Branch[S] = {
-    val li    = expr.List.Modifiable[S, Node]
+    val li    = stm.List.Modifiable[S, Node]
     val tgt   = evt.Targets[S]
     new Branch[S](tgt, li).connect()
   }

@@ -1,15 +1,15 @@
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.expr
 import de.sciss.lucre.expr.StringObj
+import de.sciss.lucre.stm
 import de.sciss.model.Change
 
 import scala.concurrent.stm.{Ref, Txn}
 import scala.swing.{BorderPanel, Button, Component, FlowPanel}
 
 object TestListApp extends AppLike {
-  implicit private val listModSer = expr.List.Modifiable.serializer[S, StringObj[S]]
-  implicit private val listSer    = expr.List.serializer[S, StringObj[S]]
+  implicit private val listModSer = stm.List.Modifiable.serializer[S, StringObj[S]]
+  implicit private val listSer    = stm.List.serializer           [S, StringObj[S]]
 
   private val h     = ListView.Handler[S, StringObj[S], Change[String]] {
     implicit tx => _.value
@@ -18,7 +18,7 @@ object TestListApp extends AppLike {
   }
 
   private lazy val (listH, view) = system.step { implicit tx =>
-    val li = expr.List.Modifiable[S, StringObj]
+    val li = stm.List.Modifiable[S, StringObj]
     tx.newHandle(li) -> ListView(li, h)
   }
 

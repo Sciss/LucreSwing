@@ -15,8 +15,7 @@ package de.sciss.lucre
 package swing
 package impl
 
-import de.sciss.lucre.expr.List
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.stm.{List, Sys}
 import de.sciss.lucre.swing.ListView.Handler
 import de.sciss.model.impl.ModelImpl
 import de.sciss.serial.Serializer

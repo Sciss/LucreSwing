@@ -2,7 +2,7 @@ package de.sciss.lucre.swing
 
 import de.sciss.lucre.expr
 import de.sciss.lucre.expr.ExOps
-import de.sciss.lucre.stm.InMemory
+import de.sciss.lucre.stm.{InMemory, WorkspaceHandle}
 
 import scala.swing.Component
 
@@ -81,6 +81,7 @@ object ResampleDlgTest extends AppLike {
 
     type              S = InMemory
     implicit val sys: S = InMemory()
+    import WorkspaceHandle.Implicits._
 
     val view = sys.step { implicit tx =>
       g.expand[S]()

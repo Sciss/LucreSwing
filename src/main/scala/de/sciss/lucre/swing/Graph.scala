@@ -13,10 +13,10 @@
 
 package de.sciss.lucre.swing
 
+import de.sciss.lucre.expr
 import de.sciss.lucre.expr.impl.{ExElem, GraphBuilderMixin, GraphSerializerMixin}
 import de.sciss.lucre.expr.{Control, Ex}
-import de.sciss.lucre.stm.{Disposable, Obj, Sys}
-import de.sciss.lucre.{expr, stm}
+import de.sciss.lucre.stm.{Cursor, Disposable, Obj, Sys, WorkspaceHandle}
 import de.sciss.serial.{DataInput, DataOutput, ImmutableSerializer}
 
 import scala.collection.immutable.{IndexedSeq => Vec, Seq => ISeq}
@@ -85,7 +85,8 @@ object Graph {
 final case class Graph(widget: Widget, controls: Vec[Control.Configured])
   extends expr.Graph {
 
-  def expand[S <: Sys[S]](self: Option[Obj[S]] = None)(implicit tx: S#Tx, cursor: stm.Cursor[S]): View[S] = {
+  def expand[S <: Sys[S]](self: Option[Obj[S]] = None)
+                         (implicit tx: S#Tx, workspace: WorkspaceHandle[S], cursor: Cursor[S]): View[S] = {
     implicit val ctx: Ex.Context[S] = Ex.Context(this, self.map(tx.newHandle(_)))
     val view: View[S] = widget.expand[S]
     if (controls.isEmpty) view else {

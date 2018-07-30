@@ -13,8 +13,7 @@
 
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.expr.List
-import de.sciss.lucre.stm.{Disposable, Sys}
+import de.sciss.lucre.stm.{Disposable, List, Sys}
 import de.sciss.lucre.swing.impl.{ListViewImpl => Impl}
 import de.sciss.model.Model
 import de.sciss.serial.Serializer
