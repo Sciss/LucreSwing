@@ -8,16 +8,17 @@ lazy val mimaVersion    = "1.11.0"
 
 lazy val deps = new {
   val main = new {
-    val lucre     = "3.9.0-SNAPSHOT"
     val desktop   = "0.9.2"
-    val widgets   = "1.12.1"
-    val treeTable = "1.4.0"
+    val lucre     = "3.9.0-SNAPSHOT"
     val model     = "0.3.4"
+    val swingPlus = "0.3.1"
+    val treeTable = "1.4.0"
+    val widgets   = "1.12.1"
   }
   val test = new {
     val fileUtil  = "1.1.3"
-    val submin    = "0.2.2"
     val scalaTest = "3.0.5"
+    val submin    = "0.2.2"
   }
 }
 
@@ -36,6 +37,7 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"      %% "lucre-expr"         % deps.main.lucre,
       "de.sciss"      %% "desktop"            % deps.main.desktop,
       "de.sciss"      %% "audiowidgets-swing" % deps.main.widgets,   // TODO: should be possible to just depend on the range slider
+      "de.sciss"      %% "swingplus"          % deps.main.swingPlus,
       "de.sciss"      %% "treetable-scala"    % deps.main.treeTable, // TODO: should be going into a dedicated sub-project?
       "de.sciss"      %% "model"              % deps.main.model,
       "de.sciss"      %% "lucre-bdb"          % deps.main.lucre     % Test,
