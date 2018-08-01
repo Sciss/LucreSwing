@@ -227,6 +227,10 @@ object IntField {
         if (editable != defaultEditable) c.editable = editable
         component = c
       }
+
+//      initProperty(keyMin   , defaultMin  )(component.min   = _)
+      initProperty(keyValue , defaultValue)(component.value = _)
+
       super.init()
     }
   }

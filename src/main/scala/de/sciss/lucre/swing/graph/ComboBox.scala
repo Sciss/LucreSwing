@@ -48,6 +48,10 @@ object ComboBox {
         itemOpt.foreach { item => c.selection.item = item }
         component = c
       }
+
+      initProperty(keyIndex, 0)(component.selection.index = _)
+      initProperty(keyValueOption, Option.empty[A])(opt => opt.foreach(component.selection.item = _))
+
       super.init()
     }
   }

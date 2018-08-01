@@ -238,6 +238,9 @@ object DoubleField {
         if (editable != defaultEditable) c.editable = editable
         component = c
       }
+
+      initProperty(keyValue, defaultValue)(component.value = _)
+
       super.init()
     }
   }

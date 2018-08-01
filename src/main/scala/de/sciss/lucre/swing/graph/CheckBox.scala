@@ -47,6 +47,9 @@ object CheckBox {
         if (selected) c.selected = true
         component = c
       }
+
+      initProperty(keySelected, defaultSelected)(component.selected = _)
+
       super.init()
     }
   }
