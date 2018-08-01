@@ -34,7 +34,7 @@ object ExprAttrTest extends AppLike {
     new scala.swing.FlowPanel(
       view.component,
       scala.swing.Button("Dice") {
-        val i = (math.random() * 6).toInt + 1
+        val i = (math.random * 6).toInt + 1 // Scala 2.11 - random is no-parens!
         sys.step { implicit tx =>
           val value = IntObj.newConst[S](i)
           val attr  = selfH().attr
