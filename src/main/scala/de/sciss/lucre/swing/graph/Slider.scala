@@ -49,7 +49,7 @@ object Slider {
       }
 
       initProperty(keyMin   , defaultMin  )(component.min   = _)
-      initProperty(keyMax   , defaultMax  )(component.min   = _)
+      initProperty(keyMax   , defaultMax  )(component.max   = _)
       initProperty(keyValue , defaultValue)(component.value = _)
 
       super.init()
