@@ -1,7 +1,7 @@
 lazy val baseName  = "LucreSwing"
 lazy val baseNameL = baseName.toLowerCase
 
-lazy val projectVersion = "1.11.1"
+lazy val projectVersion = "1.12.0-SNAPSHOT"
 lazy val mimaVersion    = "1.11.0"
 
 // ---- dependencies ----
@@ -9,11 +9,11 @@ lazy val mimaVersion    = "1.11.0"
 lazy val deps = new {
   val main = new {
     val desktop   = "0.9.2"
-    val lucre     = "3.9.0"
+    val lucre     = "3.9.1"
     val model     = "0.3.4"
     val swingPlus = "0.3.1"
     val treeTable = "1.4.0"
-    val widgets   = "1.12.1"
+    val widgets   = "1.13.0-SNAPSHOT"
   }
   val test = new {
     val fileUtil  = "1.1.3"
@@ -47,7 +47,8 @@ lazy val root = project.withId(baseNameL).in(file("."))
     ),
     scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xfuture", "-Xlint"),
     // ---- compatibility ----
-    mimaPreviousArtifacts := Set("de.sciss" %% baseNameL % mimaVersion)
+    mimaPreviousArtifacts := Set("de.sciss" %% baseNameL % mimaVersion),
+    updateOptions := updateOptions.value.withLatestSnapshots(false)
   )
   .settings(publishSettings)
 
