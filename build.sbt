@@ -1,8 +1,8 @@
 lazy val baseName  = "LucreSwing"
 lazy val baseNameL = baseName.toLowerCase
 
-lazy val projectVersion = "1.12.0-SNAPSHOT"
-lazy val mimaVersion    = "1.11.0"
+lazy val projectVersion = "1.12.0"
+lazy val mimaVersion    = "1.12.0"
 
 // ---- dependencies ----
 
@@ -13,7 +13,7 @@ lazy val deps = new {
     val model     = "0.3.4"
     val swingPlus = "0.3.1"
     val treeTable = "1.4.0"
-    val widgets   = "1.13.0-SNAPSHOT"
+    val widgets   = "1.13.0"
   }
   val test = new {
     val fileUtil  = "1.1.3"
@@ -27,10 +27,10 @@ lazy val root = project.withId(baseNameL).in(file("."))
     name                 := baseName,
     version              := projectVersion,
     organization         := "de.sciss",
-    scalaVersion         := "2.12.6",
-    crossScalaVersions   := Seq("2.12.6", "2.11.12"),
+    scalaVersion         := "2.12.7",
+    crossScalaVersions   := Seq("2.12.7", "2.11.12"),
     description          := "Swing support for Lucre, and common views",
-    homepage             := Some(url(s"https://github.com/Sciss/${name.value}")),
+    homepage             := Some(url(s"https://git.iem.at/sciss/${name.value}")),
     licenses             := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt")),
     resolvers += "Oracle Repository" at "http://download.oracle.com/maven", // required for lucrestm-bdb
     libraryDependencies ++= Seq(
@@ -66,8 +66,8 @@ lazy val publishSettings = Seq(
   pomIncludeRepository := { _ => false },
   pomExtra := { val n = name.value
 <scm>
-  <url>git@github.com:Sciss/{n}.git</url>
-  <connection>scm:git:git@github.com:Sciss/{n}.git</connection>
+  <url>git@git.iem.at:sciss/{n}.git</url>
+  <connection>scm:git:git@git.iem.at:sciss/{n}.git</connection>
 </scm>
 <developers>
   <developer>

@@ -6,9 +6,9 @@
 ## statement
 
 LucreSwing is a Scala library which bridges between Swing (through 
-the [Desktop](https://github.com/Sciss/Desktop/) project) and [LucreEvent](https://github.com/Sciss/LucreEvent/).
+the [Desktop](https://git.iem.at/sciss/Desktop/) project) and [Lucre](https://git.iem.at/sciss/Lucre/).
 It is (C)opyright 2014&ndash;2018 by Hanns Holger Rutz. All rights reserved. The project is released under
-the [GNU Lesser General Public License](https://raw.github.com/Sciss/LucreSwing/master/LICENSE) v2.1+ and comes 
+the [GNU Lesser General Public License](https://git.iem.at/sciss/LucreSwing/raw/master/LICENSE) v2.1+ and comes 
 with absolutely no warranties. To contact the author, send an email to `contact at sciss.de`
 
 ## requirements / building
