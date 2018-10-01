@@ -1,7 +1,7 @@
 package de.sciss.lucre.swing
 
 import de.sciss.lucre.expr.ExOps
-import de.sciss.lucre.stm.{InMemory, WorkspaceHandle}
+import de.sciss.lucre.stm.{InMemory, Workspace}
 
 import scala.swing.Component
 
@@ -30,7 +30,7 @@ object GridPanelTest extends AppLike {
 
     type              S = InMemory
     implicit val sys: S = InMemory()
-    import WorkspaceHandle.Implicits._
+    import Workspace.Implicits._
 
     val view = sys.step { implicit tx =>
       g.expand[S]()

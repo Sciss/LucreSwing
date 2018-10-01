@@ -1,7 +1,7 @@
 package de.sciss.lucre.swing
 
 import de.sciss.lucre.expr.{ExOps, IntObj, StringObj}
-import de.sciss.lucre.stm.{InMemory, WorkspaceHandle}
+import de.sciss.lucre.stm.{InMemory, Workspace}
 
 import scala.swing.Component
 
@@ -23,7 +23,7 @@ object ExprAttrTest extends AppLike {
 
     type              S = InMemory
     implicit val sys: S = InMemory()
-    import WorkspaceHandle.Implicits._
+    import Workspace.Implicits._
 
     val (view, selfH) = sys.step { implicit tx =>
       val self = StringObj.newConst[S]("foo"): StringObj[S]

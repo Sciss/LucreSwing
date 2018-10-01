@@ -4,7 +4,7 @@ import de.sciss.lucre.expr.StringObj
 import de.sciss.lucre.stm
 import de.sciss.model.Change
 
-import scala.concurrent.stm.{Ref, Txn}
+import scala.concurrent.stm.{InTxn, Ref, Txn}
 import scala.swing.{BorderPanel, Button, Component, FlowPanel}
 
 object TestListApp extends AppLike {
@@ -38,7 +38,7 @@ object TestListApp extends AppLike {
     val text    = scramble("Vermisste Boeing umgeleitet")
     val retries = Ref(3)
     system.step { implicit tx =>
-      implicit val itx = tx.peer
+      implicit val itx: InTxn = tx.peer
       val s     = StringObj.newConst[S](text)
       val list  = listH()
       list.addLast(s)
