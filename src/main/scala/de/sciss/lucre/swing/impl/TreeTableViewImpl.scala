@@ -16,13 +16,13 @@ package impl
 
 import java.awt
 import java.awt.EventQueue
-import javax.swing.event.CellEditorListener
-import javax.swing.table.{DefaultTableCellRenderer, TableCellEditor}
-import javax.swing.{CellEditor, DropMode, JTable}
 
+import javax.swing.event.CellEditorListener
+import javax.swing.table.{DefaultTableCellRenderer, TableCellEditor, TableCellRenderer}
+import javax.swing.{CellEditor, DropMode, JTable}
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm.{Disposable, Identifiable, IdentifierMap}
-import de.sciss.lucre.swing.TreeTableView.{ModelUpdate, Handler}
+import de.sciss.lucre.swing.TreeTableView.{Handler, ModelUpdate}
 import de.sciss.lucre.stm
 import de.sciss.model.impl.ModelImpl
 import de.sciss.serial.Serializer
@@ -31,7 +31,6 @@ import de.sciss.treetable.j.TreeTableCellEditor
 import de.sciss.treetable.{AbstractTreeModel, TreeColumnModel, TreeTable, TreeTableCellRenderer, TreeTableSelectionChanged, j}
 
 import scala.annotation.tailrec
-import scala.collection.breakOut
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.concurrent.stm.TxnLocal
 import scala.swing.{Component, ScrollPane}
@@ -259,9 +258,9 @@ object TreeTableViewImpl {
         }
       }
 
-    def selection: List[VNode] = t.selection.paths.collect {
+    def selection: List[VNode] = t.selection.paths.iterator.collect {
       case _ /* init */ :+ (last: VNode) => last
-    } (breakOut)
+    } .toList
 
     def markInsertion()(implicit tx: S#Tx): Unit = didInsert.update(true)(tx.peer)
 
@@ -497,7 +496,7 @@ object TreeTableViewImpl {
 
       t = new TreeTable(treeModel, tcm: TreeColumnModel[VNodeL])
       t.rootVisible = false
-      val r = new DefaultTableCellRenderer with TreeTableCellRenderer {
+      val r: TableCellRenderer with TreeTableCellRenderer = new DefaultTableCellRenderer with TreeTableCellRenderer {
         // private lazy val lb = new Label
         private lazy val wrapSelf = Component.wrap(this)
 

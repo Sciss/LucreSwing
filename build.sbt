@@ -1,19 +1,19 @@
 lazy val baseName  = "LucreSwing"
 lazy val baseNameL = baseName.toLowerCase
 
-lazy val projectVersion = "1.13.0"
-lazy val mimaVersion    = "1.13.0"
+lazy val projectVersion = "1.14.0-SNAPSHOT"
+lazy val mimaVersion    = "1.14.0"
 
 // ---- dependencies ----
 
 lazy val deps = new {
   val main = new {
-    val desktop   = "0.9.2"
-    val lucre     = "3.10.0"
+    val desktop   = "0.10.0-SNAPSHOT"
+    val lucre     = "3.11.0-SNAPSHOT"
     val model     = "0.3.4"
-    val swingPlus = "0.3.1"
-    val treeTable = "1.4.0"
-    val widgets   = "1.13.0"
+    val swingPlus = "0.4.0-SNAPSHOT"
+    val treeTable = "1.5.0-SNAPSHOT"
+    val widgets   = "1.14.0-SNAPSHOT"
   }
   val test = new {
     val fileUtil  = "1.1.3"
@@ -27,8 +27,8 @@ lazy val root = project.withId(baseNameL).in(file("."))
     name                 := baseName,
     version              := projectVersion,
     organization         := "de.sciss",
-    scalaVersion         := "2.12.7",
-    crossScalaVersions   := Seq("2.12.7", "2.11.12"),
+    scalaVersion         := "2.13.0-M5",
+    crossScalaVersions   := Seq("2.12.8", "2.11.12", "2.13.0-M5"),
     description          := "Swing support for Lucre, and common views",
     homepage             := Some(url(s"https://git.iem.at/sciss/${name.value}")),
     licenses             := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt")),
@@ -42,9 +42,12 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"      %% "model"              % deps.main.model,
       "de.sciss"      %% "lucre-bdb"          % deps.main.lucre     % Test,
       "de.sciss"      %% "fileutil"           % deps.test.fileUtil  % Test,
-      "de.sciss"      %  "submin"             % deps.test.submin    % Test,
-      "org.scalatest" %% "scalatest"          % deps.test.scalaTest % Test
+      "de.sciss"      %  "submin"             % deps.test.submin    % Test
     ),
+    libraryDependencies += {
+      val v = if (scalaVersion.value == "2.13.0-M5") "3.0.6-SNAP5" else deps.test.scalaTest
+      "org.scalatest" %% "scalatest" % v % Test
+    },
     scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xfuture", "-Xlint"),
     // ---- compatibility ----
     mimaPreviousArtifacts := Set("de.sciss" %% baseNameL % mimaVersion),
