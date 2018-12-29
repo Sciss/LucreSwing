@@ -1,24 +1,24 @@
 lazy val baseName  = "LucreSwing"
 lazy val baseNameL = baseName.toLowerCase
 
-lazy val projectVersion = "1.14.0-SNAPSHOT"
+lazy val projectVersion = "1.14.0"
 lazy val mimaVersion    = "1.14.0"
 
 // ---- dependencies ----
 
 lazy val deps = new {
   val main = new {
-    val desktop   = "0.10.0-SNAPSHOT"
-    val lucre     = "3.11.0-SNAPSHOT"
+    val desktop   = "0.10.0"
+    val lucre     = "3.11.0"
     val model     = "0.3.4"
-    val swingPlus = "0.4.0-SNAPSHOT"
-    val treeTable = "1.5.0-SNAPSHOT"
-    val widgets   = "1.14.0-SNAPSHOT"
+    val swingPlus = "0.4.0"
+    val treeTable = "1.5.0"
+    val widgets   = "1.14.0"
   }
   val test = new {
     val fileUtil  = "1.1.3"
     val scalaTest = "3.0.5"
-    val submin    = "0.2.2"
+    val submin    = "0.2.4"
   }
 }
 
