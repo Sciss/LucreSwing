@@ -11,12 +11,12 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre.swing
-package graph
-package impl
+package de.sciss.lucre.swing.graph.impl
 
 import de.sciss.lucre.expr.Ex
 import de.sciss.lucre.stm.{Disposable, Sys}
+import de.sciss.lucre.swing.graph.Component
+import de.sciss.lucre.swing.{View, deferTx}
 
 trait ComponentExpandedImpl[S <: Sys[S]] {
   _: View[S] =>

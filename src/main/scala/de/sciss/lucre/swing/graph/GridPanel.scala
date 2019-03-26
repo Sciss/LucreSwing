@@ -17,7 +17,7 @@ package graph
 import de.sciss.lucre.expr.graph.Constant
 import de.sciss.lucre.expr.{Ex, IExpr}
 import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
+import de.sciss.lucre.swing.graph.impl.{PanelExpandedImpl, PanelImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.swingplus.{GridPanel => Peer}
 
@@ -29,15 +29,19 @@ object GridPanel {
   private final val keyCompact            = "compact"
   private final val keyCompactRows        = "compactRows"
   private final val keyCompactColumns     = "compactColumns"
+  private final val keyHGap               = "hGap"
+  private final val keyVGap               = "vGap"
 
   private final val defaultRows           = 0 // 1
   private final val defaultColumns        = 0
   private final val defaultCompact        = false
   private final val defaultCompactRows    = false
   private final val defaultCompactColumns = false
+  private final val defaultHGap           = 4
+  private final val defaultVGap           = 2
 
   private final class Expanded[S <: Sys[S]](protected val w: GridPanel) extends View[S]
-    with ComponentHolder[Peer] with ComponentExpandedImpl[S] {
+    with ComponentHolder[Peer] with PanelExpandedImpl[S] {
 
     type C = Peer
 
@@ -45,6 +49,8 @@ object GridPanel {
       val rows0           = ctx.getProperty[Ex[Int    ]](w, keyRows    ).fold(defaultRows    )(_.expand[S].value)
       val columns         = ctx.getProperty[Ex[Int    ]](w, keyColumns ).fold(defaultColumns )(_.expand[S].value)
       val compact         = ctx.getProperty[Ex[Boolean]](w, keyCompact ).exists(_.expand[S].value)
+      val hGap            = ctx.getProperty[Ex[Int    ]](w, keyHGap    ).fold(defaultHGap    )(_.expand[S].value)
+      val vGap            = ctx.getProperty[Ex[Int    ]](w, keyVGap    ).fold(defaultVGap    )(_.expand[S].value)
       val compactRows     = compact || ctx.getProperty[Ex[Boolean]](w, keyCompactRows   ).exists(_.expand[S].value)
       val compactColumns  = compact || ctx.getProperty[Ex[Boolean]](w, keyCompactColumns).exists(_.expand[S].value)
       val rows            = if (rows0 == 0 && columns == 0) 1 else 0  // not allowed to have both zero
@@ -54,6 +60,8 @@ object GridPanel {
         val p             = new Peer(rows0 = rows, cols0 = columns)
         p.compactRows     = compactRows
         p.compactColumns  = compactColumns
+        p.hGap            = hGap
+        p.vGap            = vGap
         p.contents      ++= vec
         component         = p
       }
@@ -106,7 +114,25 @@ object GridPanel {
     }
   }
 
-  private final case class Impl(contents: Seq[Widget]) extends GridPanel with ComponentImpl {
+  final case class HGap(w: GridPanel) extends Ex[Int] {
+    override def productPrefix: String = s"GridPanel$$HGap" // serialization
+
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+      val valueOpt = ctx.getProperty[Ex[Int]](w, keyHGap)
+      valueOpt.getOrElse(Constant(defaultHGap)).expand[S]
+    }
+  }
+
+  final case class VGap(w: GridPanel) extends Ex[Int] {
+    override def productPrefix: String = s"GridPanel$$VGap" // serialization
+
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+      val valueOpt = ctx.getProperty[Ex[Int]](w, keyVGap)
+      valueOpt.getOrElse(Constant(defaultVGap)).expand[S]
+    }
+  }
+
+  private final case class Impl(contents: Seq[Widget]) extends GridPanel with PanelImpl {
     override def productPrefix = "GridPanel" // s"GridPanel$$Impl" // serialization
 
     protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
@@ -146,15 +172,46 @@ object GridPanel {
       val b = Graph.builder
       b.putProperty(this, keyCompactColumns, x)
     }
+
+    def hGap: Ex[Int] = HGap(this)
+
+    def hGap_=(x: Ex[Int]): Unit = {
+      val b = Graph.builder
+      b.putProperty(this, keyHGap, x)
+    }
+
+    def vGap: Ex[Int] = VGap(this)
+
+    def vGap_=(x: Ex[Int]): Unit = {
+      val b = Graph.builder
+      b.putProperty(this, keyVGap, x)
+    }
   }
 }
+
+/** A panel that arranges its contents in rectangular grid of rows and columns.
+  * Note that components run from left to right, top to bottom.
+  */
 trait GridPanel extends Panel {
   type C = Peer
 
+  /** Number of rows or zero for automatic determination. */
   var rows    : Ex[Int]
+  /** Number of columns or zero for automatic determination. */
   var columns : Ex[Int]
 
+  /** `true` to make the grid compact both horizontally and vertically. */
   var compact         : Ex[Boolean]
+
+  /** `true` to make the grid vertically compact. */
   var compactRows     : Ex[Boolean]
+
+  /** `true` to make the grid horizontally compact. */
   var compactColumns  : Ex[Boolean]
+
+  /** Horizontal gap between components. The default value is 4. */
+  var hGap: Ex[Int]
+
+  /** Vertical gap between components. The default value is 2. */
+  var vGap: Ex[Int]
 }

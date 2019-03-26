@@ -11,11 +11,16 @@ object BorderPanelTest extends AppLike {
     import graph._
     val g = Graph {
       val lbN = Label("North" )
+      lbN.hAlign = Align.Center
       val lbE = Label("East"  )
       val txt = TextField(10)
       txt.text() = "Center"
       val lbS = Label(txt.text())
-      BorderPanel(north = lbN, east = lbE, center = txt, south = lbS)
+      lbS.hAlign = Align.Center
+      val bp = BorderPanel(north = lbN, east = lbE, center = txt, south = lbS)
+      bp.vGap = 4
+      bp.border = Border.Empty(8)
+      bp
     }
 
     type              S = InMemory

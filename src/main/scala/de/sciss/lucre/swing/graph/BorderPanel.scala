@@ -11,15 +11,16 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre.swing
-package graph
+package de.sciss.lucre.swing.graph
 
 import java.awt.BorderLayout
 
-import de.sciss.lucre.expr.Ex
+import de.sciss.lucre.expr.graph.Constant
+import de.sciss.lucre.expr.{Ex, IExpr}
 import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
+import de.sciss.lucre.swing.graph.impl.{PanelExpandedImpl, PanelImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
+import de.sciss.lucre.swing.{Graph, View, deferTx}
 
 object BorderPanel {
   def apply(north : Widget = Empty(),
@@ -31,11 +32,13 @@ object BorderPanel {
     Impl(north = north, south = south, west = west, east = east, center = center)
 
   private final class Expanded[S <: Sys[S]](protected val w: BorderPanel) extends View[S]
-    with ComponentHolder[scala.swing.BorderPanel] with ComponentExpandedImpl[S] {
+    with ComponentHolder[scala.swing.BorderPanel] with PanelExpandedImpl[S] {
 
     type C = scala.swing.BorderPanel
 
     override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+      val hGap            = ctx.getProperty[Ex[Int    ]](w, keyHGap    ).fold(defaultHGap    )(_.expand[S].value)
+      val vGap            = ctx.getProperty[Ex[Int    ]](w, keyVGap    ).fold(defaultVGap    )(_.expand[S].value)
       val north : View[S] = if (w.north   != Empty.instance) w.north  .expand[S] else null
       val south : View[S] = if (w.south   != Empty.instance) w.south  .expand[S] else null
       val west  : View[S] = if (w.west    != Empty.instance) w.west   .expand[S] else null
@@ -43,6 +46,9 @@ object BorderPanel {
       val center: View[S] = if (w.center  != Empty.instance) w.center .expand[S] else null
       deferTx {
         val p     = new scala.swing.BorderPanel
+        val lay   = p.layoutManager
+        lay.setHgap(hGap)
+        lay.setVgap(vGap)
         val peer  = p.peer
         if (north   != null) peer.add(north .component.peer, BorderLayout.NORTH )
         if (south   != null) peer.add(south .component.peer, BorderLayout.SOUTH )
@@ -55,8 +61,26 @@ object BorderPanel {
     }
   }
 
+  final case class HGap(w: BorderPanel) extends Ex[Int] {
+    override def productPrefix: String = s"BorderPanel$$HGap" // serialization
+
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+      val valueOpt = ctx.getProperty[Ex[Int]](w, keyHGap)
+      valueOpt.getOrElse(Constant(defaultHGap)).expand[S]
+    }
+  }
+
+  final case class VGap(w: BorderPanel) extends Ex[Int] {
+    override def productPrefix: String = s"BorderPanel$$VGap" // serialization
+
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+      val valueOpt = ctx.getProperty[Ex[Int]](w, keyVGap)
+      valueOpt.getOrElse(Constant(defaultVGap)).expand[S]
+    }
+  }
+
   private final case class Impl(north: Widget, south: Widget, west: Widget, east: Widget,
-                                center: Widget) extends BorderPanel with ComponentImpl {
+                                center: Widget) extends BorderPanel with PanelImpl {
     override def productPrefix = "BorderPanel" // s"BorderPanel$$Impl" // serialization
 
     def contents: Seq[Widget] = {
@@ -69,9 +93,28 @@ object BorderPanel {
       res
     }
 
+    def hGap: Ex[Int] = HGap(this)
+
+    def hGap_=(x: Ex[Int]): Unit = {
+      val b = Graph.builder
+      b.putProperty(this, keyHGap, x)
+    }
+
+    def vGap: Ex[Int] = VGap(this)
+
+    def vGap_=(x: Ex[Int]): Unit = {
+      val b = Graph.builder
+      b.putProperty(this, keyVGap, x)
+    }
+
     protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).init()
   }
+
+  private final val keyHGap               = "hGap"
+  private final val keyVGap               = "vGap"
+  private final val defaultHGap           = 4
+  private final val defaultVGap           = 2
 }
 trait BorderPanel extends Panel {
   type C = scala.swing.BorderPanel
@@ -81,4 +124,10 @@ trait BorderPanel extends Panel {
   def west  : Widget
   def east  : Widget
   def center: Widget
+
+  /** Horizontal gap between components. The default value is 4. */
+  var hGap: Ex[Int]
+
+  /** Vertical gap between components. The default value is 2. */
+  var vGap: Ex[Int]
 }

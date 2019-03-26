@@ -14,6 +14,25 @@
 package de.sciss.lucre.swing
 package graph
 
+import de.sciss.lucre.expr.graph.Constant
+import de.sciss.lucre.expr.{Ex, IExpr}
+import de.sciss.lucre.stm.Sys
+
+object Panel {
+  final case class Border(w: Panel) extends Ex[graph.Border] {
+    override def productPrefix: String = s"Panel$$Border" // serialization
+
+    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, graph.Border] = {
+      val valueOpt = ctx.getProperty[Ex[graph.Border]](w, keyBorder)
+      valueOpt.fold(Constant(defaultBorder).expand[S])(_.expand[S])
+    }
+  }
+
+  private[graph] final val keyBorder                    = "border"
+  private[graph] final val defaultBorder: graph.Border  = graph.Border.Empty(0)
+}
 trait Panel extends Component {
   def contents: Seq[Widget]
+
+  var border: Ex[Border]
 }
