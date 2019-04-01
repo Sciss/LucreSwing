@@ -2,7 +2,7 @@
  *  FlowPanel.scala
  *  (LucreSwing)
  *
- *  Copyright (c) 2014-2018 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2014-2019 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -12,6 +12,8 @@
  */
 
 package de.sciss.lucre.swing.graph
+
+import java.awt.FlowLayout
 
 import de.sciss.lucre.expr.graph.Constant
 import de.sciss.lucre.expr.{Ex, IExpr}
@@ -47,6 +49,10 @@ object FlowPanel {
         val c = new Peer(alignSwing)(vec: _*)
         c.hGap = hGap
         c.vGap = vGap
+        c.peer.getLayout match {
+          case fl: FlowLayout => fl.setAlignOnBaseline(true)
+          case _ =>
+        }
         component = c
       }
       super.init()

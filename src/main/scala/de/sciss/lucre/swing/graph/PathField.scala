@@ -2,7 +2,7 @@
  *  PathField.scala
  *  (LucreSwing)
  *
- *  Copyright (c) 2014-2018 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2014-2019 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -14,21 +14,14 @@
 package de.sciss.lucre.swing
 package graph
 
-import de.sciss.desktop.FileDialog
+import de.sciss.desktop.{FileDialog, PathField => Peer}
 import de.sciss.file.File
-import de.sciss.lucre.event.impl.IGenerator
-import de.sciss.lucre.event.{IEvent, IPull, ITargets}
 import de.sciss.lucre.expr.ExOps._
 import de.sciss.lucre.expr.graph.Constant
 import de.sciss.lucre.expr.{Ex, IExpr, Model}
-import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
+import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl, PathFieldValueExpandedImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.model.Change
-
-import scala.concurrent.stm.Ref
-import scala.swing.event.ValueChanged
 
 object PathField {
   def apply(): PathField = Impl()
@@ -43,11 +36,11 @@ object PathField {
   val Save  : Ex[Int] = 1
   val Folder: Ex[Int] = 1
 
-  private final val keyValue        = "value"
-  private final val keyTitle        = "title"
-  private final val keyMode         = "mode"
-  private final val defaultValue    = new File("")
-  private final val defaultMode     = 0
+  private[graph] final val keyValue        = "value"
+  private[graph] final val keyTitle        = "title"
+  private[graph] final val keyMode         = "mode"
+  private[graph] final val defaultValue    = new File("")
+  private[graph] final val defaultMode     = 0
 
   final case class Value(w: PathField) extends Ex[File] {
     override def productPrefix: String = s"PathField$$Value" // serialization
@@ -57,56 +50,7 @@ object PathField {
       val ws        = w.expand[S]
       val valueOpt  = ctx.getProperty[Ex[File]](w, keyValue)
       val value0    = valueOpt.fold[File](defaultValue)(_.expand[S].value)
-      new ValueExpanded[S](ws, value0).init()
-    }
-  }
-
-  private final class ValueExpanded[S <: Sys[S]](ws: View.T[S, de.sciss.desktop.PathField], value0: File)
-                                                (implicit protected val targets: ITargets[S], cursor: stm.Cursor[S])
-    extends IExpr[S, File]
-      with IGenerator[S, Change[File]] {
-
-    private def commit(): Unit = {
-      val c       = ws.component
-      val before  = guiValue
-      val now     = c.value
-      val ch      = Change(before, now)
-      if (ch.isSignificant) {
-        guiValue    = now
-        cursor.step { implicit tx =>
-          txValue.set(now)(tx.peer)
-          fire(ch)
-        }
-      }
-    }
-
-    private[this] var guiValue: File = _
-    private[this] val txValue = Ref(value0)
-
-    def value(implicit tx: S#Tx): File = txValue.get(tx.peer)
-
-    def changed: IEvent[S, Change[File]] = this
-
-    private[lucre] def pullUpdate(pull: IPull[S])(implicit tx: S#Tx): Option[Change[File]] =
-      Some(pull.resolve[Change[File]])
-
-    def init()(implicit tx: S#Tx): this.type = {
-      deferTx {
-        val c = ws.component
-        c.listenTo(c)
-        c.reactions += {
-          case ValueChanged(_) => commit()
-        }
-        guiValue = c.value
-      }
-      this
-    }
-
-    def dispose()(implicit tx: S#Tx): Unit = {
-      deferTx {
-        val c = ws.component
-        c.deafTo(c)
-      }
+      new PathFieldValueExpandedImpl[S](ws.component, value0).init()
     }
   }
 
@@ -139,9 +83,9 @@ object PathField {
   }
 
   private final class Expanded[S <: Sys[S]](protected val w: PathField) extends View[S]
-    with ComponentHolder[de.sciss.desktop.PathField] with ComponentExpandedImpl[S] {
+    with ComponentHolder[Peer] with ComponentExpandedImpl[S] {
 
-    type C = de.sciss.desktop.PathField
+    type C = Peer
 
     override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
       val valueOpt  = ctx.getProperty[Ex[File   ]](w, keyValue).map(_.expand[S].value)
@@ -154,7 +98,7 @@ object PathField {
       }
 
       deferTx {
-        val c = new de.sciss.desktop.PathField
+        val c = new Peer
         valueOpt.foreach(c.value = _)
         titleOpt.foreach(c.title = _)
         c.mode    = mode
@@ -195,7 +139,7 @@ object PathField {
   }
 }
 trait PathField extends Component {
-  type C = de.sciss.desktop.PathField
+  type C = Peer
 
   var title : Ex[String]
   var mode  : Ex[Int]
