@@ -19,7 +19,7 @@ import de.sciss.lucre.event.{IEvent, IPull, ITargets}
 import de.sciss.lucre.expr.{Ex, IExpr, Model}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
+import de.sciss.lucre.swing.graph.impl.{ComboBoxIndexExpandedImpl, ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.model.Change
 
@@ -53,62 +53,6 @@ object ComboBox {
       initProperty(keyValueOption, Option.empty[A])(opt => opt.foreach(component.selection.item = _))
 
       super.init()
-    }
-  }
-
-  private final class IndexExpanded[S <: Sys[S], A](ws: View.T[S, de.sciss.swingplus.ComboBox[A]], value0: Int)
-                                                   (implicit protected val targets: ITargets[S], cursor: stm.Cursor[S])
-    extends IExpr[S, Int]
-      with IGenerator[S, Change[Int]] {
-
-    private def commit(): Unit = {
-      val c       = ws.component
-      val before  = guiValue
-      val now     = c.selection.index
-      val ch      = Change(before, now)
-      if (ch.isSignificant) {
-        guiValue    = now
-        cursor.step { implicit tx =>
-          txValue.set(now)(tx.peer)
-          fire(ch)
-        }
-      }
-    }
-
-    private[this] var guiValue: Int = _
-    private[this] val txValue = Ref(value0)
-
-    def value(implicit tx: S#Tx): Int = txValue.get(tx.peer)
-
-    def changed: IEvent[S, Change[Int]] = this
-
-    private[lucre] def pullUpdate(pull: IPull[S])(implicit tx: S#Tx): Option[Change[Int]] =
-      Some(pull.resolve[Change[Int]])
-
-    def init()(implicit tx: S#Tx): this.type = {
-      deferTx {
-        val c = ws.component
-        // N.B.: it is ok to register the same reactor twice,
-        // each listener will still be notified only once.
-        // (if we used a new `Reactions` instance, we would need
-        // to ensure it doesn't get garbage-collected!)
-        c.listenTo(c.selection)
-        c.reactions += {
-          case SelectionChanged(_) => commit()
-        }
-        guiValue = c.selection.index
-      }
-      this
-    }
-
-    def dispose()(implicit tx: S#Tx): Unit = {
-      deferTx {
-        val c = ws.component
-        // N.B.: this will stop delivering events to _any_ listener,
-        // however `dispose()` will be called for the entire graph,
-        // so that is not a problem
-        c.deafTo(c.selection)
-      }
     }
   }
 
@@ -168,8 +112,8 @@ object ComboBox {
     }
   }
 
-  private final val keyIndex          = "index"
-  private final val keyValueOption    = "valueOption"
+  private[graph] final val keyIndex          = "index"
+  private[graph] final val keyValueOption    = "valueOption"
 
   final case class Index[A](w: ComboBox[A]) extends Ex[Int] {
     override def productPrefix: String = s"ComboBox$$Index" // serialization
@@ -182,7 +126,7 @@ object ComboBox {
         val vec = w.items.expand[S].value
         if (vec.isEmpty) -1 else 0
       })(_.expand[S].value)
-      new IndexExpanded[S, A](ws, index0).init()
+      new ComboBoxIndexExpandedImpl[S, A](ws.component, index0).init()
     }
   }
 

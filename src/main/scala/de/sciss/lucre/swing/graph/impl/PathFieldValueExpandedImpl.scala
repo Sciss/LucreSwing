@@ -15,63 +15,28 @@ package de.sciss.lucre.swing.graph.impl
 
 import de.sciss.desktop.{PathField => Peer}
 import de.sciss.file.File
-import de.sciss.lucre.event.impl.IGenerator
-import de.sciss.lucre.event.{IEvent, IPull, ITargets}
-import de.sciss.lucre.expr.IExpr
+import de.sciss.lucre.event.ITargets
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.swing.deferTx
-import de.sciss.model.Change
 
-import scala.concurrent.stm.Ref
 import scala.swing.event.ValueChanged
 
 final class PathFieldValueExpandedImpl[S <: Sys[S]](peer: => Peer, value0: File)
-                                                   (implicit protected val targets: ITargets[S],
-                                                    cursor: stm.Cursor[S])
-  extends IExpr[S, File]
-    with IGenerator[S, Change[File]] {
+                                                   (implicit targets: ITargets[S], cursor: stm.Cursor[S])
+  extends ComponentPropertyExpandedImpl[S, File](value0) {
 
-  private def commit(): Unit = {
-    val c       = peer
-    val before  = guiValue
-    val now     = c.value
-    val ch      = Change(before, now)
-    if (ch.isSignificant) {
-      guiValue    = now
-      cursor.step { implicit tx =>
-        txValue.set(now)(tx.peer)
-        fire(ch)
-      }
+  protected def valueOnEDT: File = peer.value
+
+  protected def startListening(): Unit = {
+    val c = peer
+    c.listenTo(c)
+    c.reactions += {
+      case ValueChanged(_) => commit()
     }
   }
 
-  private[this] var guiValue: File = _
-  private[this] val txValue = Ref(value0)
-
-  def value(implicit tx: S#Tx): File = txValue.get(tx.peer)
-
-  def changed: IEvent[S, Change[File]] = this
-
-  private[lucre] def pullUpdate(pull: IPull[S])(implicit tx: S#Tx): Option[Change[File]] =
-    Some(pull.resolve[Change[File]])
-
-  def init()(implicit tx: S#Tx): this.type = {
-    deferTx {
-      val c = peer
-      c.listenTo(c)
-      c.reactions += {
-        case ValueChanged(_) => commit()
-      }
-      guiValue = c.value
-    }
-    this
-  }
-
-  def dispose()(implicit tx: S#Tx): Unit = {
-    deferTx {
-      val c = peer
-      c.deafTo(c)
-    }
+  protected def stopListening(): Unit = {
+    val c = peer
+    c.deafTo(c)
   }
 }
