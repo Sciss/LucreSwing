@@ -19,7 +19,7 @@ To use the library in your project:
 
     "de.sciss" %% "lucreswing" % v
 
-The current version `v` is `"1.15.1"`.
+The current version `v` is `"1.15.2"`.
 
 ## contributing
 
