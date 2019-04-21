@@ -30,7 +30,7 @@ object Empty {
 
     type C = scala.swing.Component
 
-    def init()(implicit tx: S#Tx): Unit = ()
+    def initControl()(implicit tx: S#Tx): Unit = ()
 
     def initComponent()(implicit tx: S#Tx): this.type = {
       deferTx {

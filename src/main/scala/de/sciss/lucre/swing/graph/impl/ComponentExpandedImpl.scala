@@ -42,7 +42,7 @@ trait ComponentExpandedImpl[S <: Sys[S]] extends View[S] with IControl[S] {
       case _ =>
     }
 
-  def init()(implicit tx: S#Tx): Unit = ()
+  def initControl()(implicit tx: S#Tx): Unit = ()
 
   def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
     initProperty(Component.keyEnabled   , Component.defaultEnabled  )(component.enabled   = _)

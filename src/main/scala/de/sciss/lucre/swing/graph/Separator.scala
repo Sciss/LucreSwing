@@ -26,7 +26,7 @@ object Separator {
 
     type C = scala.swing.Separator
 
-    def init()(implicit tx: S#Tx): Unit = ()
+    def initControl()(implicit tx: S#Tx): Unit = ()
 
     def initComponent()(implicit tx: S#Tx): this.type = {
       deferTx {
