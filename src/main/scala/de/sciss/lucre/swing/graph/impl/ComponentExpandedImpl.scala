@@ -13,13 +13,12 @@
 
 package de.sciss.lucre.swing.graph.impl
 
-import de.sciss.lucre.expr.Ex
+import de.sciss.lucre.expr.{Ex, IControl}
 import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.lucre.swing.graph.Component
 import de.sciss.lucre.swing.{View, deferTx}
 
-trait ComponentExpandedImpl[S <: Sys[S]] {
-  _: View[S] =>
+trait ComponentExpandedImpl[S <: Sys[S]] extends View[S] with IControl[S] {
 
   protected def w: Component
 
@@ -43,7 +42,9 @@ trait ComponentExpandedImpl[S <: Sys[S]] {
       case _ =>
     }
 
-  def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+  def init()(implicit tx: S#Tx): Unit = ()
+
+  def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
     initProperty(Component.keyEnabled   , Component.defaultEnabled  )(component.enabled   = _)
     initProperty(Component.keyFocusable , Component.defaultFocusable)(component.focusable = _)
     initProperty(Component.keyTooltip   , Component.defaultTooltip  )(component.tooltip   = _)

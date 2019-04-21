@@ -28,7 +28,7 @@ object ProgressBar {
 
     type C = scala.swing.ProgressBar
 
-    override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+    override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
       deferTx {
         val c = new scala.swing.ProgressBar
         component = c
@@ -39,7 +39,7 @@ object ProgressBar {
       initProperty(keyLabel       , defaultLabel        )(component.label         = _)
       initProperty(keyLabelPainted, defaultLabelPainted )(component.labelPainted  = _)
 
-      super.init()
+      super.initComponent()
     }
   }
 
@@ -103,7 +103,7 @@ object ProgressBar {
     override def productPrefix = "ProgressBar"   // serialization
 
     protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
-      new Expanded[S](this).init()
+      new Expanded[S](this).initComponent()
 
     def min: Ex[Int] = Min(this)
 

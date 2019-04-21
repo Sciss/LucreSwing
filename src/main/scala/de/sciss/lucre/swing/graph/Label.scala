@@ -32,7 +32,7 @@ object Label {
 
     private[this] var obs: Disposable[S#Tx] = _
 
-    override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+    override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
       val text    = w.text.expand[S]
       val text0   = text.value
       val hAlign  = ctx.getProperty[Ex[Int]](w, keyHAlign).fold(defaultHAlign)(_.expand[S].value)
@@ -62,7 +62,7 @@ object Label {
           component.text = ch.now
         }
       }
-      super.init()
+      super.initComponent()
     }
 
     override def dispose()(implicit tx: S#Tx): Unit = {
@@ -93,7 +93,7 @@ object Label {
     override def productPrefix: String = "Label" // serialization
 
     protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
-      new Expanded[S](this).init()
+      new Expanded[S](this).initComponent()
 
     def text: Ex[String] = text0
 

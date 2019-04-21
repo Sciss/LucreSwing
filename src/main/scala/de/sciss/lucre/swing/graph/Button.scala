@@ -35,7 +35,7 @@ object Button {
 
     type C = scala.swing.Button
 
-    override def init()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
+    override def initComponent()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
       val text      = w.text.expand[S]
       val text0     = text.value
       val text1     = if (text0.isEmpty) null else text0
@@ -43,7 +43,7 @@ object Button {
         val c = new scala.swing.Button(text1)
         component = c
       }
-      super.init()
+      super.initComponent()
     }
   }
 
@@ -92,7 +92,7 @@ object Button {
     override def productPrefix = "Button"   // serialization
 
     protected def mkControl[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
-      new Expanded[S](this).init()
+      new Expanded[S](this).initComponent()
 
     def clicked = Clicked(this)
 

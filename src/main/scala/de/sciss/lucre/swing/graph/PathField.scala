@@ -87,7 +87,7 @@ object PathField {
 
     type C = Peer
 
-    override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+    override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
       val valueOpt  = ctx.getProperty[Ex[File   ]](w, keyValue).map(_.expand[S].value)
       val titleOpt  = ctx.getProperty[Ex[String ]](w, keyTitle).map(_.expand[S].value)
       val mode      = ctx.getProperty[Ex[Int    ]](w, keyMode ).fold(defaultMode)(_.expand[S].value) match {
@@ -104,7 +104,7 @@ object PathField {
         c.mode    = mode
         component = c
       }
-      super.init()
+      super.initComponent()
     }
   }
 
@@ -112,7 +112,7 @@ object PathField {
     override def productPrefix: String = "PathField" // serialization
 
     protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
-      new Expanded[S](this).init()
+      new Expanded[S](this).initComponent()
 
     object value extends Model[File] {
       def apply(): Ex[File] = Value(w)

@@ -147,7 +147,7 @@ object TextField {
 
     type C = scala.swing.TextField
 
-    override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+    override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
       val textOpt   = ctx.getProperty[Ex[String]](w, keyText).map(_.expand[S].value)
       val text0     = textOpt.orNull
       val columns   = ctx.getProperty[Ex[Int    ]](w, keyColumns  ).fold(defaultColumns )(_.expand[S].value)
@@ -158,7 +158,7 @@ object TextField {
         if (editable != defaultEditable) c.editable = editable
         component = c
       }
-      super.init()
+      super.initComponent()
     }
   }
 
@@ -166,7 +166,7 @@ object TextField {
     override def productPrefix: String = "TextField" // serialization
     
     protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
-      new Expanded[S](this).init()
+      new Expanded[S](this).initComponent()
 
     object text extends Model[String] {
       def apply(): Ex[String] = Text(w)

@@ -45,7 +45,7 @@ object GridPanel {
 
     type C = Peer
 
-    override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+    override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
       val rows0           = ctx.getProperty[Ex[Int    ]](w, keyRows    ).fold(defaultRows    )(_.expand[S].value)
       val columns         = ctx.getProperty[Ex[Int    ]](w, keyColumns ).fold(defaultColumns )(_.expand[S].value)
       val compact         = ctx.getProperty[Ex[Boolean]](w, keyCompact ).exists(_.expand[S].value)
@@ -65,7 +65,7 @@ object GridPanel {
         p.contents      ++= vec
         component         = p
       }
-      super.init()
+      super.initComponent()
     }
   }
 
@@ -136,7 +136,7 @@ object GridPanel {
     override def productPrefix = "GridPanel" // s"GridPanel$$Impl" // serialization
 
     protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
-      new Expanded[S](this).init()
+      new Expanded[S](this).initComponent()
 
     def rows: Ex[Int] = Rows(this)
 

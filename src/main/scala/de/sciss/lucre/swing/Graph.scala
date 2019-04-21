@@ -15,8 +15,8 @@ package de.sciss.lucre.swing
 
 import de.sciss.lucre.expr
 import de.sciss.lucre.expr.impl.{ExElem, GraphBuilderMixin, GraphSerializerMixin}
-import de.sciss.lucre.expr.{Control, Ex}
-import de.sciss.lucre.stm.{Cursor, Disposable, Obj, Sys, Workspace}
+import de.sciss.lucre.expr.{Control, Ex, IControl}
+import de.sciss.lucre.stm.{Cursor, Obj, Sys, Workspace}
 import de.sciss.serial.{DataInput, DataOutput, ImmutableSerializer}
 
 import scala.collection.immutable.{IndexedSeq => Vec, Seq => ISeq}
@@ -67,12 +67,15 @@ object Graph {
     }
   }
 
-  private final class ExpandedImpl[S <: Sys[S]](val view: View[S], controls: ISeq[Disposable[S#Tx]])
-    extends View[S] {
+  private final class ExpandedImpl[S <: Sys[S]](val view: View[S], controls: ISeq[IControl[S]])
+    extends View[S] with IControl[S] {
 
     type C = scala.swing.Component
 
     def component: Component = view.component
+
+    def init()(implicit tx: S#Tx): Unit =
+      controls.foreach(_.init())
 
     def dispose()(implicit tx: S#Tx): Unit = {
       // N.B.: the view is also a control and thus will be disposed along with `controls`
@@ -85,10 +88,10 @@ object Graph {
 final case class Graph(widget: Widget, controls: Vec[Control.Configured])
   extends expr.Graph {
 
-  def expand[S <: Sys[S]](self: Option[Obj[S]] = None)
-                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: Cursor[S]): View[S] = {
+  override def expand[S <: Sys[S]](self: Option[Obj[S]])
+                                  (implicit tx: S#Tx, workspace: Workspace[S], cursor: Cursor[S]): View[S] with IControl[S]= {
     implicit val ctx: Ex.Context[S] = Ex.Context(this, self.map(tx.newHandle(_)))
-    val view: View[S] = widget.expand[S]
+    val view: View[S] with IControl[S] = widget.expand[S]
     if (controls.isEmpty) view else {
       val disp = controls.map(_.control.expand[S])
       new Graph.ExpandedImpl(view, disp)

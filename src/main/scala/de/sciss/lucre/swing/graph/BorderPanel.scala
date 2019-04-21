@@ -31,12 +31,12 @@ object BorderPanel {
            ): BorderPanel =
     Impl(north = north, south = south, west = west, east = east, center = center)
 
-  private final class Expanded[S <: Sys[S]](protected val w: BorderPanel) extends View[S]
-    with ComponentHolder[scala.swing.BorderPanel] with PanelExpandedImpl[S] {
+  private final class Expanded[S <: Sys[S]](protected val w: BorderPanel)
+    extends ComponentHolder[scala.swing.BorderPanel] with PanelExpandedImpl[S] {
 
     type C = scala.swing.BorderPanel
 
-    override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+    override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
       val hGap            = ctx.getProperty[Ex[Int    ]](w, keyHGap    ).fold(defaultHGap    )(_.expand[S].value)
       val vGap            = ctx.getProperty[Ex[Int    ]](w, keyVGap    ).fold(defaultVGap    )(_.expand[S].value)
       val north : View[S] = if (w.north   != Empty.instance) w.north  .expand[S] else null
@@ -57,7 +57,7 @@ object BorderPanel {
         if (center  != null) peer.add(center.component.peer, BorderLayout.CENTER)
         component = p
       }
-      super.init()
+      super.initComponent()
     }
   }
 
@@ -108,7 +108,7 @@ object BorderPanel {
     }
 
     protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
-      new Expanded[S](this).init()
+      new Expanded[S](this).initComponent()
   }
 
   private final val keyHGap               = "hGap"

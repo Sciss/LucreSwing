@@ -32,7 +32,7 @@ object FlowPanel {
 
     type C = Peer
 
-    override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+    override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
       val hGap      = ctx.getProperty[Ex[Int    ]](w, keyHGap    ).fold(defaultHGap    )(_.expand[S].value)
       val vGap      = ctx.getProperty[Ex[Int    ]](w, keyVGap    ).fold(defaultVGap    )(_.expand[S].value)
       val align     = ctx.getProperty[Ex[Int    ]](w, keyAlign   ).fold(defaultAlign   )(_.expand[S].value)
@@ -55,7 +55,7 @@ object FlowPanel {
         }
         component = c
       }
-      super.init()
+      super.initComponent()
     }
   }
 
@@ -90,7 +90,7 @@ object FlowPanel {
     override def productPrefix = "FlowPanel" // s"FlowPanel$$Impl" // serialization
 
     protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
-      new Expanded[S](this).init()
+      new Expanded[S](this).initComponent()
 
     def hGap: Ex[Int] = HGap(this)
 

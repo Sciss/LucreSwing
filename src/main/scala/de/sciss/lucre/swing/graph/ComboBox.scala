@@ -38,7 +38,7 @@ object ComboBox {
 
     type C = de.sciss.swingplus.ComboBox[A]
 
-    override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+    override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
       val index   = ctx.getProperty[Ex[Int]]      (w, keyIndex).fold(-1)(_.expand[S].value)
       val itemOpt = ctx.getProperty[Ex[Option[A]]](w, keyValueOption).flatMap(_.expand[S].value)
       val items0  = w.items.expand[S].value
@@ -52,7 +52,7 @@ object ComboBox {
       initProperty(keyIndex, 0)(component.selection.index = _)
       initProperty(keyValueOption, Option.empty[A])(opt => opt.foreach(component.selection.item = _))
 
-      super.init()
+      super.initComponent()
     }
   }
 
@@ -149,7 +149,7 @@ object ComboBox {
     override def productPrefix = "ComboBox"   // serialization
 
     protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
-      new Expanded[S, A](this).init()
+      new Expanded[S, A](this).initComponent()
 
     object index extends Model[Int] {
       def apply(): Ex[Int] = Index(w)

@@ -66,7 +66,7 @@ object ResampleDlgTest extends AppLike {
       ggProg.value = ggSimu.value()
       val lineSimu = ggSimu
 
-      ggRender.clicked ---> Println("TODO: Render")
+      ggRender.clicked ---> PrintLn("TODO: Render")
 
       val lineIn    = FlowPanel(lbIn, ggIn)
       val lineOut   = FlowPanel(lbOut, ggOut)

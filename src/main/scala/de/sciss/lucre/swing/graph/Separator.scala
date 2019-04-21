@@ -14,19 +14,21 @@
 package de.sciss.lucre.swing
 package graph
 
-import de.sciss.lucre.expr.Ex
+import de.sciss.lucre.expr.{Ex, IControl}
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.impl.ComponentHolder
 
 object Separator {
   def apply(): Separator = Impl()
 
-  private final class Expanded[S <: Sys[S]] extends View[S]
+  private final class Expanded[S <: Sys[S]] extends View[S] with IControl[S]
     with ComponentHolder[scala.swing.Separator] {
 
     type C = scala.swing.Separator
 
-    def init()(implicit tx: S#Tx): this.type = {
+    def init()(implicit tx: S#Tx): Unit = ()
+
+    def initComponent()(implicit tx: S#Tx): this.type = {
       deferTx {
         component = new scala.swing.Separator
       }
@@ -40,7 +42,7 @@ object Separator {
     override def productPrefix = "Separator"  // serialization
 
     protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
-      new Expanded[S].init()
+      new Expanded[S].initComponent()
   }
 }
 trait Separator extends Widget {

@@ -15,16 +15,14 @@ package de.sciss.lucre.swing.graph.impl
 
 import de.sciss.lucre.expr.Ex
 import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.Panel
 
 trait PanelExpandedImpl[S <: Sys[S]] extends ComponentExpandedImpl[S] {
-  _: View[S] =>
 
-  override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+  override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
     initProperty(Panel.keyBorder, Panel.defaultBorder) {
       c => if (c != Panel.defaultBorder) component.border = c.mkPeer()
     }
-    super.init()
+    super.initComponent()
   }
 }

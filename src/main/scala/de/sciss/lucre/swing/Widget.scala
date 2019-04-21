@@ -13,11 +13,11 @@
 
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.expr.Control
+import de.sciss.lucre.expr.{Control, IControl}
 import de.sciss.lucre.stm.Sys
 
 trait Widget extends Control {
   type C <: scala.swing.Component
 
-  type Repr[S <: Sys[S]] = View.T[S, C]
+  type Repr[S <: Sys[S]] = View.T[S, C] with IControl[S]
 }

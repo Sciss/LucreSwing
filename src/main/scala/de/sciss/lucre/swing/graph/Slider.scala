@@ -35,7 +35,7 @@ object Slider {
 
     type C = scala.swing.Slider
 
-    override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+    override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
       val minOpt    = ctx.getProperty[Ex[Int]](w, keyMin  ).map(_.expand[S].value)
       val maxOpt    = ctx.getProperty[Ex[Int]](w, keyMax  ).map(_.expand[S].value)
       val valueOpt  = ctx.getProperty[Ex[Int]](w, keyValue).map(_.expand[S].value)
@@ -52,7 +52,7 @@ object Slider {
       initProperty(keyMax   , defaultMax  )(component.max   = _)
       initProperty(keyValue , defaultValue)(component.value = _)
 
-      super.init()
+      super.initComponent()
     }
 
 //    override def dispose()(implicit tx: S#Tx): Unit = super.dispose()
@@ -148,7 +148,7 @@ object Slider {
     override def productPrefix = "Slider"   // serialization
 
     protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
-      new Expanded[S](this).init()
+      new Expanded[S](this).initComponent()
 
     def min: Ex[Int] = Min(this)
 

@@ -178,7 +178,7 @@ object IntField {
 
     type C = Peer[Int]
 
-    override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+    override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
       val value0    = ctx.getProperty[Ex[Int    ]](w, keyValue    ).fold(defaultValue   )(_.expand[S].value)
       val min       = ctx.getProperty[Ex[Int    ]](w, keyMin      ).fold(defaultMin     )(_.expand[S].value)
       val max       = ctx.getProperty[Ex[Int    ]](w, keyMax      ).fold(defaultMax     )(_.expand[S].value)
@@ -231,7 +231,7 @@ object IntField {
 //      initProperty(keyMin   , defaultMin  )(component.min   = _)
       initProperty(keyValue , defaultValue)(component.value = _)
 
-      super.init()
+      super.initComponent()
     }
   }
 
@@ -239,7 +239,7 @@ object IntField {
     override def productPrefix: String = "IntField" // serialization
 
     protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
-      new Expanded[S](this).init()
+      new Expanded[S](this).initComponent()
 
     object value extends Model[Int] {
       def apply(): Ex[Int] = Value(w)

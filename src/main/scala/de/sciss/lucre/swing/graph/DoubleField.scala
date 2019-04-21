@@ -189,7 +189,7 @@ object DoubleField {
 
     type C = Peer[Double]
 
-    override def init()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+    override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
       val value0    = ctx.getProperty[Ex[Double ]](w, keyValue    ).fold(defaultValue   )(_.expand[S].value)
       val min       = ctx.getProperty[Ex[Double ]](w, keyMin      ).fold(defaultMin     )(_.expand[S].value)
       val max       = ctx.getProperty[Ex[Double ]](w, keyMax      ).fold(defaultMax     )(_.expand[S].value)
@@ -241,7 +241,7 @@ object DoubleField {
 
       initProperty(keyValue, defaultValue)(component.value = _)
 
-      super.init()
+      super.initComponent()
     }
   }
 
@@ -249,7 +249,7 @@ object DoubleField {
     override def productPrefix: String = "DoubleField" // serialization
 
     protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
-      new Expanded[S](this).init()
+      new Expanded[S](this).initComponent()
 
     object value extends Model[Double] {
       def apply(): Ex[Double] = Value(w)
