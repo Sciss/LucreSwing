@@ -20,13 +20,13 @@ import de.sciss.lucre.swing.{View, deferTx}
 
 trait ComponentExpandedImpl[S <: Sys[S]] extends View[S] with IControl[S] {
 
-  protected def w: Component
+  protected def peer: Component
 
   private[this] var obs = List.empty[Disposable[S#Tx]]
 
   protected final def initProperty[A](key: String, default: A)(set: A => Unit)
                                      (implicit tx: S#Tx, ctx: Ex.Context[S]): Unit =
-    ctx.getProperty[Ex[A]](w, key) match {
+    ctx.getProperty[Ex[A]](peer, key) match {
       case Some(ex) =>
         val expr    = ex.expand[S]
         val value0  = expr.value

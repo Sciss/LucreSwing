@@ -30,15 +30,15 @@ import scala.concurrent.stm.Ref
 object Slider {
   def apply(): Slider = Impl()
 
-  private final class Expanded[S <: Sys[S]](protected val w: Slider) extends View[S]
+  private final class Expanded[S <: Sys[S]](protected val peer: Slider) extends View[S]
     with ComponentHolder[scala.swing.Slider] with ComponentExpandedImpl[S] {
 
     type C = scala.swing.Slider
 
     override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
-      val minOpt    = ctx.getProperty[Ex[Int]](w, keyMin  ).map(_.expand[S].value)
-      val maxOpt    = ctx.getProperty[Ex[Int]](w, keyMax  ).map(_.expand[S].value)
-      val valueOpt  = ctx.getProperty[Ex[Int]](w, keyValue).map(_.expand[S].value)
+      val minOpt    = ctx.getProperty[Ex[Int]](peer, keyMin  ).map(_.expand[S].value)
+      val maxOpt    = ctx.getProperty[Ex[Int]](peer, keyMax  ).map(_.expand[S].value)
+      val valueOpt  = ctx.getProperty[Ex[Int]](peer, keyValue).map(_.expand[S].value)
 
       deferTx {
         val c = new scala.swing.Slider

@@ -23,7 +23,7 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 object ProgressBar {
   def apply(): ProgressBar = Impl()
 
-  private final class Expanded[S <: Sys[S]](protected val w: ProgressBar) extends View[S]
+  private final class Expanded[S <: Sys[S]](protected val peer: ProgressBar) extends View[S]
     with ComponentHolder[scala.swing.ProgressBar] with ComponentExpandedImpl[S] {
 
     type C = scala.swing.ProgressBar

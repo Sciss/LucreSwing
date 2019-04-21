@@ -142,16 +142,16 @@ object TextField {
     def aux: List[Aux] = Nil
   }
 
-  private final class Expanded[S <: Sys[S]](protected val w: TextField) extends View[S]
+  private final class Expanded[S <: Sys[S]](protected val peer: TextField) extends View[S]
     with ComponentHolder[scala.swing.TextField] with ComponentExpandedImpl[S] {
 
     type C = scala.swing.TextField
 
     override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
-      val textOpt   = ctx.getProperty[Ex[String]](w, keyText).map(_.expand[S].value)
+      val textOpt   = ctx.getProperty[Ex[String]](peer, keyText).map(_.expand[S].value)
       val text0     = textOpt.orNull
-      val columns   = ctx.getProperty[Ex[Int    ]](w, keyColumns  ).fold(defaultColumns )(_.expand[S].value)
-      val editable  = ctx.getProperty[Ex[Boolean]](w, keyEditable ).fold(defaultEditable)(_.expand[S].value)
+      val columns   = ctx.getProperty[Ex[Int    ]](peer, keyColumns  ).fold(defaultColumns )(_.expand[S].value)
+      val editable  = ctx.getProperty[Ex[Boolean]](peer, keyEditable ).fold(defaultEditable)(_.expand[S].value)
 
       deferTx {
         val c = new scala.swing.TextField(text0, columns)

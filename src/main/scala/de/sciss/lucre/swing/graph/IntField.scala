@@ -173,20 +173,20 @@ object IntField {
     }
   }
 
-  private final class Expanded[S <: Sys[S]](protected val w: IntField) extends View[S]
+  private final class Expanded[S <: Sys[S]](protected val peer: IntField) extends View[S]
     with ComponentHolder[Peer[Int]] with ComponentExpandedImpl[S] {
 
     type C = Peer[Int]
 
     override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
-      val value0    = ctx.getProperty[Ex[Int    ]](w, keyValue    ).fold(defaultValue   )(_.expand[S].value)
-      val min       = ctx.getProperty[Ex[Int    ]](w, keyMin      ).fold(defaultMin     )(_.expand[S].value)
-      val max       = ctx.getProperty[Ex[Int    ]](w, keyMax      ).fold(defaultMax     )(_.expand[S].value)
-      val step      = ctx.getProperty[Ex[Int    ]](w, keyStep     ).fold(defaultStep    )(_.expand[S].value)
-      val unitS     = ctx.getProperty[Ex[String ]](w, keyUnit     ).fold(defaultUnit    )(_.expand[S].value)
-      val editable  = ctx.getProperty[Ex[Boolean]](w, keyEditable ).fold(defaultEditable)(_.expand[S].value)
+      val value0    = ctx.getProperty[Ex[Int    ]](peer, keyValue    ).fold(defaultValue   )(_.expand[S].value)
+      val min       = ctx.getProperty[Ex[Int    ]](peer, keyMin      ).fold(defaultMin     )(_.expand[S].value)
+      val max       = ctx.getProperty[Ex[Int    ]](peer, keyMax      ).fold(defaultMax     )(_.expand[S].value)
+      val step      = ctx.getProperty[Ex[Int    ]](peer, keyStep     ).fold(defaultStep    )(_.expand[S].value)
+      val unitS     = ctx.getProperty[Ex[String ]](peer, keyUnit     ).fold(defaultUnit    )(_.expand[S].value)
+      val editable  = ctx.getProperty[Ex[Boolean]](peer, keyEditable ).fold(defaultEditable)(_.expand[S].value)
 
-      val prototype = ctx.getProperty[Ex[ISeq[Int]]](w, keyPrototype).getOrElse(defaultPrototype(w)).expand[S].value
+      val prototype = ctx.getProperty[Ex[ISeq[Int]]](peer, keyPrototype).getOrElse(defaultPrototype(peer)).expand[S].value
 
       deferTx {
         val fmt: ParamFormat[Int] = new ParamFormat[Int] {

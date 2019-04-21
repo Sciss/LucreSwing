@@ -25,7 +25,7 @@ import scala.swing.{Swing, Label => Peer}
 object Label {
   def apply(text: Ex[String]): Label = Impl(text)
 
-  private final class Expanded[S <: Sys[S]](protected val w: Label) extends View[S]
+  private final class Expanded[S <: Sys[S]](protected val peer: Label) extends View[S]
     with ComponentHolder[Peer] with ComponentExpandedImpl[S] {
 
     type C = Peer
@@ -33,10 +33,10 @@ object Label {
     private[this] var obs: Disposable[S#Tx] = _
 
     override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
-      val text    = w.text.expand[S]
+      val text    = peer.text.expand[S]
       val text0   = text.value
-      val hAlign  = ctx.getProperty[Ex[Int]](w, keyHAlign).fold(defaultHAlign)(_.expand[S].value)
-      val vAlign  = ctx.getProperty[Ex[Int]](w, keyVAlign).fold(defaultVAlign)(_.expand[S].value)
+      val hAlign  = ctx.getProperty[Ex[Int]](peer, keyHAlign).fold(defaultHAlign)(_.expand[S].value)
+      val vAlign  = ctx.getProperty[Ex[Int]](peer, keyVAlign).fold(defaultVAlign)(_.expand[S].value)
 
       deferTx {
         val hAlignSwing = hAlign match {

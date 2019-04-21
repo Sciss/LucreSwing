@@ -32,16 +32,16 @@ object CheckBox {
 
   def apply(text: Ex[String] = ""): CheckBox = Impl(text)
 
-  private final class Expanded[S <: Sys[S]](protected val w: CheckBox) extends View[S]
+  private final class Expanded[S <: Sys[S]](protected val peer: CheckBox) extends View[S]
     with ComponentHolder[scala.swing.CheckBox] with ComponentExpandedImpl[S] {
 
     type C = scala.swing.CheckBox
 
     override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
-      val text      = w.text.expand[S]
+      val text      = peer.text.expand[S]
       val text0     = text.value
       val text1     = if (text0.isEmpty) null else text0
-      val selected  = ctx.getProperty[Ex[Boolean]](w, keySelected).exists(_.expand[S].value)
+      val selected  = ctx.getProperty[Ex[Boolean]](peer, keySelected).exists(_.expand[S].value)
       deferTx {
         val c = new scala.swing.CheckBox(text1)
         if (selected) c.selected = true

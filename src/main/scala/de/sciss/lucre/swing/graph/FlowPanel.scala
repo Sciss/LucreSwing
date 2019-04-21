@@ -27,16 +27,16 @@ import scala.swing.{FlowPanel => Peer}
 object FlowPanel {
   def apply(contents: Widget*): FlowPanel = Impl(contents)
 
-  private final class Expanded[S <: Sys[S]](protected val w: FlowPanel) extends View[S]
+  private final class Expanded[S <: Sys[S]](protected val peer: FlowPanel) extends View[S]
     with ComponentHolder[Peer] with PanelExpandedImpl[S] {
 
     type C = Peer
 
     override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
-      val hGap      = ctx.getProperty[Ex[Int    ]](w, keyHGap    ).fold(defaultHGap    )(_.expand[S].value)
-      val vGap      = ctx.getProperty[Ex[Int    ]](w, keyVGap    ).fold(defaultVGap    )(_.expand[S].value)
-      val align     = ctx.getProperty[Ex[Int    ]](w, keyAlign   ).fold(defaultAlign   )(_.expand[S].value)
-      val contentsV = w.contents.map(_.expand[S])
+      val hGap      = ctx.getProperty[Ex[Int    ]](peer, keyHGap    ).fold(defaultHGap    )(_.expand[S].value)
+      val vGap      = ctx.getProperty[Ex[Int    ]](peer, keyVGap    ).fold(defaultVGap    )(_.expand[S].value)
+      val align     = ctx.getProperty[Ex[Int    ]](peer, keyAlign   ).fold(defaultAlign   )(_.expand[S].value)
+      val contentsV = peer.contents.map(_.expand[S])
       deferTx {
         val alignSwing = align match {
           case graph.Align.Left     => Peer.Alignment.Left

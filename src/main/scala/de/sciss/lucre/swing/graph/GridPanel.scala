@@ -40,21 +40,21 @@ object GridPanel {
   private final val defaultHGap           = 4
   private final val defaultVGap           = 2
 
-  private final class Expanded[S <: Sys[S]](protected val w: GridPanel) extends View[S]
+  private final class Expanded[S <: Sys[S]](protected val peer: GridPanel) extends View[S]
     with ComponentHolder[Peer] with PanelExpandedImpl[S] {
 
     type C = Peer
 
     override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
-      val rows0           = ctx.getProperty[Ex[Int    ]](w, keyRows    ).fold(defaultRows    )(_.expand[S].value)
-      val columns         = ctx.getProperty[Ex[Int    ]](w, keyColumns ).fold(defaultColumns )(_.expand[S].value)
-      val compact         = ctx.getProperty[Ex[Boolean]](w, keyCompact ).exists(_.expand[S].value)
-      val hGap            = ctx.getProperty[Ex[Int    ]](w, keyHGap    ).fold(defaultHGap    )(_.expand[S].value)
-      val vGap            = ctx.getProperty[Ex[Int    ]](w, keyVGap    ).fold(defaultVGap    )(_.expand[S].value)
-      val compactRows     = compact || ctx.getProperty[Ex[Boolean]](w, keyCompactRows   ).exists(_.expand[S].value)
-      val compactColumns  = compact || ctx.getProperty[Ex[Boolean]](w, keyCompactColumns).exists(_.expand[S].value)
+      val rows0           = ctx.getProperty[Ex[Int    ]](peer, keyRows    ).fold(defaultRows    )(_.expand[S].value)
+      val columns         = ctx.getProperty[Ex[Int    ]](peer, keyColumns ).fold(defaultColumns )(_.expand[S].value)
+      val compact         = ctx.getProperty[Ex[Boolean]](peer, keyCompact ).exists(_.expand[S].value)
+      val hGap            = ctx.getProperty[Ex[Int    ]](peer, keyHGap    ).fold(defaultHGap    )(_.expand[S].value)
+      val vGap            = ctx.getProperty[Ex[Int    ]](peer, keyVGap    ).fold(defaultVGap    )(_.expand[S].value)
+      val compactRows     = compact || ctx.getProperty[Ex[Boolean]](peer, keyCompactRows   ).exists(_.expand[S].value)
+      val compactColumns  = compact || ctx.getProperty[Ex[Boolean]](peer, keyCompactColumns).exists(_.expand[S].value)
       val rows            = if (rows0 == 0 && columns == 0) 1 else 0  // not allowed to have both zero
-      val contents        = w.contents.map(_.expand[S])
+      val contents        = peer.contents.map(_.expand[S])
       deferTx {
         val vec           = contents.map(_.component)
         val p             = new Peer(rows0 = rows, cols0 = columns)

@@ -184,21 +184,21 @@ object DoubleField {
     }
   }
 
-  private final class Expanded[S <: Sys[S]](protected val w: DoubleField) extends View[S]
+  private final class Expanded[S <: Sys[S]](protected val peer: DoubleField) extends View[S]
     with ComponentHolder[Peer[Double]] with ComponentExpandedImpl[S] {
 
     type C = Peer[Double]
 
     override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
-      val value0    = ctx.getProperty[Ex[Double ]](w, keyValue    ).fold(defaultValue   )(_.expand[S].value)
-      val min       = ctx.getProperty[Ex[Double ]](w, keyMin      ).fold(defaultMin     )(_.expand[S].value)
-      val max       = ctx.getProperty[Ex[Double ]](w, keyMax      ).fold(defaultMax     )(_.expand[S].value)
-      val step      = ctx.getProperty[Ex[Double ]](w, keyStep     ).fold(defaultStep    )(_.expand[S].value)
-      val decimals  = ctx.getProperty[Ex[Int    ]](w, keyDecimals ).fold(defaultDecimals)(_.expand[S].value)
-      val unitS     = ctx.getProperty[Ex[String ]](w, keyUnit     ).fold(defaultUnit    )(_.expand[S].value)
-      val editable  = ctx.getProperty[Ex[Boolean]](w, keyEditable ).fold(defaultEditable)(_.expand[S].value)
+      val value0    = ctx.getProperty[Ex[Double ]](peer, keyValue    ).fold(defaultValue   )(_.expand[S].value)
+      val min       = ctx.getProperty[Ex[Double ]](peer, keyMin      ).fold(defaultMin     )(_.expand[S].value)
+      val max       = ctx.getProperty[Ex[Double ]](peer, keyMax      ).fold(defaultMax     )(_.expand[S].value)
+      val step      = ctx.getProperty[Ex[Double ]](peer, keyStep     ).fold(defaultStep    )(_.expand[S].value)
+      val decimals  = ctx.getProperty[Ex[Int    ]](peer, keyDecimals ).fold(defaultDecimals)(_.expand[S].value)
+      val unitS     = ctx.getProperty[Ex[String ]](peer, keyUnit     ).fold(defaultUnit    )(_.expand[S].value)
+      val editable  = ctx.getProperty[Ex[Boolean]](peer, keyEditable ).fold(defaultEditable)(_.expand[S].value)
 
-      val prototype = ctx.getProperty[Ex[ISeq[Double]]](w, keyPrototype).getOrElse(defaultPrototype(w)).expand[S].value
+      val prototype = ctx.getProperty[Ex[ISeq[Double]]](peer, keyPrototype).getOrElse(defaultPrototype(peer)).expand[S].value
 
       deferTx {
         val fmt: ParamFormat[Double] = new ParamFormat[Double] {

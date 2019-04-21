@@ -82,15 +82,15 @@ object PathField {
     }
   }
 
-  private final class Expanded[S <: Sys[S]](protected val w: PathField) extends View[S]
+  private final class Expanded[S <: Sys[S]](protected val peer: PathField) extends View[S]
     with ComponentHolder[Peer] with ComponentExpandedImpl[S] {
 
     type C = Peer
 
     override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
-      val valueOpt  = ctx.getProperty[Ex[File   ]](w, keyValue).map(_.expand[S].value)
-      val titleOpt  = ctx.getProperty[Ex[String ]](w, keyTitle).map(_.expand[S].value)
-      val mode      = ctx.getProperty[Ex[Int    ]](w, keyMode ).fold(defaultMode)(_.expand[S].value) match {
+      val valueOpt  = ctx.getProperty[Ex[File   ]](peer, keyValue).map(_.expand[S].value)
+      val titleOpt  = ctx.getProperty[Ex[String ]](peer, keyTitle).map(_.expand[S].value)
+      val mode      = ctx.getProperty[Ex[Int    ]](peer, keyMode ).fold(defaultMode)(_.expand[S].value) match {
         case 0 => FileDialog.Open
         case 1 => FileDialog.Save
         case 2 => FileDialog.Folder

@@ -33,15 +33,15 @@ object ComboBox {
 
   def apply[A](items: Ex[ISeq[A]]): ComboBox[A] = Impl(items)
 
-  private final class Expanded[S <: Sys[S], A](protected val w: ComboBox[A]) extends View[S]
+  private final class Expanded[S <: Sys[S], A](protected val peer: ComboBox[A]) extends View[S]
     with ComponentHolder[de.sciss.swingplus.ComboBox[A]] with ComponentExpandedImpl[S] {
 
     type C = de.sciss.swingplus.ComboBox[A]
 
     override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
-      val index   = ctx.getProperty[Ex[Int]]      (w, keyIndex).fold(-1)(_.expand[S].value)
-      val itemOpt = ctx.getProperty[Ex[Option[A]]](w, keyValueOption).flatMap(_.expand[S].value)
-      val items0  = w.items.expand[S].value
+      val index   = ctx.getProperty[Ex[Int]]      (peer, keyIndex).fold(-1)(_.expand[S].value)
+      val itemOpt = ctx.getProperty[Ex[Option[A]]](peer, keyValueOption).flatMap(_.expand[S].value)
+      val items0  = peer.items.expand[S].value
       deferTx {
         val c = new de.sciss.swingplus.ComboBox[A](items0)
         if (index >= 0 && index < items0.size) c.selection.index = index

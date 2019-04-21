@@ -30,13 +30,13 @@ object Button {
 
   def apply(text: Ex[String] = ""): Button = Impl(text)
 
-  private final class Expanded[S <: Sys[S]](protected val w: Button) extends View[S]
+  private final class Expanded[S <: Sys[S]](protected val peer: Button) extends View[S]
     with ComponentHolder[scala.swing.Button] with ComponentExpandedImpl[S] {
 
     type C = scala.swing.Button
 
     override def initComponent()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
-      val text      = w.text.expand[S]
+      val text      = peer.text.expand[S]
       val text0     = text.value
       val text1     = if (text0.isEmpty) null else text0
       deferTx {

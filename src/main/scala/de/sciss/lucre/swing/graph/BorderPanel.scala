@@ -31,19 +31,19 @@ object BorderPanel {
            ): BorderPanel =
     Impl(north = north, south = south, west = west, east = east, center = center)
 
-  private final class Expanded[S <: Sys[S]](protected val w: BorderPanel)
+  private final class Expanded[S <: Sys[S]](protected val peer: BorderPanel)
     extends ComponentHolder[scala.swing.BorderPanel] with PanelExpandedImpl[S] {
 
     type C = scala.swing.BorderPanel
 
     override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
-      val hGap            = ctx.getProperty[Ex[Int    ]](w, keyHGap    ).fold(defaultHGap    )(_.expand[S].value)
-      val vGap            = ctx.getProperty[Ex[Int    ]](w, keyVGap    ).fold(defaultVGap    )(_.expand[S].value)
-      val north : View[S] = if (w.north   != Empty.instance) w.north  .expand[S] else null
-      val south : View[S] = if (w.south   != Empty.instance) w.south  .expand[S] else null
-      val west  : View[S] = if (w.west    != Empty.instance) w.west   .expand[S] else null
-      val east  : View[S] = if (w.east    != Empty.instance) w.east   .expand[S] else null
-      val center: View[S] = if (w.center  != Empty.instance) w.center .expand[S] else null
+      val hGap            = ctx.getProperty[Ex[Int    ]](peer, keyHGap    ).fold(defaultHGap    )(_.expand[S].value)
+      val vGap            = ctx.getProperty[Ex[Int    ]](peer, keyVGap    ).fold(defaultVGap    )(_.expand[S].value)
+      val north : View[S] = if (peer.north   != Empty.instance) peer.north  .expand[S] else null
+      val south : View[S] = if (peer.south   != Empty.instance) peer.south  .expand[S] else null
+      val west  : View[S] = if (peer.west    != Empty.instance) peer.west   .expand[S] else null
+      val east  : View[S] = if (peer.east    != Empty.instance) peer.east   .expand[S] else null
+      val center: View[S] = if (peer.center  != Empty.instance) peer.center .expand[S] else null
       deferTx {
         val p     = new scala.swing.BorderPanel
         val lay   = p.layoutManager
@@ -111,10 +111,10 @@ object BorderPanel {
       new Expanded[S](this).initComponent()
   }
 
-  private final val keyHGap               = "hGap"
-  private final val keyVGap               = "vGap"
-  private final val defaultHGap           = 4
-  private final val defaultVGap           = 2
+  private final val keyHGap     = "hGap"
+  private final val keyVGap     = "vGap"
+  private final val defaultHGap = 4
+  private final val defaultVGap = 2
 }
 trait BorderPanel extends Panel {
   type C = scala.swing.BorderPanel
