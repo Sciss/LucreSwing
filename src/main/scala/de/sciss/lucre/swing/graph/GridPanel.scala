@@ -15,7 +15,7 @@ package de.sciss.lucre.swing
 package graph
 
 import de.sciss.lucre.expr.graph.Constant
-import de.sciss.lucre.expr.{Ex, IExpr}
+import de.sciss.lucre.expr.{Ex, IControl, IExpr}
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.impl.{PanelExpandedImpl, PanelImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
@@ -194,6 +194,8 @@ object GridPanel {
   */
 trait GridPanel extends Panel {
   type C = Peer
+
+  type Repr[S <: Sys[S]] = View.T[S, C] with IControl[S]
 
   /** Number of rows or zero for automatic determination. */
   var rows    : Ex[Int]

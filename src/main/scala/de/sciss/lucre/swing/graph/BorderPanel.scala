@@ -16,7 +16,7 @@ package de.sciss.lucre.swing.graph
 import java.awt.BorderLayout
 
 import de.sciss.lucre.expr.graph.Constant
-import de.sciss.lucre.expr.{Ex, IExpr}
+import de.sciss.lucre.expr.{Ex, IControl, IExpr}
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.impl.{PanelExpandedImpl, PanelImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
@@ -118,6 +118,8 @@ object BorderPanel {
 }
 trait BorderPanel extends Panel {
   type C = scala.swing.BorderPanel
+
+  type Repr[S <: Sys[S]] = View.T[S, C] with IControl[S]
 
   def north : Widget
   def south : Widget

@@ -13,13 +13,17 @@
 
 package de.sciss.lucre.swing.graph
 
-import de.sciss.lucre.expr.{Ex, Model}
+import de.sciss.lucre.expr.{Ex, IControl, Model}
+import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.swing.View
 
 import scala.collection.immutable.{Seq => ISeq}
 
 trait NumberField[A] extends Component {
   type C = de.sciss.audiowidgets.ParamField[A]
 
+  type Repr[S <: Sys[S]] = View.T[S, C] with IControl[S]
+  
   var min       : Ex[A]
   var max       : Ex[A]
   var step      : Ex[A]

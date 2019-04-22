@@ -15,7 +15,7 @@ package de.sciss.lucre.swing
 package graph
 
 import de.sciss.lucre.expr.graph.Constant
-import de.sciss.lucre.expr.{Ex, IExpr}
+import de.sciss.lucre.expr.{Ex, IControl, IExpr}
 import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
@@ -119,6 +119,8 @@ object Label {
 }
 trait Label extends Component {
   type C = Peer
+
+  type Repr[S <: Sys[S]] = View.T[S, C] with IControl[S]
 
   /** The label's text */
   def text: Ex[String]

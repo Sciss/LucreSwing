@@ -15,7 +15,7 @@ package de.sciss.lucre.swing
 package graph
 
 import de.sciss.lucre.expr.graph.Constant
-import de.sciss.lucre.expr.{Ex, IExpr}
+import de.sciss.lucre.expr.{Ex, IControl, IExpr}
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
@@ -143,6 +143,8 @@ object ProgressBar {
 }
 trait ProgressBar extends Component {
   type C = scala.swing.ProgressBar
+
+  type Repr[S <: Sys[S]] = View.T[S, C] with IControl[S]
 
   var min         : Ex[Int]
   var max         : Ex[Int]

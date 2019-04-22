@@ -20,7 +20,7 @@ import de.sciss.lucre.aux.Aux
 import de.sciss.lucre.event.impl.IGenerator
 import de.sciss.lucre.event.{IEvent, IPull, ITargets}
 import de.sciss.lucre.expr.graph.Constant
-import de.sciss.lucre.expr.{Ex, IExpr, Model}
+import de.sciss.lucre.expr.{Ex, IControl, IExpr, Model}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
@@ -153,6 +153,8 @@ object TextField {
       val columns   = ctx.getProperty[Ex[Int    ]](peer, keyColumns  ).fold(defaultColumns )(_.expand[S].value)
       val editable  = ctx.getProperty[Ex[Boolean]](peer, keyEditable ).fold(defaultEditable)(_.expand[S].value)
 
+//      println(s"text0 '$text0', columns $columns")
+
       deferTx {
         val c = new scala.swing.TextField(text0, columns)
         if (editable != defaultEditable) c.editable = editable
@@ -194,6 +196,8 @@ object TextField {
 }
 trait TextField extends Component {
   type C = scala.swing.TextField
+
+  type Repr[S <: Sys[S]] = View.T[S, C] with IControl[S]
 
   var columns: Ex[Int]
 

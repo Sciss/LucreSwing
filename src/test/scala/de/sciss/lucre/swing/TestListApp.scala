@@ -3,18 +3,20 @@ package de.sciss.lucre.swing
 import de.sciss.lucre.expr.StringObj
 import de.sciss.lucre.stm
 import de.sciss.model.Change
+import de.sciss.serial.Serializer
 
+import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.concurrent.stm.{InTxn, Ref, Txn}
 import scala.swing.{BorderPanel, Button, Component, FlowPanel}
 
 object TestListApp extends AppLike {
-  implicit private val listModSer = stm.List.Modifiable.serializer[S, StringObj[S]]
-  implicit private val listSer    = stm.List.serializer           [S, StringObj[S]]
+  implicit val listModSer: Serializer[S#Tx, S#Acc, stm.List.Modifiable[S, StringObj[S]]] = stm.List.Modifiable.serializer[S, StringObj[S]]
+  implicit val listSer   : Serializer[S#Tx, S#Acc, stm.List           [S, StringObj[S]]] = stm.List           .serializer[S, StringObj[S]]
 
   private val h     = ListView.Handler[S, StringObj[S], Change[String]] {
     implicit tx => _.value
   } {
-    implicit tx => (_, ch) => Some(ch.now)
+    _ => (_, ch) => Some(ch.now)
   }
 
   private lazy val (listH, view) = system.step { implicit tx =>
@@ -24,7 +26,7 @@ object TestListApp extends AppLike {
 
   private def scramble(s: String): String = {
     val sb  = new StringBuilder
-    var bag = (0 until s.length).toIndexedSeq
+    var bag: Vec[Int] = 0 until s.length
     while (bag.nonEmpty) {
       val i = (math.random * bag.size).toInt
       val j = bag(i)

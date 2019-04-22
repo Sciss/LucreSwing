@@ -18,7 +18,7 @@ import de.sciss.desktop.{FileDialog, PathField => Peer}
 import de.sciss.file.File
 import de.sciss.lucre.expr.ExOps._
 import de.sciss.lucre.expr.graph.Constant
-import de.sciss.lucre.expr.{Ex, IExpr, Model}
+import de.sciss.lucre.expr.{Ex, IControl, IExpr, Model}
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl, PathFieldValueExpandedImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
@@ -140,6 +140,8 @@ object PathField {
 }
 trait PathField extends Component {
   type C = Peer
+
+  type Repr[S <: Sys[S]] = View.T[S, C] with IControl[S]
 
   var title : Ex[String]
   var mode  : Ex[Int]

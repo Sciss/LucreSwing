@@ -16,7 +16,7 @@ package graph
 
 import de.sciss.lucre.event.impl.IGenerator
 import de.sciss.lucre.event.{IEvent, IPull, ITargets}
-import de.sciss.lucre.expr.{Ex, IExpr, Model}
+import de.sciss.lucre.expr.{Ex, IControl, IExpr, Model}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.impl.{ComboBoxIndexExpandedImpl, ComponentExpandedImpl, ComponentImpl}
@@ -172,6 +172,8 @@ object ComboBox {
 }
 trait ComboBox[A] extends Component {
   type C = de.sciss.swingplus.ComboBox[A]
+
+  type Repr[S <: Sys[S]] = View.T[S, C] with IControl[S]
 
   def items: Ex[ISeq[A]]
 

@@ -1,6 +1,6 @@
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.expr.ExOps
+import de.sciss.lucre.expr.{Ex, ExOps}
 import de.sciss.lucre.stm.{InMemory, Workspace}
 
 import scala.swing.Component
@@ -12,7 +12,7 @@ object BorderPanelTest extends AppLike {
     val g = Graph {
       val lbN = Label("North" )
       lbN.hAlign = Align.Center
-      val lbE = Label("East"  )
+      val lbE = Bang() // Label("East"  )
       val txt = TextField(10)
       txt.text() = "Center"
       val lbS = Label(txt.text())
@@ -28,7 +28,10 @@ object BorderPanelTest extends AppLike {
     import Workspace.Implicits._
 
     val view = sys.step { implicit tx =>
-      g.expand[S]()
+      implicit val ctx: Ex.Context[S] = Ex.Context()
+      val v = g.expand[S]
+      v.initControl()
+      v
     }
     view.component
   }

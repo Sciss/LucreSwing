@@ -17,7 +17,7 @@ package graph
 import de.sciss.lucre.event.impl.IGenerator
 import de.sciss.lucre.event.{IEvent, IPull, ITargets}
 import de.sciss.lucre.expr.graph.Constant
-import de.sciss.lucre.expr.{Ex, IExpr, Model}
+import de.sciss.lucre.expr.{Ex, IControl, IExpr, Model}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
@@ -176,6 +176,8 @@ object Slider {
 }
 trait Slider extends Component {
   type C = scala.swing.Slider
+
+  type Repr[S <: Sys[S]] = View.T[S, C] with IControl[S]
 
   var min   : Ex[Int]
   var max   : Ex[Int]

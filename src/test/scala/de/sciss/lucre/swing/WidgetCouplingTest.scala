@@ -1,6 +1,6 @@
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.expr.ExOps
+import de.sciss.lucre.expr.{Ex, ExOps}
 import de.sciss.lucre.stm.{InMemory, Workspace}
 
 import scala.swing.Component
@@ -25,7 +25,8 @@ object WidgetCouplingTest extends AppLike {
     import Workspace.Implicits._
 
     val view = sys.step { implicit tx =>
-      g.expand[S]()
+      implicit val ctx: Ex.Context[S] = Ex.Context()
+      g.expand[S]
     }
     view.component
   }

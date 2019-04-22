@@ -47,4 +47,6 @@ object Separator {
 }
 trait Separator extends Widget {
   type C = scala.swing.Separator
+
+  type Repr[S <: Sys[S]] = View.T[S, C] with IControl[S]
 }

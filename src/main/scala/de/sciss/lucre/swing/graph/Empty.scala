@@ -54,4 +54,6 @@ object Empty {
   */
 trait Empty extends Widget {
   type C = scala.swing.Component
+
+  type Repr[S <: Sys[S]] = View.T[S, C] with IControl[S]
 }

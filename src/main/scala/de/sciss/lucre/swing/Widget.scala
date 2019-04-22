@@ -16,8 +16,10 @@ package de.sciss.lucre.swing
 import de.sciss.lucre.expr.{Control, IControl}
 import de.sciss.lucre.stm.Sys
 
+import scala.language.higherKinds
+
 trait Widget extends Control {
   type C <: scala.swing.Component
 
-  type Repr[S <: Sys[S]] = View.T[S, C] with IControl[S]
+  type Repr[S <: Sys[S]] <: View.T[S, C] with IControl[S]
 }

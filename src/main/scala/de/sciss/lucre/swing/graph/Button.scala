@@ -19,7 +19,7 @@ import java.awt.event.{ActionEvent, ActionListener}
 import de.sciss.lucre.event.{IEvent, IPull, ITargets}
 import de.sciss.lucre.event.impl.IGenerator
 import de.sciss.lucre.expr.Ex.Context
-import de.sciss.lucre.expr.{Ex, ITrigger, Trig}
+import de.sciss.lucre.expr.{Ex, IControl, ITrigger, Trig}
 import de.sciss.lucre.expr.ExOps._
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
@@ -101,6 +101,8 @@ object Button {
 }
 trait Button extends Component {
   type C = scala.swing.Button
+
+  type Repr[S <: Sys[S]] = View.T[S, C] with IControl[S]
 
   def clicked: Button.Clicked
 
