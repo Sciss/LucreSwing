@@ -1,5 +1,6 @@
 package de.sciss.lucre.swing
 
+import de.sciss.lucre.expr.graph.PrintLn
 import de.sciss.lucre.expr.{Ex, ExOps}
 import de.sciss.lucre.stm.{InMemory, Workspace}
 
@@ -17,15 +18,27 @@ import scala.swing.Component
  */
 object TrigCombinationTest extends AppLike {
   protected def mkView(): Component = {
+    de.sciss.lucre.event.showLog = true
+
     import ExOps._
     import graph._
     val g = Graph {
-      val t1 = Bang()
-      val t2 = Bang()
-      val t3 = Bang()
-      t1 ---> t2
-      (t1 & t2) ---> t3
-      FlowPanel(t1, t2, t3)
+//      val t1 = Bang()
+//      val t2 = Bang()
+//      val t3 = Bang()
+//      t1 ---> t2
+//      (t1 & t2) ---> t3
+//      FlowPanel(t1, t2, t3)
+
+      val a = Button("Click")
+      val b = Bang()
+      val t1 = a.clicked
+      t1 ---> b
+      val t2 = b
+      val t3 = t1 & t2
+      t3 ---> PrintLn("Both")
+
+      FlowPanel(a, b)
     }
 
     type              S = InMemory
