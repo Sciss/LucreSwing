@@ -23,11 +23,13 @@ import de.sciss.lucre.event.{IEvent, IPull, ITargets}
 import de.sciss.lucre.expr.Ex.Context
 import de.sciss.lucre.expr.{Act, IAction, IControl, ITrigger, Trig}
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.stm.{Disposable, Sys}
+import de.sciss.lucre.stm.TxnLike.{peer => txPeer}
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import javax.swing.{JButton, Timer}
 
+import scala.concurrent.stm.Ref
 import scala.swing.Graphics2D
 import scala.swing.event.ButtonClicked
 
@@ -43,8 +45,33 @@ object Bang {
 
     type C = scala.swing.Button
 
+    private[this] val disposables = Ref(List.empty[Disposable[S#Tx]])
+
+    private def addDisposable(d: Disposable[S#Tx])(implicit tx: S#Tx): Unit =
+      disposables.transform(d :: _)
+
     def executeAction()(implicit tx: S#Tx): Unit = {
       fire(())
+      activate()
+    }
+
+    def addSource(tr: ITrigger[S])(implicit tx: S#Tx): Unit = {
+      // ok, this is a bit involved:
+      // we must either mixin the trait `Caching` or
+      // create an observer to not be eliminated from event
+      // reaction execution. If we don't do that, we'd only
+      // see activation when our trigger output is otherwise
+      // observed (e.g. goes into a `PrintLn`).
+      // What we do here is, first, wire the two events together,
+      // so that any instancing checking our trigger will observe it
+      // within the same event loop as the input trigger, and second,
+      // have the observation side effect (`activate`).
+      tr.changed ---> changed
+      val obs = tr.changed.react { implicit tx => _ => activate() }
+      addDisposable(obs)
+    }
+
+    private def activate()(implicit tx: S#Tx): Unit = {
       deferTx {
         setActive(true)
         timer.restart()
@@ -77,6 +104,7 @@ object Bang {
 
     override def dispose()(implicit tx: S#Tx): Unit = {
       super.dispose()
+      disposables.swap(Nil).foreach(_.dispose())
       deferTx {
         timer.stop()
       }
