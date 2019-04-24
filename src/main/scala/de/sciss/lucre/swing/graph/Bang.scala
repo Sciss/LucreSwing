@@ -18,6 +18,7 @@ import java.awt.Dimension
 import java.awt.event.{ActionEvent, ActionListener}
 import java.awt.geom.Ellipse2D
 
+import de.sciss.lucre.event.IPush.Parents
 import de.sciss.lucre.event.impl.IGenerator
 import de.sciss.lucre.event.{IEvent, IPull, ITargets}
 import de.sciss.lucre.expr.Ex.Context
@@ -42,6 +43,8 @@ object Bang {
     with ComponentHolder[scala.swing.Button] with ComponentExpandedImpl[S]
     with IAction[S] with ITrigger[S]
     with IGenerator[S, Unit] {
+
+    override def toString: String = s"Bang.Expanded@${hashCode().toHexString}"
 
     type C = scala.swing.Button
 
@@ -91,7 +94,15 @@ object Bang {
 
     def changed: IEvent[S, Unit] = this
 
-    private[lucre] def pullUpdate(pull: IPull[S])(implicit tx: S#Tx) : Option[Unit] = Trig.Some
+    private[lucre] def pullUpdate(pull: IPull[S])(implicit tx: S#Tx) : Option[Unit] = {
+      if (pull.isOrigin(this)) Trig.Some
+      else {
+        val p: Parents[S] = pull.parents(this)
+        p.iterator.map(pull(_)).collectFirst {
+          case Some(u) => u
+        }
+      }
+    }
 
     private[this] var active = false
 
