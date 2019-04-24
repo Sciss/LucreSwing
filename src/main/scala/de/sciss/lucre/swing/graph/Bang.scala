@@ -98,9 +98,7 @@ object Bang {
       if (pull.isOrigin(this)) Trig.Some
       else {
         val p: Parents[S] = pull.parents(this)
-        p.iterator.map(pull(_)).collectFirst {
-          case Some(u) => u
-        }
+        if (p.exists(pull(_).isDefined)) Trig.Some else None
       }
     }
 
