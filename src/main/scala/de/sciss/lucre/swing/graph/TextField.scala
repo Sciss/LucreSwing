@@ -19,7 +19,7 @@ import java.awt.event.{ActionEvent, ActionListener, FocusEvent, FocusListener}
 import de.sciss.lucre.aux.Aux
 import de.sciss.lucre.event.impl.IGenerator
 import de.sciss.lucre.event.{IEvent, IPull, ITargets}
-import de.sciss.lucre.expr.graph.Constant
+import de.sciss.lucre.expr.graph.Const
 import de.sciss.lucre.expr.{Ex, IControl, IExpr, Model}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
@@ -125,7 +125,7 @@ object TextField {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyColumns)
-      valueOpt.getOrElse(Constant(defaultColumns)).expand[S]
+      valueOpt.getOrElse(Const(defaultColumns)).expand[S]
     }
 
     def aux: List[Aux] = Nil
@@ -136,7 +136,7 @@ object TextField {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = {
       val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyEditable)
-      valueOpt.getOrElse(Constant(defaultEditable)).expand[S]
+      valueOpt.getOrElse(Const(defaultEditable)).expand[S]
     }
 
     def aux: List[Aux] = Nil

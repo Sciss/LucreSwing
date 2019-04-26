@@ -15,7 +15,7 @@ package de.sciss.lucre.swing.graph
 
 import java.awt.BorderLayout
 
-import de.sciss.lucre.expr.graph.Constant
+import de.sciss.lucre.expr.graph.Const
 import de.sciss.lucre.expr.{Ex, IControl, IExpr}
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.impl.{PanelExpandedImpl, PanelImpl}
@@ -66,7 +66,7 @@ object BorderPanel {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyHGap)
-      valueOpt.getOrElse(Constant(defaultHGap)).expand[S]
+      valueOpt.getOrElse(Const(defaultHGap)).expand[S]
     }
   }
 
@@ -75,7 +75,7 @@ object BorderPanel {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyVGap)
-      valueOpt.getOrElse(Constant(defaultVGap)).expand[S]
+      valueOpt.getOrElse(Const(defaultVGap)).expand[S]
     }
   }
 

@@ -14,7 +14,7 @@
 package de.sciss.lucre.swing
 package graph
 
-import de.sciss.lucre.expr.graph.Constant
+import de.sciss.lucre.expr.graph.Const
 import de.sciss.lucre.expr.{Ex, IControl, IExpr}
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.impl.{PanelExpandedImpl, PanelImpl}
@@ -74,7 +74,7 @@ object GridPanel {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyRows)
-      valueOpt.getOrElse(Constant(defaultRows)).expand[S]
+      valueOpt.getOrElse(Const(defaultRows)).expand[S]
     }
   }
 
@@ -83,7 +83,7 @@ object GridPanel {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyColumns)
-      valueOpt.getOrElse(Constant(defaultColumns)).expand[S]
+      valueOpt.getOrElse(Const(defaultColumns)).expand[S]
     }
   }
 
@@ -92,7 +92,7 @@ object GridPanel {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = {
       val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyCompact)
-      valueOpt.getOrElse(Constant(defaultCompact)).expand[S]
+      valueOpt.getOrElse(Const(defaultCompact)).expand[S]
     }
   }
 
@@ -101,7 +101,7 @@ object GridPanel {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = {
       val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyCompactRows)
-      valueOpt.getOrElse(Constant(defaultCompactRows)).expand[S]
+      valueOpt.getOrElse(Const(defaultCompactRows)).expand[S]
     }
   }
 
@@ -110,7 +110,7 @@ object GridPanel {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = {
       val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyCompactColumns)
-      valueOpt.getOrElse(Constant(defaultCompactColumns)).expand[S]
+      valueOpt.getOrElse(Const(defaultCompactColumns)).expand[S]
     }
   }
 
@@ -119,7 +119,7 @@ object GridPanel {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyHGap)
-      valueOpt.getOrElse(Constant(defaultHGap)).expand[S]
+      valueOpt.getOrElse(Const(defaultHGap)).expand[S]
     }
   }
 
@@ -128,7 +128,7 @@ object GridPanel {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyVGap)
-      valueOpt.getOrElse(Constant(defaultVGap)).expand[S]
+      valueOpt.getOrElse(Const(defaultVGap)).expand[S]
     }
   }
 

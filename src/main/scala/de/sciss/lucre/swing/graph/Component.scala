@@ -14,7 +14,7 @@
 package de.sciss.lucre.swing
 package graph
 
-import de.sciss.lucre.expr.graph.Constant
+import de.sciss.lucre.expr.graph.Const
 import de.sciss.lucre.expr.{Ex, IExpr}
 import de.sciss.lucre.stm.Sys
 
@@ -24,7 +24,7 @@ object Component {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = {
         val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyEnabled)
-        valueOpt.fold(Constant(defaultEnabled).expand[S])(_.expand[S])
+        valueOpt.fold(Const(defaultEnabled).expand[S])(_.expand[S])
     }
   }
 
@@ -33,7 +33,7 @@ object Component {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = {
         val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyFocusable)
-        valueOpt.fold(Constant(defaultFocusable).expand[S])(_.expand[S])
+        valueOpt.fold(Const(defaultFocusable).expand[S])(_.expand[S])
     }
   }
 
@@ -42,7 +42,7 @@ object Component {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, String] = {
         val valueOpt = ctx.getProperty[Ex[String]](w, keyTooltip)
-        valueOpt.fold(Constant(defaultTooltip).expand[S])(_.expand[S])
+        valueOpt.fold(Const(defaultTooltip).expand[S])(_.expand[S])
     }
   }
 

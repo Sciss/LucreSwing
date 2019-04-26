@@ -17,7 +17,7 @@ package graph
 import de.sciss.desktop.{FileDialog, PathField => Peer}
 import de.sciss.file.File
 import de.sciss.lucre.expr.ExOps._
-import de.sciss.lucre.expr.graph.Constant
+import de.sciss.lucre.expr.graph.Const
 import de.sciss.lucre.expr.{Ex, IControl, IExpr, Model}
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl, PathFieldValueExpandedImpl}
@@ -61,7 +61,7 @@ object PathField {
   )
 
   private def defaultTitle(mode: Ex[Int]): Ex[String] = {
-    Constant(titleSeq).applyOption(mode).getOrElse("Choose")
+    Const(titleSeq).applyOption(mode).getOrElse("Choose")
   }
 
   final case class Title(w: PathField) extends Ex[String] {
@@ -78,7 +78,7 @@ object PathField {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyMode)
-      valueOpt.getOrElse(Constant(defaultMode)).expand[S]
+      valueOpt.getOrElse(Const(defaultMode)).expand[S]
     }
   }
 

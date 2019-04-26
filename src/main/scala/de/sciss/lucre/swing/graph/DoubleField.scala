@@ -20,7 +20,7 @@ import java.util.Locale
 import de.sciss.audiowidgets.{ParamFormat, UnitView, ParamField => Peer}
 import de.sciss.lucre.event.impl.IGenerator
 import de.sciss.lucre.event.{IEvent, IPull, ITargets}
-import de.sciss.lucre.expr.graph.Constant
+import de.sciss.lucre.expr.graph.Const
 import de.sciss.lucre.expr.{Ex, ExSeq, IExpr, Model}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
@@ -121,7 +121,7 @@ object DoubleField {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Double] = {
       val valueOpt = ctx.getProperty[Ex[Double]](w, keyMin)
-      valueOpt.getOrElse(Constant(defaultMin)).expand[S]
+      valueOpt.getOrElse(Const(defaultMin)).expand[S]
     }
   }
 
@@ -130,7 +130,7 @@ object DoubleField {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Double] = {
       val valueOpt = ctx.getProperty[Ex[Double]](w, keyMax)
-      valueOpt.getOrElse(Constant(defaultMax)).expand[S]
+      valueOpt.getOrElse(Const(defaultMax)).expand[S]
     }
   }
 
@@ -139,7 +139,7 @@ object DoubleField {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Double] = {
       val valueOpt = ctx.getProperty[Ex[Double]](w, keyStep)
-      valueOpt.getOrElse(Constant(defaultStep)).expand[S]
+      valueOpt.getOrElse(Const(defaultStep)).expand[S]
     }
   }
 
@@ -148,7 +148,7 @@ object DoubleField {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyDecimals)
-      valueOpt.getOrElse(Constant(defaultDecimals)).expand[S]
+      valueOpt.getOrElse(Const(defaultDecimals)).expand[S]
     }
   }
 
@@ -157,7 +157,7 @@ object DoubleField {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, String] = {
     val valueOpt = ctx.getProperty[Ex[String]](w, keyUnit)
-        valueOpt.getOrElse(Constant(defaultUnit)).expand[S]
+        valueOpt.getOrElse(Const(defaultUnit)).expand[S]
     }
   }
 
@@ -180,7 +180,7 @@ object DoubleField {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = {
       val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyEditable)
-      valueOpt.getOrElse(Constant(defaultEditable)).expand[S]
+      valueOpt.getOrElse(Const(defaultEditable)).expand[S]
     }
   }
 

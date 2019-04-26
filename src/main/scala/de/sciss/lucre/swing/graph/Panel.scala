@@ -14,7 +14,7 @@
 package de.sciss.lucre.swing
 package graph
 
-import de.sciss.lucre.expr.graph.Constant
+import de.sciss.lucre.expr.graph.Const
 import de.sciss.lucre.expr.{Ex, IExpr}
 import de.sciss.lucre.stm.Sys
 
@@ -24,7 +24,7 @@ object Panel {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, graph.Border] = {
       val valueOpt = ctx.getProperty[Ex[graph.Border]](w, keyBorder)
-      valueOpt.fold(Constant(defaultBorder).expand[S])(_.expand[S])
+      valueOpt.fold(Const(defaultBorder).expand[S])(_.expand[S])
     }
   }
 

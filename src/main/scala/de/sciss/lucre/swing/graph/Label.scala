@@ -14,7 +14,7 @@
 package de.sciss.lucre.swing
 package graph
 
-import de.sciss.lucre.expr.graph.Constant
+import de.sciss.lucre.expr.graph.Const
 import de.sciss.lucre.expr.{Ex, IControl, IExpr}
 import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
@@ -76,7 +76,7 @@ object Label {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyHAlign)
-      valueOpt.fold(Constant(defaultHAlign).expand[S])(_.expand[S])
+      valueOpt.fold(Const(defaultHAlign).expand[S])(_.expand[S])
     }
   }
 
@@ -85,7 +85,7 @@ object Label {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyVAlign)
-      valueOpt.fold(Constant(defaultVAlign).expand[S])(_.expand[S])
+      valueOpt.fold(Const(defaultVAlign).expand[S])(_.expand[S])
     }
   }
 

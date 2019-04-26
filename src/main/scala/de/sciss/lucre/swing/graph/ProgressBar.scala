@@ -14,7 +14,7 @@
 package de.sciss.lucre.swing
 package graph
 
-import de.sciss.lucre.expr.graph.Constant
+import de.sciss.lucre.expr.graph.Const
 import de.sciss.lucre.expr.{Ex, IControl, IExpr}
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
@@ -59,7 +59,7 @@ object ProgressBar {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt  = ctx.getProperty[Ex[Int]](w, keyValue)
-      valueOpt.orElse(ctx.getProperty[Ex[Int]](w, keyMin)).getOrElse(Constant(defaultMin)).expand[S]
+      valueOpt.orElse(ctx.getProperty[Ex[Int]](w, keyMin)).getOrElse(Const(defaultMin)).expand[S]
     }
   }
 
@@ -68,7 +68,7 @@ object ProgressBar {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyMin)
-      valueOpt.getOrElse(Constant(defaultMin)).expand[S]
+      valueOpt.getOrElse(Const(defaultMin)).expand[S]
     }
   }
 
@@ -77,7 +77,7 @@ object ProgressBar {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyMax)
-      valueOpt.getOrElse(Constant(defaultMax)).expand[S]
+      valueOpt.getOrElse(Const(defaultMax)).expand[S]
     }
   }
 
@@ -86,7 +86,7 @@ object ProgressBar {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, String] = {
       val valueOpt = ctx.getProperty[Ex[String]](w, keyLabel)
-      valueOpt.getOrElse(Constant(defaultLabel)).expand[S]
+      valueOpt.getOrElse(Const(defaultLabel)).expand[S]
     }
   }
 
@@ -95,7 +95,7 @@ object ProgressBar {
 
     def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = {
       val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyLabelPainted)
-      valueOpt.getOrElse(Constant(defaultLabelPainted)).expand[S]
+      valueOpt.getOrElse(Const(defaultLabelPainted)).expand[S]
     }
   }
 
