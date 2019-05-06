@@ -50,7 +50,7 @@ object PathField {
       val ws        = w.expand[S]
       val valueOpt  = ctx.getProperty[Ex[File]](w, keyValue)
       val value0    = valueOpt.fold[File](defaultValue)(_.expand[S].value)
-      new PathFieldValueExpandedImpl[S](ws.component, value0).init()
+      new PathFieldValueExpandedImpl[S](ws.component, value0).init()  // IntelliJ highlight bug
     }
   }
 
