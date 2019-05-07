@@ -19,7 +19,8 @@ import java.awt.event.{ActionEvent, ActionListener}
 import de.sciss.lucre.event.impl.IGenerator
 import de.sciss.lucre.event.{IEvent, IPull, ITargets}
 import de.sciss.lucre.expr.ExOps._
-import de.sciss.lucre.expr.{Ex, IControl, IExpr, Model}
+import de.sciss.lucre.expr.graph.Ex
+import de.sciss.lucre.expr.{Context, IControl, IExpr, Model}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
@@ -37,7 +38,7 @@ object CheckBox {
 
     type C = scala.swing.CheckBox
 
-    override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+    override def initComponent()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
       val text      = peer.text.expand[S]
       val text0     = text.value
       val text1     = if (text0.isEmpty) null else text0
@@ -108,11 +109,11 @@ object CheckBox {
   final case class Selected(w: CheckBox) extends Ex[Boolean] {
     override def productPrefix: String = s"CheckBox$$Selected" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = {
-      import ctx.{cursor, targets}
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Boolean] = {
       val ws          = w.expand[S]
       val selectedOpt = ctx.getProperty[Ex[Boolean]](w, keySelected)
       val selected0   = selectedOpt.fold[Boolean](defaultSelected)(_.expand[S].value)
+      import ctx.{cursor, targets}
       new SelectedExpanded[S](ws, selected0).init()
     }
   }
@@ -120,7 +121,7 @@ object CheckBox {
   private final case class Impl(text0: Ex[String]) extends CheckBox with ComponentImpl { w =>
     override def productPrefix = "CheckBox"   // serialization
 
-    protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
+    protected def mkControl[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).initComponent()
 
     object selected extends Model[Boolean] {

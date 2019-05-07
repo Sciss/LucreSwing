@@ -16,7 +16,8 @@ package graph
 
 import de.sciss.lucre.event.impl.IGenerator
 import de.sciss.lucre.event.{IEvent, IPull, ITargets}
-import de.sciss.lucre.expr.{Ex, IControl, IExpr, Model}
+import de.sciss.lucre.expr.graph.Ex
+import de.sciss.lucre.expr.{Context, IControl, IExpr, Model}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.impl.{ComboBoxIndexExpandedImpl, ComponentExpandedImpl, ComponentImpl}
@@ -38,9 +39,9 @@ object ComboBox {
 
     type C = de.sciss.swingplus.ComboBox[A]
 
-    override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
-      val index   = ctx.getProperty[Ex[Int]]      (peer, keyIndex).fold(-1)(_.expand[S].value)
-      val itemOpt = ctx.getProperty[Ex[Option[A]]](peer, keyValueOption).flatMap(_.expand[S].value)
+    override def initComponent()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
+      val index   = ctx.getProperty[Ex[Int]]      (peer, keyIndex      ).fold(-1) (_.expand[S].value)
+      val itemOpt = ctx.getProperty[Ex[Option[A]]](peer, keyValueOption).flatMap  (_.expand[S].value)
       val items0  = peer.items.expand[S].value
       deferTx {
         val c = new de.sciss.swingplus.ComboBox[A](items0)
@@ -118,7 +119,7 @@ object ComboBox {
   final case class Index[A](w: ComboBox[A]) extends Ex[Int] {
     override def productPrefix: String = s"ComboBox$$Index" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
       import ctx.{cursor, targets}
       val ws        = w.expand[S]
       val indexOpt  = ctx.getProperty[Ex[Int]](w, keyIndex)
@@ -133,7 +134,7 @@ object ComboBox {
   final case class ValueOption[A](w: ComboBox[A]) extends Ex[Option[A]] {
     override def productPrefix: String = s"ComboBox$$ValueOption" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Option[A]] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Option[A]] = {
       import ctx.{cursor, targets}
       val ws        = w.expand[S]
       val itemOpt   = ctx.getProperty[Ex[Option[A]]](w, keyValueOption)
@@ -148,7 +149,7 @@ object ComboBox {
   private final case class Impl[A](items: Ex[ISeq[A]]) extends ComboBox[A] with ComponentImpl { w =>
     override def productPrefix = "ComboBox"   // serialization
 
-    protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
+    protected def mkControl[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S, A](this).initComponent()
 
     object index extends Model[Int] {

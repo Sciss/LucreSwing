@@ -21,8 +21,9 @@ import java.awt.geom.Ellipse2D
 import de.sciss.lucre.event.IPush.Parents
 import de.sciss.lucre.event.impl.IGenerator
 import de.sciss.lucre.event.{IEvent, IPull, ITargets}
-import de.sciss.lucre.expr.Ex.Context
-import de.sciss.lucre.expr.{Act, IAction, IControl, ITrigger, Trig}
+import de.sciss.lucre.expr.Context
+import de.sciss.lucre.expr.graph.{Act, Trig}
+import de.sciss.lucre.expr.{IAction, IControl, ITrigger}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.lucre.stm.TxnLike.{peer => txPeer}

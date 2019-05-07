@@ -18,8 +18,9 @@ import java.awt.datatransfer.{DataFlavor, Transferable}
 import de.sciss.lucre.aux.{Aux, ProductWithAux}
 import de.sciss.lucre.event.impl.{IEventImpl, IGenerator}
 import de.sciss.lucre.event.{IEvent, IPublisher, IPull, ITargets}
+import de.sciss.lucre.expr.graph.{Control, Ex, Trig}
 import de.sciss.lucre.expr.impl.IControlImpl
-import de.sciss.lucre.expr.{Control, Ex, IControl, IExpr, ITrigger, Trig}
+import de.sciss.lucre.expr.{Context, IControl, IExpr, ITrigger}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm.TxnLike.peer
@@ -129,7 +130,7 @@ object DropTarget {
   final case class Value[A](s: Select[A]) extends Ex[A] {
     override def productPrefix = s"DropTarget$$Value" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, A] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, A] = {
       val sEx = s.expand[S]
       import ctx.targets
       new ValueExpanded(s.selector.defaultData, sEx.changed, tx)
@@ -139,7 +140,7 @@ object DropTarget {
   final case class Received[A](s: Select[A]) extends Trig {
     override def productPrefix = s"DropTarget$$Received" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): ITrigger[S] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): ITrigger[S] = {
       val sEx = s.expand[S]
       import ctx.targets
       new ReceivedExpanded(sEx.changed, tx)
@@ -181,8 +182,8 @@ object DropTarget {
     def received: Trig  = Received(this)
     def value   : Ex[A] = Value   (this)
 
-    protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] = {
-      import ctx.{targets, cursor}
+    protected def mkControl[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+      import ctx.{cursor, targets}
       new SelectExpanded(this, w.expand[S]).initSelect()
     }
   }
@@ -232,7 +233,7 @@ object DropTarget {
 
     type C = Peer
 
-    override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+    override def initComponent()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
       deferTx {
         val c = new PeerImpl
         component = c
@@ -246,7 +247,7 @@ object DropTarget {
 
     def select[A: Selector]: Select[A] = Select(this)
 
-    protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
+    protected def mkControl[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).initComponent()
   }
 

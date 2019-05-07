@@ -13,7 +13,8 @@
 
 package de.sciss.lucre.swing.graph.impl
 
-import de.sciss.lucre.expr.{Ex, IControl}
+import de.sciss.lucre.expr.graph.Ex
+import de.sciss.lucre.expr.{Context, IControl}
 import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.lucre.swing.graph.Component
 import de.sciss.lucre.swing.{View, deferTx}
@@ -25,7 +26,7 @@ trait ComponentExpandedImpl[S <: Sys[S]] extends View[S] with IControl[S] {
   private[this] var obs = List.empty[Disposable[S#Tx]]
 
   protected final def initProperty[A](key: String, default: A)(set: A => Unit)
-                                     (implicit tx: S#Tx, ctx: Ex.Context[S]): Unit =
+                                     (implicit tx: S#Tx, ctx: Context[S]): Unit =
     ctx.getProperty[Ex[A]](peer, key) match {
       case Some(ex) =>
         val expr    = ex.expand[S]
@@ -44,7 +45,7 @@ trait ComponentExpandedImpl[S <: Sys[S]] extends View[S] with IControl[S] {
 
   def initControl()(implicit tx: S#Tx): Unit = ()
 
-  def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+  def initComponent()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
     initProperty(Component.keyEnabled   , Component.defaultEnabled  )(component.enabled   = _)
     initProperty(Component.keyFocusable , Component.defaultFocusable)(component.focusable = _)
     initProperty(Component.keyTooltip   , Component.defaultTooltip  )(component.tooltip   = _)

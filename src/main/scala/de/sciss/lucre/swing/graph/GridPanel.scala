@@ -14,8 +14,8 @@
 package de.sciss.lucre.swing
 package graph
 
-import de.sciss.lucre.expr.graph.Const
-import de.sciss.lucre.expr.{Ex, IControl, IExpr}
+import de.sciss.lucre.expr.graph.{Const, Ex}
+import de.sciss.lucre.expr.{Context, IControl, IExpr}
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.impl.{PanelExpandedImpl, PanelImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
@@ -45,7 +45,7 @@ object GridPanel {
 
     type C = Peer
 
-    override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+    override def initComponent()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
       val rows0           = ctx.getProperty[Ex[Int    ]](peer, keyRows    ).fold(defaultRows    )(_.expand[S].value)
       val columns         = ctx.getProperty[Ex[Int    ]](peer, keyColumns ).fold(defaultColumns )(_.expand[S].value)
       val compact         = ctx.getProperty[Ex[Boolean]](peer, keyCompact ).exists(_.expand[S].value)
@@ -72,7 +72,7 @@ object GridPanel {
   final case class Rows(w: GridPanel) extends Ex[Int] {
     override def productPrefix: String = s"GridPanel$$Rows" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyRows)
       valueOpt.getOrElse(Const(defaultRows)).expand[S]
     }
@@ -81,7 +81,7 @@ object GridPanel {
   final case class Columns(w: GridPanel) extends Ex[Int] {
     override def productPrefix: String = s"GridPanel$$Columns" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyColumns)
       valueOpt.getOrElse(Const(defaultColumns)).expand[S]
     }
@@ -90,7 +90,7 @@ object GridPanel {
   final case class Compact(w: GridPanel) extends Ex[Boolean] {
     override def productPrefix: String = s"GridPanel$$Compact" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Boolean] = {
       val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyCompact)
       valueOpt.getOrElse(Const(defaultCompact)).expand[S]
     }
@@ -99,7 +99,7 @@ object GridPanel {
   final case class CompactRows(w: GridPanel) extends Ex[Boolean] {
     override def productPrefix: String = s"GridPanel$$CompactRows" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Boolean] = {
       val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyCompactRows)
       valueOpt.getOrElse(Const(defaultCompactRows)).expand[S]
     }
@@ -108,7 +108,7 @@ object GridPanel {
   final case class CompactColumns(w: GridPanel) extends Ex[Boolean] {
     override def productPrefix: String = s"GridPanel$$CompactColumns" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Boolean] = {
       val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyCompactColumns)
       valueOpt.getOrElse(Const(defaultCompactColumns)).expand[S]
     }
@@ -117,7 +117,7 @@ object GridPanel {
   final case class HGap(w: GridPanel) extends Ex[Int] {
     override def productPrefix: String = s"GridPanel$$HGap" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyHGap)
       valueOpt.getOrElse(Const(defaultHGap)).expand[S]
     }
@@ -126,7 +126,7 @@ object GridPanel {
   final case class VGap(w: GridPanel) extends Ex[Int] {
     override def productPrefix: String = s"GridPanel$$VGap" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyVGap)
       valueOpt.getOrElse(Const(defaultVGap)).expand[S]
     }
@@ -135,7 +135,7 @@ object GridPanel {
   private final case class Impl(contents: Seq[Widget]) extends GridPanel with PanelImpl {
     override def productPrefix = "GridPanel" // s"GridPanel$$Impl" // serialization
 
-    protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
+    protected def mkControl[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).initComponent()
 
     def rows: Ex[Int] = Rows(this)

@@ -15,8 +15,8 @@ package de.sciss.lucre.swing.graph
 
 import java.awt.FlowLayout
 
-import de.sciss.lucre.expr.graph.Const
-import de.sciss.lucre.expr.{Ex, IControl, IExpr}
+import de.sciss.lucre.expr.graph.{Const, Ex}
+import de.sciss.lucre.expr.{Context, IControl, IExpr}
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.impl.{PanelExpandedImpl, PanelImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
@@ -32,7 +32,7 @@ object FlowPanel {
 
     type C = Peer
 
-    override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+    override def initComponent()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
       val hGap      = ctx.getProperty[Ex[Int    ]](peer, keyHGap    ).fold(defaultHGap    )(_.expand[S].value)
       val vGap      = ctx.getProperty[Ex[Int    ]](peer, keyVGap    ).fold(defaultVGap    )(_.expand[S].value)
       val align     = ctx.getProperty[Ex[Int    ]](peer, keyAlign   ).fold(defaultAlign   )(_.expand[S].value)
@@ -62,7 +62,7 @@ object FlowPanel {
   final case class HGap(w: FlowPanel) extends Ex[Int] {
     override def productPrefix: String = s"FlowPanel$$HGap" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyHGap)
       valueOpt.getOrElse(Const(defaultHGap)).expand[S]
     }
@@ -71,7 +71,7 @@ object FlowPanel {
   final case class VGap(w: FlowPanel) extends Ex[Int] {
     override def productPrefix: String = s"FlowPanel$$VGap" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyVGap)
       valueOpt.getOrElse(Const(defaultVGap)).expand[S]
     }
@@ -80,7 +80,7 @@ object FlowPanel {
   final case class Align(w: Component) extends Ex[Int] {
     override def productPrefix: String = s"FlowPanel$$Align" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyAlign)
       valueOpt.fold(Const(defaultAlign).expand[S])(_.expand[S])
     }
@@ -89,7 +89,7 @@ object FlowPanel {
   private final case class Impl(contents: Seq[Widget]) extends FlowPanel with PanelImpl {
     override def productPrefix = "FlowPanel" // s"FlowPanel$$Impl" // serialization
 
-    protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
+    protected def mkControl[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).initComponent()
 
     def hGap: Ex[Int] = HGap(this)

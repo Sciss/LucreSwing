@@ -16,8 +16,8 @@ package graph
 
 import de.sciss.lucre.event.impl.IGenerator
 import de.sciss.lucre.event.{IEvent, IPull, ITargets}
-import de.sciss.lucre.expr.graph.Const
-import de.sciss.lucre.expr.{Ex, IControl, IExpr, Model}
+import de.sciss.lucre.expr.graph.{Const, Ex}
+import de.sciss.lucre.expr.{Context, IControl, IExpr, Model}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
@@ -35,7 +35,7 @@ object Slider {
 
     type C = scala.swing.Slider
 
-    override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+    override def initComponent()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
       val minOpt    = ctx.getProperty[Ex[Int]](peer, keyMin  ).map(_.expand[S].value)
       val maxOpt    = ctx.getProperty[Ex[Int]](peer, keyMax  ).map(_.expand[S].value)
       val valueOpt  = ctx.getProperty[Ex[Int]](peer, keyValue).map(_.expand[S].value)
@@ -117,7 +117,7 @@ object Slider {
   final case class Value(w: Slider) extends Ex[Int] {
     override def productPrefix: String = s"Slider$$Value" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
       import ctx.{cursor, targets}
       val ws        = w.expand[S]
       val valueOpt  = ctx.getProperty[Ex[Int]](w, keyValue)
@@ -129,7 +129,7 @@ object Slider {
   final case class Min(w: Slider) extends Ex[Int] {
     override def productPrefix: String = s"Slider$$Min" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyMin)
       valueOpt.getOrElse(Const(defaultMin)).expand[S]
     }
@@ -138,7 +138,7 @@ object Slider {
   final case class Max(w: Slider) extends Ex[Int] {
     override def productPrefix: String = s"Slider$$Max" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyMax)
       valueOpt.getOrElse(Const(defaultMax)).expand[S]
     }
@@ -147,7 +147,7 @@ object Slider {
   private final case class Impl() extends Slider with ComponentImpl { w =>
     override def productPrefix = "Slider"   // serialization
 
-    protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
+    protected def mkControl[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).initComponent()
 
     def min: Ex[Int] = Min(this)

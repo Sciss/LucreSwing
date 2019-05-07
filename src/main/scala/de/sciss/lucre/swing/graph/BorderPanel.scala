@@ -15,8 +15,8 @@ package de.sciss.lucre.swing.graph
 
 import java.awt.BorderLayout
 
-import de.sciss.lucre.expr.graph.Const
-import de.sciss.lucre.expr.{Ex, IControl, IExpr}
+import de.sciss.lucre.expr.graph.{Const, Ex}
+import de.sciss.lucre.expr.{Context, IControl, IExpr}
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.impl.{PanelExpandedImpl, PanelImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
@@ -36,7 +36,7 @@ object BorderPanel {
 
     type C = scala.swing.BorderPanel
 
-    override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+    override def initComponent()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
       val hGap            = ctx.getProperty[Ex[Int    ]](peer, keyHGap    ).fold(defaultHGap    )(_.expand[S].value)
       val vGap            = ctx.getProperty[Ex[Int    ]](peer, keyVGap    ).fold(defaultVGap    )(_.expand[S].value)
       val north : View[S] = if (peer.north   != Empty.instance) peer.north  .expand[S] else null
@@ -64,7 +64,7 @@ object BorderPanel {
   final case class HGap(w: BorderPanel) extends Ex[Int] {
     override def productPrefix: String = s"BorderPanel$$HGap" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyHGap)
       valueOpt.getOrElse(Const(defaultHGap)).expand[S]
     }
@@ -73,7 +73,7 @@ object BorderPanel {
   final case class VGap(w: BorderPanel) extends Ex[Int] {
     override def productPrefix: String = s"BorderPanel$$VGap" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyVGap)
       valueOpt.getOrElse(Const(defaultVGap)).expand[S]
     }
@@ -107,7 +107,7 @@ object BorderPanel {
       b.putProperty(this, keyVGap, x)
     }
 
-    protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
+    protected def mkControl[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).initComponent()
   }
 

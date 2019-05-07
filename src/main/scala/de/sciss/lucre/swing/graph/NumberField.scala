@@ -13,7 +13,8 @@
 
 package de.sciss.lucre.swing.graph
 
-import de.sciss.lucre.expr.{Ex, IControl, Model}
+import de.sciss.lucre.expr.graph.Ex
+import de.sciss.lucre.expr.{IControl, Model}
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.View
 

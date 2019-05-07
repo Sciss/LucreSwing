@@ -14,7 +14,7 @@
 package de.sciss.lucre.swing
 package graph
 
-import de.sciss.lucre.expr.{Ex, IControl}
+import de.sciss.lucre.expr.{Context, IControl}
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.impl.ComponentHolder
 
@@ -45,7 +45,7 @@ object Empty {
   private final case class Impl() extends Empty {
     override def productPrefix = "Empty"  // serialization
 
-    protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
+    protected def mkControl[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S].initComponent()
   }
 }

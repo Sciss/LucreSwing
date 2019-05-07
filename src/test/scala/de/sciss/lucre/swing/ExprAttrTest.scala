@@ -1,6 +1,6 @@
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.expr.{Ex, ExOps, IntObj, StringObj}
+import de.sciss.lucre.expr.{Context, ExOps, IntObj, StringObj}
 import de.sciss.lucre.stm.{InMemory, Workspace}
 
 import scala.swing.Component
@@ -28,7 +28,7 @@ object ExprAttrTest extends AppLike {
     val (view, selfH) = sys.step { implicit tx =>
       val self  = StringObj.newConst[S]("foo"): StringObj[S]
       val selfH = tx.newHandle(self)
-      implicit val ctx: Ex.Context[S] = Ex.Context(Some(selfH))
+      implicit val ctx: Context[S] = Context(Some(selfH))
       val _view = g.expand[S]
       _view -> selfH
     }

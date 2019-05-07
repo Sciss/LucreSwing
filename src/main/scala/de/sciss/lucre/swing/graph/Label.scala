@@ -14,8 +14,8 @@
 package de.sciss.lucre.swing
 package graph
 
-import de.sciss.lucre.expr.graph.Const
-import de.sciss.lucre.expr.{Ex, IControl, IExpr}
+import de.sciss.lucre.expr.graph.{Const, Ex}
+import de.sciss.lucre.expr.{Context, IControl, IExpr}
 import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
@@ -32,7 +32,7 @@ object Label {
 
     private[this] var obs: Disposable[S#Tx] = _
 
-    override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+    override def initComponent()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
       val text    = peer.text.expand[S]
       val text0   = text.value
       val hAlign  = ctx.getProperty[Ex[Int]](peer, keyHAlign).fold(defaultHAlign)(_.expand[S].value)
@@ -74,7 +74,7 @@ object Label {
   final case class HAlign(w: Component) extends Ex[Int] {
     override def productPrefix: String = s"Label$$HAlign" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyHAlign)
       valueOpt.fold(Const(defaultHAlign).expand[S])(_.expand[S])
     }
@@ -83,7 +83,7 @@ object Label {
   final case class VAlign(w: Component) extends Ex[Int] {
     override def productPrefix: String = s"Label$$VAlign" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyVAlign)
       valueOpt.fold(Const(defaultVAlign).expand[S])(_.expand[S])
     }
@@ -92,7 +92,7 @@ object Label {
   private final case class Impl(text0: Ex[String]) extends Label with ComponentImpl {
     override def productPrefix: String = "Label" // serialization
 
-    protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
+    protected def mkControl[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).initComponent()
 
     def text: Ex[String] = text0

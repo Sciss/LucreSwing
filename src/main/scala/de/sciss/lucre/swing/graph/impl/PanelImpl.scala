@@ -13,7 +13,7 @@
 
 package de.sciss.lucre.swing.graph.impl
 
-import de.sciss.lucre.expr.Ex
+import de.sciss.lucre.expr.graph.Ex
 import de.sciss.lucre.swing.Graph
 import de.sciss.lucre.swing.graph.{Border, Panel}
 

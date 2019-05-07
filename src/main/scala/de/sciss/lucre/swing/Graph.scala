@@ -15,8 +15,10 @@ package de.sciss.lucre.swing
 
 import de.sciss.lucre.expr
 import de.sciss.lucre.expr.impl.{ExElem, GraphBuilderMixin, GraphSerializerMixin}
-import de.sciss.lucre.expr.{Control, Ex, IControl}
+import de.sciss.lucre.expr.{Context, IControl}
+import de.sciss.lucre.expr.graph.Control
 import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.swing.graph.Widget
 import de.sciss.serial.{DataInput, DataOutput, ImmutableSerializer}
 
 import scala.collection.immutable.{IndexedSeq => Vec, Seq => ISeq}
@@ -88,7 +90,7 @@ object Graph {
 final case class Graph(widget: Widget, controls: Vec[Control.Configured])
   extends expr.Graph {
 
-  override def expand[S <: Sys[S]](implicit tx: S#Tx, ctx: Ex.Context[S]): View[S] with IControl[S] =
+  override def expand[S <: Sys[S]](implicit tx: S#Tx, ctx: Context[S]): View[S] with IControl[S] =
     ctx.withGraph(this) {
       val view: View[S] with IControl[S] = widget.expand[S]
       if (controls.isEmpty) view else {

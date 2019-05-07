@@ -14,8 +14,8 @@
 package de.sciss.lucre.swing
 package graph
 
-import de.sciss.lucre.expr.graph.Const
-import de.sciss.lucre.expr.{Ex, IControl, IExpr}
+import de.sciss.lucre.expr.graph.{Const, Ex}
+import de.sciss.lucre.expr.{Context, IControl, IExpr}
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
@@ -28,7 +28,7 @@ object ProgressBar {
 
     type C = scala.swing.ProgressBar
 
-    override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+    override def initComponent()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
       deferTx {
         val c = new scala.swing.ProgressBar
         component = c
@@ -57,7 +57,7 @@ object ProgressBar {
   final case class Value(w: ProgressBar) extends Ex[Int] {
     override def productPrefix: String = s"ProgressBar$$Value" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt  = ctx.getProperty[Ex[Int]](w, keyValue)
       valueOpt.orElse(ctx.getProperty[Ex[Int]](w, keyMin)).getOrElse(Const(defaultMin)).expand[S]
     }
@@ -66,7 +66,7 @@ object ProgressBar {
   final case class Min(w: ProgressBar) extends Ex[Int] {
     override def productPrefix: String = s"ProgressBar$$Min" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyMin)
       valueOpt.getOrElse(Const(defaultMin)).expand[S]
     }
@@ -75,7 +75,7 @@ object ProgressBar {
   final case class Max(w: ProgressBar) extends Ex[Int] {
     override def productPrefix: String = s"ProgressBar$$Max" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyMax)
       valueOpt.getOrElse(Const(defaultMax)).expand[S]
     }
@@ -84,7 +84,7 @@ object ProgressBar {
   final case class Label(w: ProgressBar) extends Ex[String] {
     override def productPrefix: String = s"ProgressBar$$String" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, String] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, String] = {
       val valueOpt = ctx.getProperty[Ex[String]](w, keyLabel)
       valueOpt.getOrElse(Const(defaultLabel)).expand[S]
     }
@@ -93,7 +93,7 @@ object ProgressBar {
   final case class LabelPainted(w: ProgressBar) extends Ex[Boolean] {
     override def productPrefix: String = s"ProgressBar$$LabelPainted" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Boolean] = {
       val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyLabelPainted)
       valueOpt.getOrElse(Const(defaultLabelPainted)).expand[S]
     }
@@ -102,7 +102,7 @@ object ProgressBar {
   private final case class Impl() extends ProgressBar with ComponentImpl {
     override def productPrefix = "ProgressBar"   // serialization
 
-    protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
+    protected def mkControl[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).initComponent()
 
     def min: Ex[Int] = Min(this)

@@ -19,8 +19,8 @@ import java.awt.event.{ActionEvent, ActionListener, FocusEvent, FocusListener}
 import de.sciss.lucre.aux.Aux
 import de.sciss.lucre.event.impl.IGenerator
 import de.sciss.lucre.event.{IEvent, IPull, ITargets}
-import de.sciss.lucre.expr.graph.Const
-import de.sciss.lucre.expr.{Ex, IControl, IExpr, Model}
+import de.sciss.lucre.expr.graph.{Const, Ex}
+import de.sciss.lucre.expr.{Context, IControl, IExpr, Model}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
@@ -49,7 +49,7 @@ object TextField {
   final case class Text(w: TextField) extends Ex[String] {
     override def productPrefix: String = s"TextField$$Text" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, String] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, String] = {
       import ctx.{cursor, targets}
       val ws        = w.expand[S]
       val valueOpt  = ctx.getProperty[Ex[String]](w, keyText)
@@ -123,7 +123,7 @@ object TextField {
   final case class Columns(w: TextField) extends Ex[Int] {
     override def productPrefix: String = s"TextField$$Columns" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Int] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyColumns)
       valueOpt.getOrElse(Const(defaultColumns)).expand[S]
     }
@@ -134,7 +134,7 @@ object TextField {
   final case class Editable(w: TextField) extends Ex[Boolean] {
     override def productPrefix: String = s"TextField$$Editable" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Boolean] = {
+    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Boolean] = {
       val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyEditable)
       valueOpt.getOrElse(Const(defaultEditable)).expand[S]
     }
@@ -147,7 +147,7 @@ object TextField {
 
     type C = scala.swing.TextField
 
-    override def initComponent()(implicit tx: S#Tx, ctx: Ex.Context[S]): this.type = {
+    override def initComponent()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
       val textOpt   = ctx.getProperty[Ex[String]](peer, keyText).map(_.expand[S].value)
       val text0     = textOpt.orNull
       val columns   = ctx.getProperty[Ex[Int    ]](peer, keyColumns  ).fold(defaultColumns )(_.expand[S].value)
@@ -167,7 +167,7 @@ object TextField {
   private final case class Impl() extends TextField with ComponentImpl { w =>
     override def productPrefix: String = "TextField" // serialization
     
-    protected def mkControl[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): Repr[S] =
+    protected def mkControl[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).initComponent()
 
     object text extends Model[String] {

@@ -16,11 +16,11 @@ package graph
 
 import java.awt.event.{ActionEvent, ActionListener}
 
-import de.sciss.lucre.event.{IEvent, IPull, ITargets}
 import de.sciss.lucre.event.impl.IGenerator
-import de.sciss.lucre.expr.Ex.Context
-import de.sciss.lucre.expr.{Ex, IControl, ITrigger, Trig}
+import de.sciss.lucre.event.{IEvent, IPull, ITargets}
 import de.sciss.lucre.expr.ExOps._
+import de.sciss.lucre.expr.graph.{Ex, Trig}
+import de.sciss.lucre.expr.{Context, IControl, ITrigger}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
@@ -82,7 +82,7 @@ object Button {
     override def productPrefix = s"Button$$Clicked"   // serialization
 
     protected def mkTrig[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): ITrigger[S] = {
-      import ctx.{targets, cursor}
+      import ctx.{cursor, targets}
       val ws = w.expand[S]
       new ClickedExpanded[S](ws).init()
     }

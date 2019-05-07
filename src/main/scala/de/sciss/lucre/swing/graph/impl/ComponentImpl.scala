@@ -15,7 +15,7 @@ package de.sciss.lucre.swing
 package graph
 package impl
 
-import de.sciss.lucre.expr.Ex
+import de.sciss.lucre.expr.graph.Ex
 
 trait ComponentImpl {
   _: Component =>
