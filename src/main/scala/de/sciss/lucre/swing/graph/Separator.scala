@@ -41,7 +41,7 @@ object Separator {
   private final case class Impl() extends Separator {
     override def productPrefix = "Separator"  // serialization
 
-    protected def mkControl[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S].initComponent()
   }
 }

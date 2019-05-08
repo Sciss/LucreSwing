@@ -72,18 +72,22 @@ object Label {
   }
 
   final case class HAlign(w: Component) extends Ex[Int] {
+    type Repr[S <: Sys[S]] = IExpr[S, Int]
+
     override def productPrefix: String = s"Label$$HAlign" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyHAlign)
       valueOpt.fold(Const(defaultHAlign).expand[S])(_.expand[S])
     }
   }
 
   final case class VAlign(w: Component) extends Ex[Int] {
+    type Repr[S <: Sys[S]] = IExpr[S, Int]
+
     override def productPrefix: String = s"Label$$VAlign" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyVAlign)
       valueOpt.fold(Const(defaultVAlign).expand[S])(_.expand[S])
     }
@@ -92,7 +96,7 @@ object Label {
   private final case class Impl(text0: Ex[String]) extends Label with ComponentImpl {
     override def productPrefix: String = "Label" // serialization
 
-    protected def mkControl[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).initComponent()
 
     def text: Ex[String] = text0

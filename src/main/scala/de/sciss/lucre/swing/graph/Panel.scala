@@ -20,9 +20,11 @@ import de.sciss.lucre.stm.Sys
 
 object Panel {
   final case class Border(w: Panel) extends Ex[graph.Border] {
+    type Repr[S <: Sys[S]] = IExpr[S, graph.Border]
+
     override def productPrefix: String = s"Panel$$Border" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, graph.Border] = {
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
       val valueOpt = ctx.getProperty[Ex[graph.Border]](w, keyBorder)
       valueOpt.fold(Const(defaultBorder).expand[S])(_.expand[S])
     }

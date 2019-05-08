@@ -18,8 +18,6 @@ import de.sciss.lucre.expr.{IControl, Model}
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.View
 
-import scala.collection.immutable.{Seq => ISeq}
-
 trait NumberField[A] extends Component {
   type C = de.sciss.audiowidgets.ParamField[A]
 
@@ -31,7 +29,7 @@ trait NumberField[A] extends Component {
   var editable  : Ex[Boolean]
 
   var unit      : Ex[String]
-  var prototype : Ex[ISeq[A]]
+  var prototype : Ex[Seq[A]]
 
   def value     : Model[A]
 }

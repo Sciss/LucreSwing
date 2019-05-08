@@ -177,7 +177,7 @@ object Bang {
   private final case class Impl() extends Bang with ComponentImpl {
     override def productPrefix = "Bang"   // serialization
 
-    protected def mkControl[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
       import ctx.{cursor, targets}
       new Expanded[S](this).initComponent()
     }

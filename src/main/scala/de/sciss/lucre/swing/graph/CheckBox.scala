@@ -107,9 +107,11 @@ object CheckBox {
   private final val keySelected     = "selected"
 
   final case class Selected(w: CheckBox) extends Ex[Boolean] {
+    type Repr[S <: Sys[S]] = IExpr[S, Boolean]
+
     override def productPrefix: String = s"CheckBox$$Selected" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Boolean] = {
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
       val ws          = w.expand[S]
       val selectedOpt = ctx.getProperty[Ex[Boolean]](w, keySelected)
       val selected0   = selectedOpt.fold[Boolean](defaultSelected)(_.expand[S].value)
@@ -121,7 +123,7 @@ object CheckBox {
   private final case class Impl(text0: Ex[String]) extends CheckBox with ComponentImpl { w =>
     override def productPrefix = "CheckBox"   // serialization
 
-    protected def mkControl[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).initComponent()
 
     object selected extends Model[Boolean] {

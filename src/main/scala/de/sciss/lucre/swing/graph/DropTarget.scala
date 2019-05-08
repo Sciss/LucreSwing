@@ -127,20 +127,24 @@ object DropTarget {
     def changed: IEvent[S, Unit] = this
   }
 
-  final case class Value[A](s: Select[A]) extends Ex.Lazy[A] {
+  final case class Value[A](s: Select[A]) extends Ex[A] {
+    type Repr[S <: Sys[S]] = IExpr[S, A]
+
     override def productPrefix = s"DropTarget$$Value" // serialization
 
-    protected def mkExpr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, A] = {
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
       val sEx = s.expand[S]
       import ctx.targets
       new ValueExpanded(s.selector.defaultData, sEx.changed, tx)
     }
   }
 
-  final case class Received[A](s: Select[A]) extends Trig.Lazy {
+  final case class Received[A](s: Select[A]) extends Trig {
+    type Repr[S <: Sys[S]] = ITrigger[S]
+
     override def productPrefix = s"DropTarget$$Received" // serialization
 
-    protected def mkTrig[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): ITrigger[S] = {
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
       val sEx = s.expand[S]
       import ctx.targets
       new ReceivedExpanded(sEx.changed, tx)
@@ -173,16 +177,16 @@ object DropTarget {
   final case class Select[A](w: DropTarget)(implicit val selector: Selector[A])
     extends Control with ProductWithAux {
 
-    override def productPrefix = s"DropTarget$$Select" // serialization
-
     type Repr[S <: Sys[S]] = IControl[S] with IPublisher[S, A]
+
+    override def productPrefix = s"DropTarget$$Select" // serialization
 
     def aux: List[Aux] = selector :: Nil
 
     def received: Trig  = Received(this)
     def value   : Ex[A] = Value   (this)
 
-    protected def mkControl[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
       import ctx.{cursor, targets}
       new SelectExpanded(this, w.expand[S]).initSelect()
     }
@@ -247,7 +251,7 @@ object DropTarget {
 
     def select[A: Selector]: Select[A] = Select(this)
 
-    protected def mkControl[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).initComponent()
   }
 

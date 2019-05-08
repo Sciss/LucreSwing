@@ -20,27 +20,33 @@ import de.sciss.lucre.stm.Sys
 
 object Component {
   final case class Enabled(w: Component) extends Ex[Boolean] {
+    type Repr[S <: Sys[S]] = IExpr[S, Boolean]
+
     override def productPrefix: String = s"Component$$Enabled" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Boolean] = {
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
         val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyEnabled)
         valueOpt.fold(Const(defaultEnabled).expand[S])(_.expand[S])
     }
   }
 
   final case class Focusable(w: Component) extends Ex[Boolean] {
+    type Repr[S <: Sys[S]] = IExpr[S, Boolean]
+
     override def productPrefix: String = s"Component$$Focusable" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Boolean] = {
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
         val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyFocusable)
         valueOpt.fold(Const(defaultFocusable).expand[S])(_.expand[S])
     }
   }
 
   final case class Tooltip(w: Component) extends Ex[String] {
+    type Repr[S <: Sys[S]] = IExpr[S, String]
+
     override def productPrefix: String = s"Component$$Tooltip" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, String] = {
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
         val valueOpt = ctx.getProperty[Ex[String]](w, keyTooltip)
         valueOpt.fold(Const(defaultTooltip).expand[S])(_.expand[S])
     }

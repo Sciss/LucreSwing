@@ -78,10 +78,12 @@ object Button {
     }
   }
 
-  final case class Clicked(w: Button) extends Trig.Lazy {
+  final case class Clicked(w: Button) extends Trig {
+    type Repr[S <: Sys[S]] = ITrigger[S]
+
     override def productPrefix = s"Button$$Clicked"   // serialization
 
-    protected def mkTrig[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): ITrigger[S] = {
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
       import ctx.{cursor, targets}
       val ws = w.expand[S]
       new ClickedExpanded[S](ws).init()
@@ -91,7 +93,7 @@ object Button {
   private final case class Impl(text0: Ex[String]) extends Button with ComponentImpl {
     override def productPrefix = "Button"   // serialization
 
-    protected def mkControl[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).initComponent()
 
     def clicked = Clicked(this)

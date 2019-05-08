@@ -60,27 +60,33 @@ object FlowPanel {
   }
 
   final case class HGap(w: FlowPanel) extends Ex[Int] {
+    type Repr[S <: Sys[S]] = IExpr[S, Int]
+
     override def productPrefix: String = s"FlowPanel$$HGap" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyHGap)
       valueOpt.getOrElse(Const(defaultHGap)).expand[S]
     }
   }
 
   final case class VGap(w: FlowPanel) extends Ex[Int] {
+    type Repr[S <: Sys[S]] = IExpr[S, Int]
+
     override def productPrefix: String = s"FlowPanel$$VGap" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyVGap)
       valueOpt.getOrElse(Const(defaultVGap)).expand[S]
     }
   }
 
   final case class Align(w: Component) extends Ex[Int] {
+    type Repr[S <: Sys[S]] = IExpr[S, Int]
+
     override def productPrefix: String = s"FlowPanel$$Align" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyAlign)
       valueOpt.fold(Const(defaultAlign).expand[S])(_.expand[S])
     }
@@ -89,7 +95,7 @@ object FlowPanel {
   private final case class Impl(contents: Seq[Widget]) extends FlowPanel with PanelImpl {
     override def productPrefix = "FlowPanel" // s"FlowPanel$$Impl" // serialization
 
-    protected def mkControl[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).initComponent()
 
     def hGap: Ex[Int] = HGap(this)

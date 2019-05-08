@@ -43,9 +43,11 @@ object PathField {
   private[graph] final val defaultMode     = 0
 
   final case class Value(w: PathField) extends Ex[File] {
+    type Repr[S <: Sys[S]] = IExpr[S, File]
+
     override def productPrefix: String = s"PathField$$Value" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, File] = {
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
       import ctx.{cursor, targets}
       val ws        = w.expand[S]
       val valueOpt  = ctx.getProperty[Ex[File]](w, keyValue)
@@ -65,18 +67,22 @@ object PathField {
   }
 
   final case class Title(w: PathField) extends Ex[String] {
+    type Repr[S <: Sys[S]] = IExpr[S, String]
+
     override def productPrefix: String = s"PathField$$Title" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, String] = {
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
       val valueOpt = ctx.getProperty[Ex[String]](w, keyTitle)
       valueOpt.getOrElse(defaultTitle(w.mode)).expand[S]
     }
   }
 
   final case class Mode(w: PathField) extends Ex[Int] {
+    type Repr[S <: Sys[S]] = IExpr[S, Int]
+
     override def productPrefix: String = s"PathField$$Mode" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Int] = {
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyMode)
       valueOpt.getOrElse(Const(defaultMode)).expand[S]
     }
@@ -111,7 +117,7 @@ object PathField {
   private final case class Impl() extends PathField with ComponentImpl { w =>
     override def productPrefix: String = "PathField" // serialization
 
-    protected def mkControl[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).initComponent()
 
     object value extends Model[File] {
