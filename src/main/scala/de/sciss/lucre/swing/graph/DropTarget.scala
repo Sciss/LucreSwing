@@ -49,12 +49,12 @@ object DropTarget {
     implicit object String extends Selector[java.lang.String] with Aux.Factory {
       final val id = 3000
 
-      def canImport(t: Transferable): Boolean =
+      def canImport[S <: Sys[S]](t: Transferable)(implicit ctx: Context[S]): Boolean =
         t.isDataFlavorSupported(DataFlavor.stringFlavor)
 
       def defaultData: String = ""
 
-      def importData(t: Transferable): String =
+      def importData[S <: Sys[S]](t: Transferable)(implicit ctx: Context[S]): String =
         t.getTransferData(DataFlavor.stringFlavor).asInstanceOf[java.lang.String]
 
       def readIdentifiedAux(in: DataInput): Aux = this
@@ -63,12 +63,12 @@ object DropTarget {
     implicit object File extends Selector[java.io.File] with Aux.Factory {
       final val id = 3001
 
-      def canImport(t: Transferable): Boolean =
+      def canImport[S <: Sys[S]](t: Transferable)(implicit ctx: Context[S]): Boolean =
         t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
 
       def defaultData: java.io.File = new java.io.File("")
 
-      def importData(t: Transferable): java.io.File = {
+      def importData[S <: Sys[S]](t: Transferable)(implicit ctx: Context[S]): java.io.File = {
         val data = t.getTransferData(DataFlavor.javaFileListFlavor).asInstanceOf[java.util.List[java.io.File]]
         data.get(0)
       }
@@ -77,12 +77,12 @@ object DropTarget {
     }
   }
   trait Selector[+A] extends Aux {
-    def canImport(t: Transferable): Boolean
+    def canImport[S <: Sys[S]](t: Transferable)(implicit ctx: Context[S]): Boolean
 
     def defaultData: A
 
     /** May throw an exception. */
-    def importData(t: Transferable): A
+    def importData[S <: Sys[S]](t: Transferable)(implicit ctx: Context[S]): A
   }
 
   private final class ValueExpanded[S <: Sys[S], A](value0: A, evt: IEvent[S, A], tx0: S#Tx)
@@ -127,20 +127,20 @@ object DropTarget {
     def changed: IEvent[S, Unit] = this
   }
 
-  final case class Value[A](s: Select[A]) extends Ex[A] {
+  final case class Value[A](s: Select[A]) extends Ex.Lazy[A] {
     override def productPrefix = s"DropTarget$$Value" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, A] = {
+    protected def mkExpr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, A] = {
       val sEx = s.expand[S]
       import ctx.targets
       new ValueExpanded(s.selector.defaultData, sEx.changed, tx)
     }
   }
 
-  final case class Received[A](s: Select[A]) extends Trig {
+  final case class Received[A](s: Select[A]) extends Trig.Lazy {
     override def productPrefix = s"DropTarget$$Received" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): ITrigger[S] = {
+    protected def mkTrig[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): ITrigger[S] = {
       val sEx = s.expand[S]
       import ctx.targets
       new ReceivedExpanded(sEx.changed, tx)
@@ -190,7 +190,7 @@ object DropTarget {
 
   private final case class DropEvent[A](s: Selector[A])
 
-  private final class PeerImpl extends Peer {
+  private final class PeerImpl[S <: Sys[S]](implicit ctx: Context[S]) extends Peer {
     private[this] var selectors = List.empty[SelectorFun[_]]
 
     icon          = new TargetIcon()
