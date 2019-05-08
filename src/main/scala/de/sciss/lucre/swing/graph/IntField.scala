@@ -160,7 +160,7 @@ object IntField {
     }
   }
 
-  private def defaultPrototype[S <: Sys[S]](w: IntField)(implicit ctx: Context[S]): Ex[Seq[Int]] = {
+  private def defaultPrototype[S <: Sys[S]](w: IntField)(implicit ctx: Context[S], tx: S#Tx): Ex[Seq[Int]] = {
     val seq0 = ctx.getProperty[Ex[Int]](w, keyValue).toList
     ExSeq(w.min :: w.max :: seq0: _*)
   }

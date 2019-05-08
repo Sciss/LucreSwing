@@ -90,12 +90,12 @@ object Graph {
 final case class Graph(widget: Widget, controls: Vec[Control.Configured])
   extends expr.Graph {
 
-  override def expand[S <: Sys[S]](implicit tx: S#Tx, ctx: Context[S]): View[S] with IControl[S] =
-    ctx.withGraph(this) {
-      val view: View[S] with IControl[S] = widget.expand[S]
-      if (controls.isEmpty) view else {
-        val disposables = controls.map(_.control.expand[S])
-        new Graph.ExpandedImpl(view, disposables)
-      }
+  override def expand[S <: Sys[S]](implicit tx: S#Tx, ctx: Context[S]): View[S] with IControl[S] = {
+    ctx.initGraph(this)
+    val view: View[S] with IControl[S] = widget.expand[S]
+    if (controls.isEmpty) view else {
+      val disposables = controls.map(_.control.expand[S])
+      new Graph.ExpandedImpl(view, disposables)
     }
+  }
 }

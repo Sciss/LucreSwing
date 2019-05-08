@@ -173,7 +173,7 @@ object DoubleField {
     }
   }
 
-  private def defaultPrototype[S <: Sys[S]](w: DoubleField)(implicit ctx: Context[S]): Ex[Seq[Double]] = {
+  private def defaultPrototype[S <: Sys[S]](w: DoubleField)(implicit ctx: Context[S], tx: S#Tx): Ex[Seq[Double]] = {
     val seq0 = ctx.getProperty[Ex[Double]](w, keyValue).toList
     ExSeq(w.min :: w.max :: seq0: _*)
   }
