@@ -17,7 +17,7 @@ import java.awt.datatransfer.{DataFlavor, Transferable}
 
 import de.sciss.lucre.aux.{Aux, ProductWithAux}
 import de.sciss.lucre.event.impl.{IEventImpl, IGenerator}
-import de.sciss.lucre.event.{IEvent, IPublisher, IPull, ITargets}
+import de.sciss.lucre.event.{Caching, IEvent, IPublisher, IPull, ITargets}
 import de.sciss.lucre.expr.graph.{Control, Ex, Trig}
 import de.sciss.lucre.expr.impl.IControlImpl
 import de.sciss.lucre.expr.{Context, IControl, IExpr, ITrigger}
@@ -87,9 +87,9 @@ object DropTarget {
 
   private final class ValueExpanded[S <: Sys[S], A](value0: A, evt: IEvent[S, A], tx0: S#Tx)
                                                    (implicit protected val targets: ITargets[S])
-    extends IExpr[S, A] with IEventImpl[S, Change[A]] {
+    extends IExpr[S, A] with IEventImpl[S, Change[A]] with Caching {
 
-    private[this] val ref = Ref(value0)
+    private[this] val ref = Ref(value0) // requires caching!
 
     evt.--->(this)(tx0)
 
