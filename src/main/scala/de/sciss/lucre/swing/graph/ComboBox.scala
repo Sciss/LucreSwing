@@ -24,7 +24,6 @@ import de.sciss.lucre.swing.graph.impl.{ComboBoxIndexExpandedImpl, ComponentExpa
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.model.Change
 
-import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.stm.Ref
 import scala.swing.event.SelectionChanged
 
@@ -32,7 +31,7 @@ import scala.swing.event.SelectionChanged
 // which may come handy at some point
 object ComboBox {
 
-  def apply[A](items: Ex[ISeq[A]]): ComboBox[A] = Impl(items)
+  def apply[A](items: Ex[Seq[A]]): ComboBox[A] = Impl(items)
 
   private final class Expanded[S <: Sys[S], A](protected val peer: ComboBox[A]) extends View[S]
     with ComponentHolder[de.sciss.swingplus.ComboBox[A]] with ComponentExpandedImpl[S] {
@@ -150,7 +149,7 @@ object ComboBox {
     }
   }
 
-  private final case class Impl[A](items: Ex[ISeq[A]]) extends ComboBox[A] with ComponentImpl { w =>
+  private final case class Impl[A](items: Ex[Seq[A]]) extends ComboBox[A] with ComponentImpl { w =>
     override def productPrefix = "ComboBox"   // serialization
 
     protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
@@ -180,7 +179,7 @@ trait ComboBox[A] extends Component {
 
   type Repr[S <: Sys[S]] = View.T[S, C] with IControl[S]
 
-  def items: Ex[ISeq[A]]
+  def items: Ex[Seq[A]]
 
   /** Index of selected item or `-1` */
   def index: Model[Int]
