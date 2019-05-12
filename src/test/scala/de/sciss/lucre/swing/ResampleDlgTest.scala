@@ -1,14 +1,13 @@
 package de.sciss.lucre.swing
 
 import de.sciss.lucre.expr
-import de.sciss.lucre.expr.{Context, ExOps}
+import de.sciss.lucre.expr.Context
 import de.sciss.lucre.stm.{InMemory, Workspace}
 
 import scala.swing.Component
 
 object ResampleDlgTest extends AppLike {
   protected def mkView(): Component = {
-    import ExOps._
     import expr.graph._
     import graph._
     val g = Graph {

@@ -1,13 +1,12 @@
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.expr.{Context, ExOps}
+import de.sciss.lucre.expr.Context
 import de.sciss.lucre.stm.{InMemory, Workspace}
 
 import scala.swing.Component
 
 object GraphTest extends AppLike {
   protected def mkView(): Component = {
-    import ExOps._
     import graph._
     val g = Graph {
       val sl      = Slider()

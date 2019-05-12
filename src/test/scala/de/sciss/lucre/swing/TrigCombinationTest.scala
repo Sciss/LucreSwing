@@ -1,6 +1,6 @@
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.expr.{Context, ExOps}
+import de.sciss.lucre.expr.Context
 import de.sciss.lucre.stm.{InMemory, Workspace}
 
 import scala.swing.Component
@@ -19,7 +19,6 @@ object TrigCombinationTest extends AppLike {
   protected def mkView(): Component = {
     de.sciss.lucre.event.showLog = true
 
-    import ExOps._
     import de.sciss.lucre.expr.graph._
     import de.sciss.lucre.swing.graph._
 

@@ -1,13 +1,13 @@
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.expr.{Context, ExOps, IntObj, StringObj}
+import de.sciss.lucre.expr.{Context, ExImport, IntObj, StringObj}
 import de.sciss.lucre.stm.{InMemory, Workspace}
 
 import scala.swing.Component
 
 object ExprAttrTest extends AppLike {
   protected def mkView(): Component = {
-    import ExOps._
+    import ExImport._
     import graph._
 
     val keyDice   = "dice"

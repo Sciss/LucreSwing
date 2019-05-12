@@ -1,12 +1,10 @@
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.expr.ExOps
 import de.sciss.serial.{DataInput, DataOutput}
 import org.scalatest.{FlatSpec, Matchers}
 
 class SerializationSpec extends FlatSpec with Matchers {
   "An graph" should "be serializable" in {
-    import ExOps._
     import graph._
     val gIn = Graph {
       val sl      = Slider()
@@ -29,7 +27,6 @@ class SerializationSpec extends FlatSpec with Matchers {
   }
 
   "Another graph" should "be serializable" in {
-    import ExOps._
     import graph._
     val gIn = Graph {
       val contents0 = (1 to 3).flatMap { i =>

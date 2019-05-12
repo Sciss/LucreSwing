@@ -18,7 +18,6 @@ import java.awt.event.{ActionEvent, ActionListener}
 
 import de.sciss.lucre.event.impl.IGenerator
 import de.sciss.lucre.event.{IEvent, IPull, ITargets}
-import de.sciss.lucre.expr.ExOps._
 import de.sciss.lucre.expr.graph.Ex
 import de.sciss.lucre.expr.{Context, IControl, IExpr, Model}
 import de.sciss.lucre.stm

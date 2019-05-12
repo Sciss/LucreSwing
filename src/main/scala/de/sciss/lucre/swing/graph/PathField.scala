@@ -16,7 +16,6 @@ package graph
 
 import de.sciss.desktop.{FileDialog, PathField => Peer}
 import de.sciss.file.File
-import de.sciss.lucre.expr.ExOps._
 import de.sciss.lucre.expr.graph.{Const, Ex}
 import de.sciss.lucre.expr.{Context, IControl, IExpr, Model}
 import de.sciss.lucre.stm.Sys
