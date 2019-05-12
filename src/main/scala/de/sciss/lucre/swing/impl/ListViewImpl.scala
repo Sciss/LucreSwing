@@ -11,12 +11,12 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre
-package swing
-package impl
+package de.sciss.lucre.swing.impl
 
 import de.sciss.lucre.stm.{List, Sys}
 import de.sciss.lucre.swing.ListView.Handler
+import de.sciss.lucre.swing.LucreSwing.{deferTx, log, requireEDT}
+import de.sciss.lucre.swing.{ListView, Observation}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.serial.Serializer
 import de.sciss.swingplus
@@ -74,7 +74,7 @@ object ListViewImpl {
 //              }
 //            }
         }
-      })
+      })  // IntelliJ highlight bug
       current.set(newObsOpt)(tx.peer)
       val items = newOption.fold(Vec.empty[Data])(ll => ll.iterator.map(handler.data).toIndexedSeq)
       deferTx {

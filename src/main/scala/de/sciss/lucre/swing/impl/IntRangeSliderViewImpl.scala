@@ -11,19 +11,19 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre.swing
-package impl
-
-import javax.swing.undo.UndoableEdit
+package de.sciss.lucre.swing.impl
 
 import de.sciss.audiowidgets.{DualRangeModel, DualRangeSlider}
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.expr.IntObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.swing.{IntRangeSliderView, Observation}
+import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.edit.EditVar
+import javax.swing.undo.UndoableEdit
 
-import scala.concurrent.stm.{Ref, TxnLocal}
+import scala.concurrent.stm.{InTxn, Ref, TxnLocal}
 import scala.swing.Swing
 
 object IntRangeSliderViewImpl {
@@ -60,7 +60,7 @@ object IntRangeSliderViewImpl {
 
     // executes the `now` function on the GUI thread
     private def mkObs(expr: Option[IntObj[S]])(now: Int => Unit)(implicit tx: S#Tx) = expr.map { ex =>
-      Observation(ex)(tx => upd => if (!eventOrigin.get(tx.peer)) deferTx(now(upd.now))(tx))
+      Observation(ex)(tx => upd => if (!eventOrigin.get(tx.peer)) deferTx(now(upd.now))(tx))  // IntelliJ highlight bug
     }
 
     private def withoutListening[A](thunk: => A): A = {
@@ -173,7 +173,7 @@ object IntRangeSliderViewImpl {
     private lazy val modelListener = Swing.ChangeListener { _ =>
       // println(s"adjusting? ${model0.adjusting}")
       val editOpt = cursor.step { implicit tx =>
-        implicit val itx = tx.peer
+        implicit val itx: InTxn = tx.peer
         // Signalize that the event originated in the GUI, so that
         // we don't feed back from Txn to GUI
         eventOrigin.set(true)
@@ -182,7 +182,7 @@ object IntRangeSliderViewImpl {
           IntObj.Var.unapply(obs.value()).flatMap { vr =>
             if (vr.value != modelVal) {
               val ex   = IntObj.newConst[S](modelVal)
-              implicit val intTpe = IntObj
+              implicit val intTpe: IntObj.type = IntObj
               val edit = EditVar.Expr[S, Int, IntObj](editName, vr, ex)
               Some(edit)
             }
@@ -218,7 +218,7 @@ object IntRangeSliderViewImpl {
     }
 
     def dispose()(implicit tx: S#Tx): Unit = {
-      implicit val itx = tx.peer
+      implicit val itx: InTxn = tx.peer
       _value  .swap(None).foreach(_.dispose())
       _extent .swap(None).foreach(_.dispose())
       _rangeLo.swap(None).foreach(_.dispose())

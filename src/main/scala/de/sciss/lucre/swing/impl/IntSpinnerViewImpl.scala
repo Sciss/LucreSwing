@@ -11,16 +11,16 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre
-package swing
-package impl
+package de.sciss.lucre.swing.impl
 
-import javax.swing.{JSpinner, SpinnerNumberModel}
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.stm.Disposable
+import de.sciss.lucre.stm
+import de.sciss.lucre.stm.{Disposable, Sys}
+import de.sciss.lucre.swing.IntSpinnerView
+import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.swingplus.Spinner
+import javax.swing.{JSpinner, SpinnerNumberModel}
 
 object IntSpinnerViewImpl extends CellViewFactory[Int] {
   def apply[S <: Sys[S]](cell: CellView[S#Tx, Int], name: String, width: Int)

@@ -11,8 +11,7 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre.swing
-package graph
+package de.sciss.lucre.swing.graph
 
 import de.sciss.lucre.expr.graph.{Const, Ex}
 import de.sciss.lucre.expr.{Context, IExpr}

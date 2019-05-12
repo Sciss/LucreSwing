@@ -11,15 +11,15 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre.swing
-package impl
+package de.sciss.lucre.swing.impl
 
-import javax.swing.undo.UndoableEdit
 import de.sciss.lucre.expr.{CellView, Expr, Type}
 import de.sciss.lucre.stm.{Disposable, Sys}
+import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.edit.{EditCellView, EditExprMap}
 import de.sciss.lucre.{stm, event => evt}
 import de.sciss.model.Change
+import javax.swing.undo.UndoableEdit
 
 import scala.concurrent.stm.Ref
 import scala.language.higherKinds

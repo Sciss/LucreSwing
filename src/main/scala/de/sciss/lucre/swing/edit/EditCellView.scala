@@ -11,14 +11,11 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre
-package swing
-package edit
+package de.sciss.lucre.swing.edit
 
-import de.sciss.lucre
 import de.sciss.lucre.expr.CellView
-import lucre.stm.Sys
-import lucre.stm
+import de.sciss.lucre.stm
+import de.sciss.lucre.stm.Sys
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 object EditCellView {

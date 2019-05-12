@@ -15,7 +15,8 @@ package de.sciss.lucre.swing
 
 import de.sciss.lucre.event.Publisher
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Sys, Disposable}
+import de.sciss.lucre.stm.{Disposable, Sys}
+import de.sciss.lucre.swing.LucreSwing.log
 import de.sciss.serial.Serializer
 
 object Observation {

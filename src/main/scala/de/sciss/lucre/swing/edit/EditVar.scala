@@ -11,21 +11,18 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre
-package swing
-package edit
+package de.sciss.lucre.swing.edit
 
-import de.sciss.lucre
-import de.sciss.lucre.expr.Type
-import lucre.stm.Sys
-import lucre.stm
-import javax.swing.undo.{UndoableEdit, AbstractUndoableEdit}
+import de.sciss.lucre.expr.{Expr, Type}
+import de.sciss.lucre.stm
+import de.sciss.lucre.stm.Sys
 import de.sciss.serial
+import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 import scala.language.higherKinds
 
 object EditVar {
-  def Expr[S <: Sys[S], A, Ex[~ <: Sys[~]] <: expr.Expr[~, A]](name: String, expr: Ex[S] with stm.Var[S#Tx, Ex[S]],
+  def Expr[S <: Sys[S], A, Ex[~ <: Sys[~]] <: Expr[~, A]](name: String, expr: Ex[S] with stm.Var[S#Tx, Ex[S]],
                                                                value: Ex[S])
                           (implicit tx: S#Tx, cursor: stm.Cursor[S], tpe: Type.Expr[A, Ex]): UndoableEdit =
     apply[S, Ex[S], Ex[S] with stm.Var[S#Tx, Ex[S]]](name, expr, value)(tx, cursor, tpe.serializer, tpe.varSerializer)

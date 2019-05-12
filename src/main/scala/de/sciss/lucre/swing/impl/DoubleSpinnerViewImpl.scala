@@ -11,22 +11,22 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre
-package swing
-package impl
+package de.sciss.lucre.swing.impl
 
-import javax.swing.{JSpinner, SpinnerNumberModel}
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.stm.Disposable
+import de.sciss.lucre.stm
+import de.sciss.lucre.stm.{Disposable, Sys}
+import de.sciss.lucre.swing.DoubleSpinnerView
+import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.swingplus.Spinner
+import javax.swing.{JSpinner, SpinnerNumberModel}
 
 object DoubleSpinnerViewImpl {
   def apply[S <: Sys[S]](_cell: CellView[S#Tx, Double], name: String, width: Int)
                            (implicit tx: S#Tx, cursor: stm.Cursor[S],
                             undoManager: UndoManager): DoubleSpinnerView[S] = {
-    val res = new Impl[S](maxWidth = width) {
+    val res: Impl[S] = new Impl[S](maxWidth = width) {
       impl =>
       protected var (value, committer)          = CellViewFactory.mkCommitter(_cell, name)(tx, cursor)
       protected val observer: Disposable[S#Tx]  = CellViewFactory.mkObserver (_cell, impl)
@@ -39,7 +39,7 @@ object DoubleSpinnerViewImpl {
   def optional[S <: Sys[S]](_cell: CellView[S#Tx, Option[Double]], name: String, width: Int, default0: Option[Double])
                         (implicit tx: S#Tx, cursor: stm.Cursor[S],
                          undoManager: UndoManager): DoubleSpinnerView.Optional[S] = {
-    val res = new OptionalImpl[S](maxWidth = width) {
+    val res: OptionalImpl[S] = new OptionalImpl[S](maxWidth = width) {
       impl =>
 
       protected var (value, committer)          = CellViewFactory.mkCommitter(_cell, name)(tx, cursor)

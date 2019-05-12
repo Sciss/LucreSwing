@@ -11,11 +11,12 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre.swing
-package graph
+package de.sciss.lucre.swing.graph
 
 import de.sciss.lucre.expr.{Context, IControl}
 import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.impl.ComponentHolder
 
 object Separator {

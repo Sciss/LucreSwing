@@ -11,11 +11,11 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre.swing
-package graph
-package impl
+package de.sciss.lucre.swing.graph.impl
 
+import de.sciss.lucre.expr.Graph
 import de.sciss.lucre.expr.graph.Ex
+import de.sciss.lucre.swing.graph.Component
 
 trait ComponentImpl {
   _: Component =>

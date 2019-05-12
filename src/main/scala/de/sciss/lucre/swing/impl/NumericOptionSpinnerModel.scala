@@ -11,10 +11,10 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre.swing
-package impl
+package de.sciss.lucre.swing.impl
 
 import java.io.Serializable
+
 import javax.swing.AbstractSpinnerModel
 
 class NumericOptionSpinnerModel[A](value0: Option[A], minimum0: Option[A], maximum0: Option[A], stepSize0: A)

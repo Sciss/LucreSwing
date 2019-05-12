@@ -11,24 +11,24 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre.swing
-package impl
+package de.sciss.lucre.swing.impl
 
 import java.awt
 import java.awt.EventQueue
 
-import javax.swing.event.CellEditorListener
-import javax.swing.table.{DefaultTableCellRenderer, TableCellEditor, TableCellRenderer}
-import javax.swing.{CellEditor, DropMode, JTable}
-import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.stm.{Disposable, Identifiable, IdentifierMap}
-import de.sciss.lucre.swing.TreeTableView.{Handler, ModelUpdate}
 import de.sciss.lucre.stm
+import de.sciss.lucre.stm.{Disposable, Identifiable, IdentifierMap, Sys}
+import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
+import de.sciss.lucre.swing.TreeTableView
+import de.sciss.lucre.swing.TreeTableView.{Handler, ModelUpdate}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.serial.Serializer
 import de.sciss.treetable.TreeTable.Path
 import de.sciss.treetable.j.TreeTableCellEditor
 import de.sciss.treetable.{AbstractTreeModel, TreeColumnModel, TreeTable, TreeTableCellRenderer, TreeTableSelectionChanged, j}
+import javax.swing.event.CellEditorListener
+import javax.swing.table.{DefaultTableCellRenderer, TableCellEditor, TableCellRenderer}
+import javax.swing.{CellEditor, DropMode, JTable}
 
 import scala.annotation.tailrec
 import scala.collection.immutable.{IndexedSeq => Vec}

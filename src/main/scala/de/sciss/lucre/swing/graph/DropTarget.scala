@@ -24,9 +24,10 @@ import de.sciss.lucre.expr.{Context, IControl, IExpr, ITrigger}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm.TxnLike.peer
+import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.swing.{TargetIcon, View, deferTx}
+import de.sciss.lucre.swing.{TargetIcon, View}
 import de.sciss.model.Change
 import de.sciss.serial.DataInput
 import javax.swing.TransferHandler

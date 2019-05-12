@@ -4,6 +4,7 @@ import de.sciss.lucre.event.{Pull, Targets}
 import de.sciss.lucre.expr.IntObj
 import de.sciss.lucre.stm.impl.ObjSerializer
 import de.sciss.lucre.stm.{Copy, Disposable, Elem, Obj, Sys}
+import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.TreeTableView.ModelUpdate
 import de.sciss.lucre.{stm, event => evt}
 import de.sciss.model.Change
@@ -121,7 +122,7 @@ class TestTreeTableApp[T <: Sys[T]](system: T)(implicit val cursor: stm.Cursor[T
     with evt.impl.SingleNode[S, Node.Update[S]]
     /* with evt.impl.MappingGenerator[S, Node.Update, Change[Int], Node] */ { leaf =>
 
-    def branchOption = None
+    def branchOption: Option[Branch[S]] = None
 
     def copy[Out <: Sys[Out]]()(implicit tx: S#Tx, txOut: Out#Tx, context: Copy[S, Out]): Elem[Out] =
       new Leaf(Targets[Out], context(expr)) // .connect()
@@ -191,7 +192,7 @@ class TestTreeTableApp[T <: Sys[T]](system: T)(implicit val cursor: stm.Cursor[T
 
     def branchOption(node: Node[S]): Option[Branch[S]] = node.branchOption
 
-    def observe(n: Node[S], dispatch: (S#Tx) => (ModelUpdate[Node[S], Branch[S]]) => Unit)
+    def observe(n: Node[S], dispatch: S#Tx => ModelUpdate[Node[S], Branch[S]] => Unit)
                (implicit tx: S#Tx): Disposable[S#Tx] = n.changed.react { implicit tx => upd =>
       val m = mapUpdate(upd)
       m.foreach(dispatch(tx)(_))
@@ -278,7 +279,7 @@ class TestTreeTableApp[T <: Sys[T]](system: T)(implicit val cursor: stm.Cursor[T
       Component.wrap(c.asInstanceOf[JComponent]) -> e
     }
 
-    val columnNames = Vec("Foo", "Bar")
+    val columnNames: Vec[String] = Vector("Foo", "Bar")
 
     def isEditable(data: Data, column: Int): Boolean = column == 1 && data.isInstanceOf[Data.Leaf]
 
@@ -297,7 +298,7 @@ class TestTreeTableApp[T <: Sys[T]](system: T)(implicit val cursor: stm.Cursor[T
     //    }
 
     def data(node: Node[S])(implicit tx:  S#Tx): Data = node match {
-      case b: Branch[S]  => Data.Branch
+      case _: Branch[S]  => Data.Branch
       case l: Leaf  [S]  => new Data.Leaf(l.expr.value)
     }
   }

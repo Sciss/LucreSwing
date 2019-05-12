@@ -11,14 +11,14 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre
-package swing
-package impl
+package de.sciss.lucre.swing.impl
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.stm.Disposable
+import de.sciss.lucre.stm
+import de.sciss.lucre.stm.{Disposable, Sys}
+import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.{BooleanCheckBoxView, View}
 
 import scala.swing.CheckBox
 import scala.swing.event.ButtonClicked
@@ -27,7 +27,7 @@ object BooleanCheckBoxViewImpl extends CellViewFactory[Boolean] {
   def apply[S <: Sys[S]](cell: CellView[S#Tx, Boolean], name: String)
                            (implicit tx: S#Tx, cursor: stm.Cursor[S],
                             undoManager: UndoManager): BooleanCheckBoxView[S] = {
-    val res = new Impl[S](editName = name) {
+    val res: Impl[S] = new Impl[S](editName = name) {
       impl =>
       protected var (value, committer)          = CellViewFactory.mkCommitter(cell, name)(tx, cursor)
       protected val observer: Disposable[S#Tx]  = CellViewFactory.mkObserver (cell, impl)
@@ -40,7 +40,7 @@ object BooleanCheckBoxViewImpl extends CellViewFactory[Boolean] {
   def optional[S <: Sys[S]](cell: CellView[S#Tx, Option[Boolean]], name: String, default: Boolean)
                            (implicit tx: S#Tx, cursor: stm.Cursor[S],
                             undoManager: UndoManager): BooleanCheckBoxView[S] = {
-    val res = new OptionalImpl[S](editName = name, default = default) {
+    val res: OptionalImpl[S] = new OptionalImpl[S](editName = name, default = default) {
       impl =>
       protected var (value, committer)          = CellViewFactory.mkCommitter(cell, name)(tx, cursor)
       protected val observer: Disposable[S#Tx]  = CellViewFactory.mkObserver (cell, impl)

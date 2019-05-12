@@ -13,10 +13,10 @@
 
 package de.sciss.lucre.swing
 
-import javax.swing.{RootPaneContainer, SwingUtilities}
-
 import de.sciss.desktop
 import de.sciss.lucre.stm.{Disposable, Sys}
+import de.sciss.lucre.swing.LucreSwing.requireEDT
+import javax.swing.{RootPaneContainer, SwingUtilities}
 
 import scala.swing.Component
 

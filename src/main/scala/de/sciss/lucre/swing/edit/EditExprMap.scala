@@ -11,20 +11,17 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre
-package swing
-package edit
+package de.sciss.lucre.swing.edit
 
-import javax.swing.undo.UndoableEdit
-
-import de.sciss.lucre.expr.Type
+import de.sciss.lucre.expr.{Expr, Type}
 import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.{event => evt}
+import de.sciss.lucre.{stm, event => evt}
+import javax.swing.undo.UndoableEdit
 
 import scala.language.higherKinds
 
 object EditExprMap {
-  def apply[S <: Sys[S], K, A, Ex[~ <: Sys[~]] <: expr.Expr[~, A]](name: String, map: evt.Map.Modifiable[S, K, Ex],
+  def apply[S <: Sys[S], K, A, Ex[~ <: Sys[~]] <: Expr[~, A]](name: String, map: evt.Map.Modifiable[S, K, Ex],
                                key: K, value: Option[Ex[S]])
                               (implicit tx: S#Tx, cursor: stm.Cursor[S],
                                keyType  : evt.Map.Key[K],

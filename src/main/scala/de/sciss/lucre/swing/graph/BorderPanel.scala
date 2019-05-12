@@ -18,9 +18,10 @@ import java.awt.BorderLayout
 import de.sciss.lucre.expr.graph.{Const, Ex}
 import de.sciss.lucre.expr.{Context, IControl, IExpr}
 import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.graph.impl.{PanelExpandedImpl, PanelImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.swing.{Graph, View, deferTx}
+import de.sciss.lucre.swing.{Graph, View}
 
 object BorderPanel {
   def apply(north : Widget = Empty(),

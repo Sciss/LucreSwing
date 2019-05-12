@@ -11,12 +11,11 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre
-package swing
-package impl
+package de.sciss.lucre.swing.impl
 
 import java.awt.geom.{AffineTransform, GeneralPath, Path2D}
 import java.awt.{Color, Graphics, Graphics2D, RenderingHints, Shape}
+
 import javax.swing.border.Border
 
 import scala.swing.{Component, Insets, Swing}

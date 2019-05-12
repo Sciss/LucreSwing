@@ -11,17 +11,17 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre
-package swing
-package impl
+package de.sciss.lucre.swing.impl
 
 import java.awt.event.KeyEvent
 
-import javax.swing.KeyStroke
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.stm.Disposable
+import de.sciss.lucre.stm
+import de.sciss.lucre.stm.{Disposable, Sys}
+import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.StringFieldView
+import javax.swing.KeyStroke
 
 import scala.swing.event.EditDone
 import scala.swing.{Action, TextField}

@@ -11,8 +11,7 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre.swing
-package graph
+package de.sciss.lucre.swing.graph
 
 import java.awt.event.{ActionEvent, ActionListener}
 
@@ -22,6 +21,8 @@ import de.sciss.lucre.expr.graph.{Ex, Trig}
 import de.sciss.lucre.expr.{Context, IControl, ITrigger}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
 

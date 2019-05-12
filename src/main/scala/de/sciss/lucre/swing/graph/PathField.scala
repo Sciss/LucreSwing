@@ -11,14 +11,15 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre.swing
-package graph
+package de.sciss.lucre.swing.graph
 
 import de.sciss.desktop.{FileDialog, PathField => Peer}
 import de.sciss.file.File
 import de.sciss.lucre.expr.graph.{Const, Ex}
-import de.sciss.lucre.expr.{Context, IControl, IExpr, Model}
+import de.sciss.lucre.expr.{Context, Graph, IControl, IExpr, Model}
 import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl, PathFieldValueExpandedImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
 

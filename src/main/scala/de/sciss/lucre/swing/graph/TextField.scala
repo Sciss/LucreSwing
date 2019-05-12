@@ -11,18 +11,18 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre.swing
-package graph
+package de.sciss.lucre.swing.graph
 
 import java.awt.event.{ActionEvent, ActionListener, FocusEvent, FocusListener}
 
-import de.sciss.lucre.aux.Aux
 import de.sciss.lucre.event.impl.IGenerator
 import de.sciss.lucre.event.{IEvent, IPull, ITargets}
 import de.sciss.lucre.expr.graph.{Const, Ex}
-import de.sciss.lucre.expr.{Context, IControl, IExpr, Model}
+import de.sciss.lucre.expr.{Context, Graph, IControl, IExpr, Model}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.model.Change
@@ -58,8 +58,6 @@ object TextField {
       val value0    = valueOpt.fold[String](defaultText)(_.expand[S].value)
       new TextExpanded[S](ws, value0).init()
     }
-
-    def aux: List[Aux] = Nil
   }
 
   private final class TextExpanded[S <: Sys[S]](ws: View.T[S, scala.swing.TextField], value0: String)
@@ -131,8 +129,6 @@ object TextField {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyColumns)
       valueOpt.getOrElse(Const(defaultColumns)).expand[S]
     }
-
-    def aux: List[Aux] = Nil
   }
 
   final case class Editable(w: TextField) extends Ex[Boolean] {
@@ -144,8 +140,6 @@ object TextField {
       val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyEditable)
       valueOpt.getOrElse(Const(defaultEditable)).expand[S]
     }
-
-    def aux: List[Aux] = Nil
   }
 
   private final class Expanded[S <: Sys[S]](protected val peer: TextField) extends View[S]

@@ -11,14 +11,11 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre
-package swing
-package impl
+package de.sciss.lucre.swing.impl
 
+import de.sciss.lucre.stm.{Disposable, Sys}
+import de.sciss.lucre.swing.View
 import javax.swing.event.{UndoableEditEvent, UndoableEditListener}
-
-import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.stm.Disposable
 
 import scala.swing.{Component, TextComponent}
 

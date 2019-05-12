@@ -14,9 +14,9 @@
 package de.sciss.lucre.swing
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Disposable
+import de.sciss.lucre.stm.{Disposable, Sys}
+import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 
 import scala.swing.Component

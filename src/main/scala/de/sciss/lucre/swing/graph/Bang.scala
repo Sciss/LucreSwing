@@ -11,8 +11,7 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre.swing
-package graph
+package de.sciss.lucre.swing.graph
 
 import java.awt.Dimension
 import java.awt.event.{ActionEvent, ActionListener}
@@ -21,12 +20,13 @@ import java.awt.geom.Ellipse2D
 import de.sciss.lucre.event.IPush.Parents
 import de.sciss.lucre.event.impl.IGenerator
 import de.sciss.lucre.event.{IEvent, IPull, ITargets}
-import de.sciss.lucre.expr.Context
 import de.sciss.lucre.expr.graph.{Act, Trig}
-import de.sciss.lucre.expr.{IAction, IControl, ITrigger}
+import de.sciss.lucre.expr.{Context, IAction, IControl, ITrigger}
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.lucre.stm.TxnLike.{peer => txPeer}
+import de.sciss.lucre.stm.{Disposable, Sys}
+import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import javax.swing.{JButton, Timer}

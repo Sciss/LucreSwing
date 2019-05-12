@@ -18,7 +18,7 @@ import de.sciss.lucre.event.{IEvent, IPull, ITargets}
 import de.sciss.lucre.expr.IExpr
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.swing.deferTx
+import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.model.Change
 
 import scala.concurrent.stm.Ref

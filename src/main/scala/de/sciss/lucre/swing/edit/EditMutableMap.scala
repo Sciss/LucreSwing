@@ -11,15 +11,12 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre
-package swing
-package edit
+package de.sciss.lucre.swing.edit
 
-import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
-
-import de.sciss.lucre.{event => evt}
 import de.sciss.lucre.stm.{Elem, Sys}
+import de.sciss.lucre.{stm, event => evt}
 import de.sciss.serial.Serializer
+import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 import scala.language.higherKinds
 

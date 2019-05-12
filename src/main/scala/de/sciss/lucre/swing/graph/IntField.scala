@@ -11,8 +11,7 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre.swing
-package graph
+package de.sciss.lucre.swing.graph
 
 import java.text.{NumberFormat, ParseException}
 import java.util.Locale
@@ -21,9 +20,11 @@ import de.sciss.audiowidgets.{ParamFormat, UnitView, ParamField => Peer}
 import de.sciss.lucre.event.impl.IGenerator
 import de.sciss.lucre.event.{IEvent, IPull, ITargets}
 import de.sciss.lucre.expr.graph.{Const, Ex}
-import de.sciss.lucre.expr.{Context, ExSeq, IExpr, Model}
+import de.sciss.lucre.expr.{Context, ExSeq, Graph, IExpr, Model}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.model.Change

@@ -11,9 +11,9 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre
-package swing
-package impl
+package de.sciss.lucre.swing.impl
+
+import de.sciss.lucre.swing.LucreSwing.requireEDT
 
 trait ComponentHolder[C] {
 //  type C = C1

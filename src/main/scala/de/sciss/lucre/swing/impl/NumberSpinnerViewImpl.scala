@@ -11,22 +11,21 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre.swing
-package impl
+package de.sciss.lucre.swing.impl
 
 import java.awt.Color
 import java.awt.event.KeyEvent
 import java.text.NumberFormat
 import java.util.Locale
-import javax.swing.JFormattedTextField.AbstractFormatter
-import javax.swing.text.DefaultFormatterFactory
-import javax.swing.{JFormattedTextField, JSpinner, KeyStroke, SpinnerModel, SwingConstants}
 
 import de.sciss.audiowidgets
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.swingplus.Spinner
+import javax.swing.JFormattedTextField.AbstractFormatter
+import javax.swing.text.DefaultFormatterFactory
+import javax.swing.{JFormattedTextField, JSpinner, KeyStroke, SpinnerModel, SwingConstants}
 
 import scala.swing.event.{FocusLost, KeyTyped, ValueChanged}
 import scala.swing.{Action, Component, Swing, TextComponent}

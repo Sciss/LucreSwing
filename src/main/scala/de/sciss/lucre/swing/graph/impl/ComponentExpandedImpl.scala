@@ -16,8 +16,9 @@ package de.sciss.lucre.swing.graph.impl
 import de.sciss.lucre.expr.graph.Ex
 import de.sciss.lucre.expr.{Context, IControl}
 import de.sciss.lucre.stm.{Disposable, Sys}
+import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.Component
-import de.sciss.lucre.swing.{View, deferTx}
 
 trait ComponentExpandedImpl[S <: Sys[S]] extends View[S] with IControl[S] {
 
