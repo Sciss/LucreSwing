@@ -224,7 +224,8 @@ object DropTarget {
           done(value)
           true
         } catch {
-          case NonFatal(_) =>
+          case NonFatal(ex) =>
+            ex.printStackTrace()
             false
         }
     }
