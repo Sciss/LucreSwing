@@ -22,9 +22,9 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 import scala.swing.Dimension
 
 object Empty {
-  def apply(): Empty = instance
+  def apply(): Empty = Impl() // instance
 
-  private[graph] val instance: Empty = Impl()
+//  private[graph] val instance: Empty = Impl()
 
   private final class Expanded[S <: Sys[S]] extends View[S] with IControl[S]
     with ComponentHolder[scala.swing.Component] {
