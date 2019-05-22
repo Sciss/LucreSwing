@@ -13,6 +13,7 @@
 
 package de.sciss.lucre.swing.graph
 
+import java.awt.Dimension
 import java.awt.datatransfer.{DataFlavor, Transferable}
 
 import de.sciss.lucre.aux.{Aux, ProductWithAux}
@@ -30,10 +31,11 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{TargetIcon, View}
 import de.sciss.model.Change
 import de.sciss.serial.DataInput
-import javax.swing.TransferHandler
 import javax.swing.TransferHandler.TransferSupport
+import javax.swing.{JLabel, TransferHandler}
 
 import scala.concurrent.stm.Ref
+import scala.swing.Graphics2D
 import scala.util.control.NonFatal
 
 object DropTarget {
@@ -198,8 +200,29 @@ object DropTarget {
   private final class PeerImpl[S <: Sys[S]](implicit ctx: Context[S]) extends Peer {
     private[this] var selectors = List.empty[SelectorFun[_]]
 
-    icon          = new TargetIcon()
-    disabledIcon  = new TargetIcon(enabled = false)
+    override lazy val peer: JLabel = new JLabel(" ") with SuperMixin {
+      // XXX TODO --- hack to avoid too narrow buttons under certain look-and-feel
+      override def getPreferredSize: Dimension = {
+        val d = super.getPreferredSize
+        if (!isPreferredSizeSet) {
+          val e     = math.max(24, math.max(d.width, d.height))
+          d.width   = e
+          d.height  = e
+        }
+        d
+      }
+    }
+
+    override protected def paintComponent(g: Graphics2D): Unit = {
+      super.paintComponent(g)
+      val p       = peer
+      val w       = p.getWidth
+      val h       = p.getHeight
+      val extent  = math.min(w, h)
+      if (extent > 0) {
+        TargetIcon.paint(g, x = (w - extent) >> 1, y = (h - extent) >> 1, extent = extent, enabled = enabled)
+      }
+    }
 
     private object TH extends TransferHandler {
       override def canImport (support: TransferSupport): Boolean = enabled && {

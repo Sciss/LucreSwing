@@ -13,36 +13,40 @@
 
 package de.sciss.lucre.swing
 
-import java.awt.{BasicStroke, Color, Graphics, RenderingHints}
 import java.awt.geom.{GeneralPath, Line2D, Path2D}
-
-import javax.swing.Icon
+import java.awt.{BasicStroke, Color, RenderingHints}
 
 import scala.swing.Graphics2D
 
 /** A "target" icon useful for drag and drop targets. */
-final class TargetIcon(extent: Int = 24, enabled: Boolean = true) extends Icon {
-  private[this] val scale = extent.toDouble / 48   // natural size: 48x48
-
-  def getIconWidth  : Int = extent
-  def getIconHeight : Int = extent
+object TargetIcon {
 
   private[this] val strk1   = new BasicStroke(3f)
   private[this] val strk2   = new BasicStroke(6f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER)
   private[this] val strk3   = new BasicStroke(27.15094757f)
   private[this] val strk4   = new BasicStroke(68.07427216f)
 
-  private[this] val colr1   = if (enabled) Color.black                 else new Color(0x60000000, true)
-  private[this] val colr2   = if (enabled) new Color(0x1A1A1A)         else new Color(0x601A1A1A, true)
-  private[this] val colr3   = if (enabled) new Color(0xD40000)         else new Color(0x60808080, true)
-  private[this] val colr4   = if (enabled) Color.white                 else new Color(0x60FFFFFF, true)
-  private[this] val colr4b  = /*if (enabled) */ new Color(0x4AFFFFFF, true) // else new Color(0x12FFFFFF, true)
-
   private[this] val gp      = new GeneralPath()
   private[this] val ln      = new Line2D.Float()
 
-  def paintIcon(c: java.awt.Component, g0: Graphics, x: Int, y: Int): Unit = {
-    val g = g0.asInstanceOf[Graphics2D]
+  private[this] val colr1E  = Color.black
+  private[this] val colr1D  = new Color(0x60000000, true)
+  private[this] val colr2E  = new Color(0x1A1A1A)
+  private[this] val colr2D  = new Color(0x601A1A1A, true)
+  private[this] val colr3E  = new Color(0xD40000)
+  private[this] val colr3D  = new Color(0x60808080, true)
+  private[this] val colr4E  = Color.white
+  private[this] val colr4D  = new Color(0x60FFFFFF, true)
+  private[this] val colr5   = /*if (enabled) */ new Color(0x4AFFFFFF, true) // else new Color(0x12FFFFFF, true)
+
+  def paint(g: Graphics2D, x: Int, y: Int, extent: Double, enabled: Boolean): Unit = {
+    val scale = extent.toDouble / 48   // natural size: 48x48
+
+    val colr1   = if (enabled) colr1E else colr1D
+    val colr2   = if (enabled) colr2E else colr2D
+    val colr3   = if (enabled) colr3E else colr3D
+    val colr4   = if (enabled) colr4E else colr4D
+
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING  , RenderingHints.VALUE_ANTIALIAS_ON)
     g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE )
 
@@ -171,7 +175,7 @@ final class TargetIcon(extent: Int = 24, enabled: Boolean = true) extends Icon {
     p3622.curveTo(1065.2448f, 243.69492f, 910.0374f, 94.5625f, 720.0f, 94.5625f)
     p3622.closePath()
     g.translate(0,152.36218)
-    g.setColor(colr4b)
+    g.setColor(colr5)
     g.setStroke(strk4)
     g.fill(p3622)
     // g.setTransform(at0)

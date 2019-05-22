@@ -40,11 +40,11 @@ object BorderPanel {
     override def initComponent()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
       val hGap            = ctx.getProperty[Ex[Int    ]](peer, keyHGap    ).fold(defaultHGap    )(_.expand[S].value)
       val vGap            = ctx.getProperty[Ex[Int    ]](peer, keyVGap    ).fold(defaultVGap    )(_.expand[S].value)
-      val north : View[S] = if (peer.north .isInstanceOf[Empty]) peer.north  .expand[S] else null
-      val south : View[S] = if (peer.south .isInstanceOf[Empty]) peer.south  .expand[S] else null
-      val west  : View[S] = if (peer.west  .isInstanceOf[Empty]) peer.west   .expand[S] else null
-      val east  : View[S] = if (peer.east  .isInstanceOf[Empty]) peer.east   .expand[S] else null
-      val center: View[S] = if (peer.center.isInstanceOf[Empty]) peer.center .expand[S] else null
+      val north : View[S] = if (peer.north .isInstanceOf[Empty]) null else peer.north  .expand[S]
+      val south : View[S] = if (peer.south .isInstanceOf[Empty]) null else peer.south  .expand[S]
+      val west  : View[S] = if (peer.west  .isInstanceOf[Empty]) null else peer.west   .expand[S]
+      val east  : View[S] = if (peer.east  .isInstanceOf[Empty]) null else peer.east   .expand[S]
+      val center: View[S] = if (peer.center.isInstanceOf[Empty]) null else peer.center .expand[S]
       deferTx {
         val p     = new scala.swing.BorderPanel
         val lay   = p.layoutManager
@@ -90,11 +90,11 @@ object BorderPanel {
 
     def contents: Seq[Widget] = {
       var res = List.empty[Widget]
-      if (center.isInstanceOf[Empty]) res ::= center
-      if (east  .isInstanceOf[Empty]) res ::= east
-      if (west  .isInstanceOf[Empty]) res ::= west
-      if (south .isInstanceOf[Empty]) res ::= south
-      if (north .isInstanceOf[Empty]) res ::= north
+      if (!center.isInstanceOf[Empty]) res ::= center
+      if (!east  .isInstanceOf[Empty]) res ::= east
+      if (!west  .isInstanceOf[Empty]) res ::= west
+      if (!south .isInstanceOf[Empty]) res ::= south
+      if (!north .isInstanceOf[Empty]) res ::= north
       res
     }
 
