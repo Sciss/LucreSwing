@@ -21,6 +21,7 @@ import javax.swing.undo.UndoableEdit
 import scala.language.higherKinds
 
 object EditExprMap {
+  @deprecated("Try to transition to stm.UndoManager", since = "1.17.0")
   def apply[S <: Sys[S], K, A, Ex[~ <: Sys[~]] <: Expr[~, A]](name: String, map: evt.Map.Modifiable[S, K, Ex],
                                key: K, value: Option[Ex[S]])
                               (implicit tx: S#Tx, cursor: stm.Cursor[S],

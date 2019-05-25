@@ -19,6 +19,7 @@ import de.sciss.lucre.stm.Sys
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 object EditCellView {
+  @deprecated("Try to transition to stm.UndoManager", since = "1.17.0")
   def apply[S <: Sys[S], A](name: String, cell: CellView.Var[S, A], value: A)
                            (implicit tx: S#Tx, cursor: stm.Cursor[S]): UndoableEdit = {
     import cell.serializer

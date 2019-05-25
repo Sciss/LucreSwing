@@ -22,11 +22,13 @@ import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 import scala.language.higherKinds
 
 object EditVar {
+  @deprecated("Try to transition to stm.UndoManager", since = "1.17.0")
   def Expr[S <: Sys[S], A, Ex[~ <: Sys[~]] <: Expr[~, A]](name: String, expr: Ex[S] with stm.Var[S#Tx, Ex[S]],
                                                                value: Ex[S])
                           (implicit tx: S#Tx, cursor: stm.Cursor[S], tpe: Type.Expr[A, Ex]): UndoableEdit =
     apply[S, Ex[S], Ex[S] with stm.Var[S#Tx, Ex[S]]](name, expr, value)(tx, cursor, tpe.serializer, tpe.varSerializer)
 
+  @deprecated("Try to transition to stm.UndoManager", since = "1.17.0")
   def apply[S <: Sys[S], Elem, Vr <: stm.Source[S#Tx, Elem] with stm.Sink[S#Tx, Elem]](
     name: String, expr: Vr, value: Elem)(implicit tx: S#Tx, cursor: stm.Cursor[S],
                                          serializer   : serial.Serializer[S#Tx, S#Acc, Elem],
