@@ -27,7 +27,7 @@ class TestTreeTableApp[T <: Sys[T]](system: T)(implicit val cursor: stm.Cursor[T
     final val typeId = 0x10000000
 
     object Update {
-      case class Branch[S <: Sys[S]](branch: app.Branch[S], peer: stm.List.Update[S, Node[S]]) extends Update[S]
+      case class Branch[S <: Sys[S]](branch: app.Branch[S], peer: stm.List.Update[S, Node[S], stm.List[S, Node[S]]]) extends Update[S]
       case class Leaf  [S <: Sys[S]](leaf  : app.Leaf  [S], peer: Change[Int]) extends Update[S]
     }
     trait Update[S <: Sys[S]]
