@@ -97,7 +97,7 @@ object TextField {
     def changed: IEvent[S, Change[String]] = this
 
     private[lucre] def pullUpdate(pull: IPull[S])(implicit tx: S#Tx): Option[Change[String]] =
-      Some(pull.resolve[Change[String]])
+      Some(pull.resolve)
 
     def init()(implicit tx: S#Tx): this.type = {
       deferTx {

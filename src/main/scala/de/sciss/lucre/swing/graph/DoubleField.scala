@@ -97,7 +97,7 @@ object DoubleField {
     def changed: IEvent[S, Change[Double]] = this
 
     private[lucre] def pullUpdate(pull: IPull[S])(implicit tx: S#Tx): Option[Change[Double]] =
-      Some(pull.resolve[Change[Double]])
+      Some(pull.resolve)
 
     def init()(implicit tx: S#Tx): this.type = {
       deferTx {

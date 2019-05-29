@@ -84,7 +84,7 @@ object ComboBox {
     def changed: IEvent[S, Change[Option[A]]] = this
 
     private[lucre] def pullUpdate(pull: IPull[S])(implicit tx: S#Tx): Option[Change[Option[A]]] =
-      Some(pull.resolve[Change[Option[A]]])
+      Some(pull.resolve)
 
     def init()(implicit tx: S#Tx): this.type = {
       deferTx {

@@ -18,7 +18,7 @@ import java.awt.datatransfer.{DataFlavor, Transferable}
 
 import de.sciss.lucre.aux.{Aux, ProductWithAux}
 import de.sciss.lucre.event.impl.{IEventImpl, IGenerator}
-import de.sciss.lucre.event.{Caching, IEvent, IPublisher, IPull, ITargets}
+import de.sciss.lucre.event.{Caching, IEvent, IPublisher, IPull, IPush, ITargets}
 import de.sciss.lucre.expr.graph.{Control, Ex, Trig}
 import de.sciss.lucre.expr.impl.IControlImpl
 import de.sciss.lucre.expr.{Context, IControl, IExpr, ITrigger}
@@ -96,7 +96,8 @@ object DropTarget {
 
     evt.--->(this)(tx0)
 
-    def value(implicit tx: S#Tx): A = ref()
+    def value(implicit tx: S#Tx): A =
+      IPush.tryPull(this).fold(ref())(_.now)
 
     def dispose()(implicit tx: S#Tx): Unit =
       evt.-/->(this)
@@ -160,7 +161,7 @@ object DropTarget {
     extends IControlImpl[S] with IGenerator[S, A] with IPublisher[S, A] {
 
     private[lucre] def pullUpdate(pull: IPull[S])(implicit tx: S#Tx): Option[A] =
-      Some(pull.resolve[A])
+      Some(pull.resolve)
 
     def initSelect()(implicit tx: S#Tx): this.type = {
       deferTx {

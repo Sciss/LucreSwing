@@ -64,7 +64,7 @@ abstract class ComponentPropertyExpandedImpl[S <: Sys[S], A](value0: A)
   def changed: IEvent[S, Change[A]] = this
 
   private[lucre] def pullUpdate(pull: IPull[S])(implicit tx: S#Tx): Option[Change[A]] =
-    Some(pull.resolve[Change[A]])
+    Some(pull.resolve)
 
   def init()(implicit tx: S#Tx): this.type = {
     deferTx {

@@ -88,7 +88,7 @@ object Slider {
     def changed: IEvent[S, Change[Int]] = this
 
     private[lucre] def pullUpdate(pull: IPull[S])(implicit tx: S#Tx): Option[Change[Int]] =
-      Some(pull.resolve[Change[Int]])
+      Some(pull.resolve)
 
     def init()(implicit tx: S#Tx): this.type = {
       deferTx {
