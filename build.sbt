@@ -1,23 +1,23 @@
 lazy val baseName  = "LucreSwing"
 lazy val baseNameL = baseName.toLowerCase
 
-lazy val projectVersion = "1.17.1-SNAPSHOT"
+lazy val projectVersion = "1.17.1"
 lazy val mimaVersion    = "1.17.0"
 
 // ---- dependencies ----
 
 lazy val deps = new {
   val main = new {
-    val desktop   = "0.10.3"
-    val lucre     = "3.13.1-SNAPSHOT"
+    val desktop   = "0.10.4"
+    val lucre     = "3.13.1"
     val model     = "0.3.4"
     val swingPlus = "0.4.2"
     val treeTable = "1.5.1"
-    val widgets   = "1.14.1"
+    val widgets   = "1.14.2"
   }
   val test = new {
     val fileUtil  = "1.1.3"
-    val scalaTest = "3.0.8-RC2"
+    val scalaTest = "3.0.8-RC4"
     val submin    = "0.2.5"
   }
 }
@@ -45,11 +45,11 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"      %  "submin"             % deps.test.submin    % Test
     ),
     libraryDependencies += {
-      if (scalaVersion.value == "2.13.0-RC2") {
-        "org.scalatest" % "scalatest_2.13.0-RC1" % deps.test.scalaTest %Test
-      } else {
+      // if (scalaVersion.value == "2.13.0-RC2") {
+      //   "org.scalatest" % "scalatest_2.13.0-RC1" % deps.test.scalaTest %Test
+      // } else {
         "org.scalatest" %% "scalatest" % deps.test.scalaTest %Test
-      }
+      // }
     },
     scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xlint", "-Xsource:2.13"),
     // ---- compatibility ----
