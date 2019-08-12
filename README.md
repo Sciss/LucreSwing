@@ -13,13 +13,13 @@ with absolutely no warranties. To contact the author, send an email to `contact 
 
 ## requirements / building
 
-This project compiles against Scala 2.13, 2.12, 2.11 using sbt.
+This project compiles against Scala 2.13, 2.12 using sbt (the last version to support Scala 2.11 is 1.17.2).
 
 To use the library in your project:
 
     "de.sciss" %% "lucreswing" % v
 
-The current version `v` is `"1.17.2"`.
+The current version `v` is `"1.18.0"`.
 
 ## contributing
 

@@ -1,15 +1,15 @@
 lazy val baseName  = "LucreSwing"
 lazy val baseNameL = baseName.toLowerCase
 
-lazy val projectVersion = "1.17.2"
-lazy val mimaVersion    = "1.17.0"
+lazy val projectVersion = "1.18.0-SNAPSHOT"
+lazy val mimaVersion    = "1.18.0"
 
 // ---- dependencies ----
 
 lazy val deps = new {
   val main = new {
     val desktop   = "0.10.4"
-    val lucre     = "3.13.1"
+    val lucre     = "3.14.0-SNAPSHOT"
     val model     = "0.3.4"
     val swingPlus = "0.4.2"
     val treeTable = "1.5.1"
@@ -17,7 +17,7 @@ lazy val deps = new {
   }
   val test = new {
     val fileUtil  = "1.1.3"
-    val scalaTest = "3.0.8-RC5"
+    val scalaTest = "3.0.8"
     val submin    = "0.2.5"
   }
 }
@@ -27,8 +27,8 @@ lazy val root = project.withId(baseNameL).in(file("."))
     name                 := baseName,
     version              := projectVersion,
     organization         := "de.sciss",
-    scalaVersion         := "2.12.8",
-    crossScalaVersions   := Seq("2.12.8", "2.11.12", "2.13.0"),
+    scalaVersion         := "2.12.9",
+    crossScalaVersions   := Seq("2.13.0", "2.12.9"),
     description          := "Swing support for Lucre, and common views",
     homepage             := Some(url(s"https://git.iem.at/sciss/${name.value}")),
     licenses             := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt")),
@@ -45,11 +45,7 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"      %  "submin"             % deps.test.submin    % Test
     ),
     libraryDependencies += {
-      if (scalaVersion.value == "2.13.0") {
-        "org.scalatest" % "scalatest_2.13.0-RC3" % deps.test.scalaTest %Test
-      } else {
-        "org.scalatest" %% "scalatest" % deps.test.scalaTest %Test
-      }
+      "org.scalatest" %% "scalatest" % deps.test.scalaTest %Test
     },
     scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xlint", "-Xsource:2.13"),
     // ---- compatibility ----

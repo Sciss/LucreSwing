@@ -13,6 +13,7 @@
 
 package de.sciss.lucre.swing.graph
 
+import de.sciss.lucre.expr.graph.Ex
 import javax.swing.border.{Border => Peer}
 
 import scala.swing.Swing
@@ -35,6 +36,8 @@ object Border {
       Swing.EmptyBorder(top = top, left = left, bottom = bottom, right = right)
     }
   }
+
+  implicit object ExValue extends Ex.Value[Border]
 }
 trait Border extends Product {
   private[swing] def mkPeer(): Peer
