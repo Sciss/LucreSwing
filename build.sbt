@@ -48,6 +48,7 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "org.scalatest" %% "scalatest" % deps.test.scalaTest %Test
     },
     scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xlint", "-Xsource:2.13"),
+    scalacOptions in (Compile, compile) ++= (if (scala.util.Properties.isJavaAtLeast("9")) Seq("-release", "8") else Nil), // JDK >8 breaks API; skip scala-doc
     // ---- compatibility ----
     mimaPreviousArtifacts := Set("de.sciss" %% baseNameL % mimaVersion),
     updateOptions := updateOptions.value.withLatestSnapshots(false)
