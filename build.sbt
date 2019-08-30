@@ -31,7 +31,7 @@ lazy val root = project.withId(baseNameL).in(file("."))
     crossScalaVersions   := Seq("2.13.0", "2.12.9"),
     description          := "Swing support for Lucre, and common views",
     homepage             := Some(url(s"https://git.iem.at/sciss/${name.value}")),
-    licenses             := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt")),
+    licenses             := Seq("AGPL v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
     resolvers += "Oracle Repository" at "http://download.oracle.com/maven", // required for lucrestm-bdb
     libraryDependencies ++= Seq(
       "de.sciss"      %% "lucre-expr"         % deps.main.lucre,
