@@ -35,7 +35,7 @@ object CellViewFactory {
 
   def mkCommitter[S <: Sys[S], A](cell: CellView[S#Tx, A], name: String)
                                  (implicit tx: S#Tx, cursor: stm.Cursor[S]): (A, Option[Committer[S, A]]) = {
-    val com = CellView.Var.unapply(cell).map { vr =>
+    val com = CellView.VarR.unapply(cell).map { vr =>
       new Committer[S, A] {
         def commit(newValue: A)(implicit tx: S#Tx): UndoableEdit =
           EditCellView[S, A](s"Change $name", cell = vr, value = newValue)

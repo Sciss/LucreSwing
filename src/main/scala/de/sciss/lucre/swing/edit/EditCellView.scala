@@ -20,7 +20,7 @@ import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 object EditCellView {
   @deprecated("Try to transition to stm.UndoManager", since = "1.17.0")
-  def apply[S <: Sys[S], A](name: String, cell: CellView.Var[S, A], value: A)
+  def apply[S <: Sys[S], A](name: String, cell: CellView.VarR[S, A], value: A)
                            (implicit tx: S#Tx, cursor: stm.Cursor[S]): UndoableEdit = {
     import cell.serializer
     val beforeH = tx.newHandle(cell.repr)
@@ -29,7 +29,7 @@ object EditCellView {
     res
   }
 
-  private final class Impl[S <: Sys[S], A, Repr0](name: String, cell: CellView.Var[S, A] { type Repr = Repr0 })
+  private final class Impl[S <: Sys[S], A, Repr0](name: String, cell: CellView.VarR[S, A] { type Repr = Repr0 })
                                                  (beforeH: stm.Source[S#Tx, Repr0], now: A)
                                                  (implicit cursor: stm.Cursor[S])
     extends AbstractUndoableEdit {
