@@ -17,9 +17,9 @@ This project compiles against Scala 2.13, 2.12 using sbt (the last version to su
 
 To use the library in your project:
 
-    "de.sciss" %% "lucreswing" % v
+    "de.sciss" %% "lucre-swing" % v
 
-The current version `v` is `"1.18.0"`.
+The current version `v` is `"1.19.0"`.
 
 ## contributing
 

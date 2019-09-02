@@ -16,7 +16,7 @@ package de.sciss.lucre.swing.graph
 import java.awt.Dimension
 import java.awt.datatransfer.{DataFlavor, Transferable}
 
-import de.sciss.lucre.aux.{Aux, ProductWithAux}
+import de.sciss.lucre.adjunct.{Adjunct, ProductWithAdjuncts}
 import de.sciss.lucre.event.impl.{IEventImpl, IGenerator}
 import de.sciss.lucre.event.{Caching, IEvent, IPublisher, IPull, IPush, ITargets}
 import de.sciss.lucre.expr.graph.{Control, Ex, Trig}
@@ -42,14 +42,14 @@ object DropTarget {
   def apply(): DropTarget = Impl()
 
   private lazy val _init: Unit = {
-    Aux.addFactory(Selector.String)
-    Aux.addFactory(Selector.File  )
+    Adjunct.addFactory(Selector.String)
+    Adjunct.addFactory(Selector.File  )
   }
 
   def init(): Unit = _init
 
   object Selector {
-    implicit object String extends Selector[java.lang.String] with Aux.Factory {
+    implicit object String extends Selector[java.lang.String] with Adjunct.Factory {
       final val id = 3000
 
       def canImport[S <: Sys[S]](t: Transferable)(implicit ctx: Context[S]): Boolean =
@@ -60,10 +60,10 @@ object DropTarget {
       def importData[S <: Sys[S]](t: Transferable)(implicit ctx: Context[S]): String =
         t.getTransferData(DataFlavor.stringFlavor).asInstanceOf[java.lang.String]
 
-      def readIdentifiedAux(in: DataInput): Aux = this
+      def readIdentifiedAdjunct(in: DataInput): Adjunct = this
     }
 
-    implicit object File extends Selector[java.io.File] with Aux.Factory {
+    implicit object File extends Selector[java.io.File] with Adjunct.Factory {
       final val id = 3001
 
       def canImport[S <: Sys[S]](t: Transferable)(implicit ctx: Context[S]): Boolean =
@@ -76,10 +76,10 @@ object DropTarget {
         data.get(0)
       }
 
-      def readIdentifiedAux(in: DataInput): Aux = this
+      def readIdentifiedAdjunct(in: DataInput): Adjunct = this
     }
   }
-  trait Selector[+A] extends Aux {
+  trait Selector[+A] extends Adjunct {
     def canImport[S <: Sys[S]](t: Transferable)(implicit ctx: Context[S]): Boolean
 
     def defaultData: A
@@ -179,13 +179,13 @@ object DropTarget {
   }
 
   final case class Select[A](w: DropTarget)(implicit val selector: Selector[A])
-    extends Control with ProductWithAux {
+    extends Control with ProductWithAdjuncts {
 
     type Repr[S <: Sys[S]] = IControl[S] with IPublisher[S, A]
 
     override def productPrefix = s"DropTarget$$Select" // serialization
 
-    def aux: List[Aux] = selector :: Nil
+    def adjuncts: List[Adjunct] = selector :: Nil
 
     def received: Trig  = Received(this)
     def value   : Ex[A] = Value   (this)

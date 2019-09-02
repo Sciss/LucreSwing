@@ -1,15 +1,16 @@
-lazy val baseName  = "LucreSwing"
-lazy val baseNameL = baseName.toLowerCase
+lazy val baseName   = "Lucre-Swing"
+lazy val baseNameL  = baseName.toLowerCase
+lazy val gitProject = "LucreSwing"
 
-lazy val projectVersion = "1.18.0"
-lazy val mimaVersion    = "1.18.0"
+lazy val projectVersion = "1.19.0"
+lazy val mimaVersion    = "1.19.0"
 
 // ---- dependencies ----
 
 lazy val deps = new {
   val main = new {
     val desktop   = "0.10.4"
-    val lucre     = "3.14.0"
+    val lucre     = "3.15.0"
     val model     = "0.3.4"
     val swingPlus = "0.4.2"
     val treeTable = "1.5.1"
@@ -30,9 +31,9 @@ lazy val root = project.withId(baseNameL).in(file("."))
     scalaVersion         := "2.12.9",
     crossScalaVersions   := Seq("2.13.0", "2.12.9"),
     description          := "Swing support for Lucre, and common views",
-    homepage             := Some(url(s"https://git.iem.at/sciss/${name.value}")),
+    homepage             := Some(url(s"https://git.iem.at/sciss/$gitProject")),
     licenses             := Seq("AGPL v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
-    resolvers += "Oracle Repository" at "http://download.oracle.com/maven", // required for lucrestm-bdb
+//    resolvers += "Oracle Repository" at "http://download.oracle.com/maven", // required for lucre-bdb
     libraryDependencies ++= Seq(
       "de.sciss"      %% "lucre-expr"         % deps.main.lucre,
       "de.sciss"      %% "desktop"            % deps.main.desktop,
@@ -67,7 +68,7 @@ lazy val publishSettings = Seq(
   },
   publishArtifact in Test := false,
   pomIncludeRepository := { _ => false },
-  pomExtra := { val n = name.value
+  pomExtra := { val n = gitProject
 <scm>
   <url>git@git.iem.at:sciss/{n}.git</url>
   <connection>scm:git:git@git.iem.at:sciss/{n}.git</connection>
