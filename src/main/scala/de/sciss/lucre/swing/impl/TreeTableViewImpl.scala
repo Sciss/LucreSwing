@@ -13,8 +13,8 @@
 
 package de.sciss.lucre.swing.impl
 
-import java.awt
 import java.awt.EventQueue
+import java.{awt, util}
 
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Identifiable, IdentifierMap, Sys}
@@ -28,6 +28,7 @@ import de.sciss.treetable.j.TreeTableCellEditor
 import de.sciss.treetable.{AbstractTreeModel, TreeColumnModel, TreeTable, TreeTableCellRenderer, TreeTableSelectionChanged, j}
 import javax.swing.event.CellEditorListener
 import javax.swing.table.{DefaultTableCellRenderer, TableCellEditor, TableCellRenderer}
+import javax.swing.tree.{DefaultMutableTreeNode, TreeNode}
 import javax.swing.{CellEditor, DropMode, JTable}
 
 import scala.annotation.tailrec
@@ -39,14 +40,21 @@ object TreeTableViewImpl {
   var DEBUG = false
 
   private object NodeViewImpl {
-    sealed trait Base[S <: Sys[S], Node, Branch, Data] extends Disposable[S#Tx] {
-      def isLeaf: Boolean
+    // Note: mixing in `javax.swing.TreeNode` is not strictly required, but some
+    // look and feels like WebLookAndFeel assume this to be the case and otherwise break!
+    sealed trait Base[S <: Sys[S], Node, Branch, Data] extends Disposable[S#Tx] with TreeNode {
+//      def isLeaf: Boolean
       def numChildren: Int
       def parentOption1: Option[BranchOrRoot[S, Node, Branch, Data]]
 
       protected def observer: Disposable[S#Tx]
 
       def dispose()(implicit tx: S#Tx): Unit = observer.dispose()
+
+      // ---- TreeNode ----
+
+      final def getChildCount     : Int     = numChildren
+      final def getAllowsChildren : Boolean = !isLeaf
     }
 
     sealed trait BranchOrRoot[S <: Sys[S], Node, Branch, Data] extends Base[S, Node, Branch, Data] {
@@ -56,9 +64,20 @@ object TreeTableViewImpl {
 
       // ---- impl ----
 
-      final var children    : Vec[NodeViewImpl[S, Node, Branch, Data]] = Vector.empty
+      final var childSeq    : Vec[NodeViewImpl[S, Node, Branch, Data]] = Vector.empty
       final def isLeaf      : Boolean = false
-      final def numChildren : Int     = children.size
+      final def numChildren : Int     = childSeq.size
+
+      // ---- TreeNode ----
+
+      def getChildAt(childIndex: Int): TreeNode = null
+
+      def getIndex(node: TreeNode): Int = -1
+
+      def children(): util.Enumeration[_] = {
+        import scala.collection.JavaConverters._
+        childSeq.iterator.asJavaEnumeration
+      }
     }
 
     class BranchImpl[S <: Sys[S], Node, Branch, Data](val parentImpl: BranchOrRoot[S, Node, Branch, Data],
@@ -69,6 +88,10 @@ object TreeTableViewImpl {
       extends BranchOrRoot[S, Node, Branch, Data] with NodeViewImpl[S, Node, Branch, Data] {
 
       override def toString = s"Branch($modelData, $renderData)"
+
+      // ---- TreeNode ----
+
+      def getParent: TreeNode = parentImpl
     }
 
     class Leaf[S <: Sys[S], Node, Branch, Data](val parentImpl: BranchOrRoot[S, Node, Branch, Data],
@@ -77,10 +100,20 @@ object TreeTableViewImpl {
                                         protected val observer: Disposable[S#Tx])
       extends NodeViewImpl[S, Node, Branch, Data] {
 
-      def isLeaf = true
+      def isLeaf: Boolean = true
       def numChildren = 0
 
       override def toString = s"Leaf($modelData, $renderData)"
+
+      // ---- TreeNode ----
+
+      def getChildAt(childIndex: Int): TreeNode = null
+
+      def getParent: TreeNode = parentImpl
+
+      def getIndex(node: TreeNode): Int = -1
+
+      def children(): util.Enumeration[_] = DefaultMutableTreeNode.EMPTY_ENUMERATION
     }
 
     class Root[S <: Sys[S], Node, Branch, Data](val branchH: stm.Source[S#Tx, Branch],
@@ -90,6 +123,10 @@ object TreeTableViewImpl {
       def parentOption1: Option[NodeViewImpl.BranchOrRoot[S, Node, Branch, Data]] = None
 
       override def toString = "Root"
+
+      // ---- TreeNode ----
+
+      def getParent: TreeNode = null
     }
   }
   private sealed trait NodeViewImpl[S <: Sys[S], Node, Branch, Data]
@@ -179,14 +216,14 @@ object TreeTableViewImpl {
       def getChildCount(parent: VNodeL): Int = parent.numChildren
 
       def getChild(parent: VNodeL, index: Int): VNode = parent match {
-        case b: VBranchL => b.children(index)
+        case b: VBranchL => b.childSeq(index)
         case _           => sys.error(s"parent $parent is not a branch")
       }
 
       def isLeaf(node: VNodeL): Boolean = node.isLeaf
 
       def getIndexOfChild(parent: VNodeL, child: VNodeL): Int = parent match {
-        case b: VBranchL => b.children.indexOf(child)
+        case b: VBranchL => b.childSeq.indexOf(child)
         case _           => sys.error(s"parent $parent is not a branch")
       }
 
@@ -219,19 +256,19 @@ object TreeTableViewImpl {
       def elemAddedNoRefresh(parent: VBranchL, idx: Int, view: VNode): Unit = {
         if (DEBUG) println(s"model.elemAdded($parent, $idx, $view)")
         val g       = parent  // Option.getOrElse(_root)
-        require(idx >= 0 && idx <= g.children.size, idx.toString)
-        g.children  = g.children.patch(idx, Vector(view), 0)
+        require(idx >= 0 && idx <= g.childSeq.size, idx.toString)
+        g.childSeq  = g.childSeq.patch(idx, Vector(view), 0)
       }
 
       def elemRemoved(parent: VBranchL, idx: Int): Unit = {
         if (DEBUG) println(s"model.elemRemoved($parent, $idx)")
-        require(idx >= 0 && idx < parent.children.size, idx.toString)
-        val v       = parent.children(idx)
+        require(idx >= 0 && idx < parent.childSeq.size, idx.toString)
+        val v       = parent.childSeq(idx)
         // this is insane. the tree UI still accesses the model based on the previous assumption
         // about the number of children, it seems. therefore, we must not update children before
         // returning from fireNodesRemoved.
         fireNodesRemoved(v)
-        parent.children  = parent.children.patch(idx, Vector.empty, 1)
+        parent.childSeq  = parent.childSeq.patch(idx, Vector.empty, 1)
       }
 
       def elemUpdated(view: VNode): Unit = {
@@ -448,7 +485,7 @@ object TreeTableViewImpl {
       def disposeChildren(node: VNodeL): Unit = {
         node match {
           case b: VBranchL =>
-            b.children.foreach(disposeChildren)
+            b.childSeq.foreach(disposeChildren)
           case _ =>
         }
         node.dispose()

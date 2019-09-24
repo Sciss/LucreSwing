@@ -2,7 +2,7 @@ lazy val baseName   = "Lucre-Swing"
 lazy val baseNameL  = baseName.toLowerCase
 lazy val gitProject = "LucreSwing"
 
-lazy val projectVersion = "1.19.0"
+lazy val projectVersion = "1.19.1-SNAPSHOT"
 lazy val mimaVersion    = "1.19.0"
 
 // ---- dependencies ----
@@ -10,7 +10,7 @@ lazy val mimaVersion    = "1.19.0"
 lazy val deps = new {
   val main = new {
     val desktop   = "0.10.4"
-    val lucre     = "3.15.0"
+    val lucre     = "3.15.1"
     val model     = "0.3.4"
     val swingPlus = "0.4.2"
     val treeTable = "1.5.1"
@@ -28,8 +28,8 @@ lazy val root = project.withId(baseNameL).in(file("."))
     name                 := baseName,
     version              := projectVersion,
     organization         := "de.sciss",
-    scalaVersion         := "2.12.9",
-    crossScalaVersions   := Seq("2.13.0", "2.12.9"),
+    scalaVersion         := "2.12.10",
+    crossScalaVersions   := Seq("2.13.1", "2.12.10"),
     description          := "Swing support for Lucre, and common views",
     homepage             := Some(url(s"https://git.iem.at/sciss/$gitProject")),
     licenses             := Seq("AGPL v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
@@ -43,7 +43,8 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"      %% "model"              % deps.main.model,
       "de.sciss"      %% "lucre-bdb"          % deps.main.lucre     % Test,
       "de.sciss"      %% "fileutil"           % deps.test.fileUtil  % Test,
-      "de.sciss"      %  "submin"             % deps.test.submin    % Test
+//      "de.sciss"      %  "submin"             % deps.test.submin    % Test,
+      "com.weblookandfeel" % "weblaf-ui" % "1.2.10" % Test,
     ),
     libraryDependencies += {
       "org.scalatest" %% "scalatest" % deps.test.scalaTest %Test

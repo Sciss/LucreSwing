@@ -1,11 +1,12 @@
 package de.sciss.lucre.swing
 
+import com.alee.laf.WebLookAndFeel
 import de.sciss.desktop.UndoManager
 import de.sciss.file.File
 import de.sciss.lucre.expr.LucreExpr
 import de.sciss.lucre.stm.Durable
 import de.sciss.lucre.stm.store.BerkeleyDB
-import de.sciss.submin.Submin
+//import de.sciss.submin.Submin
 
 import scala.swing.{Component, Frame, MainFrame, Menu, MenuBar, MenuItem, SimpleSwingApplication}
 
@@ -17,7 +18,8 @@ trait AppLike extends SimpleSwingApplication {
 
   override def main(args: Array[String]): Unit = {
     LucreExpr.init()
-    Submin.install(true)
+//    Submin.install(true)
+    WebLookAndFeel.install()
     super.main(args)
   }
 
