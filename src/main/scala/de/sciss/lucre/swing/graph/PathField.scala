@@ -34,7 +34,7 @@ object PathField {
 
   val Open  : Ex[Int] = 0
   val Save  : Ex[Int] = 1
-  val Folder: Ex[Int] = 1
+  val Folder: Ex[Int] = 2
 
   private[graph] final val keyValue        = "value"
   private[graph] final val keyTitle        = "title"
