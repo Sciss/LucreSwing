@@ -15,8 +15,8 @@ package de.sciss.lucre.swing.graph
 
 import java.awt.event.{ActionEvent, ActionListener}
 
-import de.sciss.lucre.event.impl.IGenerator
-import de.sciss.lucre.event.{IEvent, IPull, ITargets}
+import de.sciss.lucre.event.impl.IChangeGenerator
+import de.sciss.lucre.event.{IChangeEvent, IPull, ITargets}
 import de.sciss.lucre.expr.graph.Ex
 import de.sciss.lucre.expr.{Context, Graph, IControl, IExpr, Model}
 import de.sciss.lucre.stm
@@ -58,7 +58,7 @@ object CheckBox {
   private final class SelectedExpanded[S <: Sys[S]](ws: View.T[S, scala.swing.CheckBox], value0: Boolean)
                                                    (implicit protected val targets: ITargets[S], cursor: stm.Cursor[S])
     extends IExpr[S, Boolean]
-      with IGenerator[S, Change[Boolean]] {
+      with IChangeGenerator[S, Boolean] {
 
     private[this] val listener = new ActionListener {
       def actionPerformed(e: ActionEvent): Unit = {
@@ -81,10 +81,10 @@ object CheckBox {
 
     def value(implicit tx: S#Tx): Boolean = txValue.get(tx.peer)
 
-    def changed: IEvent[S, Change[Boolean]] = this
+    def changed: IChangeEvent[S, Boolean] = this
 
-    private[lucre] def pullUpdate(pull: IPull[S])(implicit tx: S#Tx): Option[Change[Boolean]] =
-      Some(pull.resolve[Change[Boolean]])
+    private[lucre] def pullChange(pull: IPull[S])(implicit tx: S#Tx, phase: IPull.Phase): Boolean =
+      pull.resolveExpr(this)
 
     def init()(implicit tx: S#Tx): this.type = {
       deferTx {

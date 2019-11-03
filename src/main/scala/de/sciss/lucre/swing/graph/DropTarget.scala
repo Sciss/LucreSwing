@@ -17,8 +17,8 @@ import java.awt.Dimension
 import java.awt.datatransfer.{DataFlavor, Transferable}
 
 import de.sciss.lucre.adjunct.{Adjunct, ProductWithAdjuncts}
-import de.sciss.lucre.event.impl.{IEventImpl, IGenerator}
-import de.sciss.lucre.event.{Caching, IEvent, IPublisher, IPull, IPush, ITargets}
+import de.sciss.lucre.event.impl.{IChangeEventImpl, IEventImpl, IGenerator}
+import de.sciss.lucre.event.{Caching, IChangeEvent, IEvent, IPublisher, IPull, IPush, ITargets}
 import de.sciss.lucre.expr.graph.{Control, Ex, Trig}
 import de.sciss.lucre.expr.impl.IControlImpl
 import de.sciss.lucre.expr.{Context, IControl, IExpr, ITrigger}
@@ -90,7 +90,7 @@ object DropTarget {
 
   private final class ValueExpanded[S <: Sys[S], A](value0: A, evt: IEvent[S, A], tx0: S#Tx)
                                                    (implicit protected val targets: ITargets[S])
-    extends IExpr[S, A] with IEventImpl[S, Change[A]] with Caching {
+    extends IExpr[S, A] with IChangeEventImpl[S, A] with Caching {
 
     private[this] val ref = Ref(value0) // requires caching!
 
@@ -102,7 +102,14 @@ object DropTarget {
     def dispose()(implicit tx: S#Tx): Unit =
       evt.-/->(this)
 
-    private[lucre] def pullUpdate(pull: IPull[S])(implicit tx: S#Tx): Option[Change[A]] =
+//    private[lucre] def pullChange(pull: IPull[S])(implicit tx: S#Tx, phase: IPull.Phase): A = {
+//      val v = pull.applyChange(evt)
+//    }
+
+    private[lucre] def pullChange(pull: IPull[S])(implicit tx: S#Tx, phase: IPull.Phase): A =
+      if (phase.isBefore) ref() else pull(evt).get
+
+    override private[lucre] def pullUpdate(pull: IPull[S])(implicit tx: S#Tx): Option[Change[A]] =
       pull(evt).flatMap { aNow =>
         val aBefore = ref()
         if (aBefore != aNow) {
@@ -114,7 +121,7 @@ object DropTarget {
         }
       }
 
-    def changed: IEvent[S, Change[A]] = this
+    def changed: IChangeEvent[S, A] = this
   }
 
   private final class ReceivedExpanded[S <: Sys[S]](evt: IEvent[S, Any], tx0: S#Tx)

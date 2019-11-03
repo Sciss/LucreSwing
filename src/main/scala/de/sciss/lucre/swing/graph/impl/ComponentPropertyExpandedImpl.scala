@@ -13,8 +13,8 @@
 
 package de.sciss.lucre.swing.graph.impl
 
-import de.sciss.lucre.event.impl.IGenerator
-import de.sciss.lucre.event.{IEvent, IPull, ITargets}
+import de.sciss.lucre.event.impl.IChangeGenerator
+import de.sciss.lucre.event.{IChangeEvent, IPull, ITargets}
 import de.sciss.lucre.expr.IExpr
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
@@ -28,7 +28,7 @@ abstract class ComponentPropertyExpandedImpl[S <: Sys[S], A](value0: A)
                                                             (implicit protected val targets: ITargets[S],
                                                              cursor: stm.Cursor[S])
   extends IExpr[S, A]
-    with IGenerator[S, Change[A]] {
+    with IChangeGenerator[S, A] {
 
   // ---- abstract ----
 
@@ -61,10 +61,10 @@ abstract class ComponentPropertyExpandedImpl[S <: Sys[S], A](value0: A)
 
   def value(implicit tx: S#Tx): A = txValue.get(tx.peer)
 
-  def changed: IEvent[S, Change[A]] = this
+  def changed: IChangeEvent[S, A] = this
 
-  private[lucre] def pullUpdate(pull: IPull[S])(implicit tx: S#Tx): Option[Change[A]] =
-    Some(pull.resolve)
+  private[lucre] def pullChange(pull: IPull[S])(implicit tx: S#Tx, phase: IPull.Phase): A =
+    pull.resolveExpr(this)
 
   def init()(implicit tx: S#Tx): this.type = {
     deferTx {

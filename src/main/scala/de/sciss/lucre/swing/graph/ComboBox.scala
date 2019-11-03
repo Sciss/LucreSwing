@@ -13,8 +13,8 @@
 
 package de.sciss.lucre.swing.graph
 
-import de.sciss.lucre.event.impl.IGenerator
-import de.sciss.lucre.event.{IEvent, IPull, ITargets}
+import de.sciss.lucre.event.impl.IChangeGenerator
+import de.sciss.lucre.event.{IChangeEvent, IPull, ITargets}
 import de.sciss.lucre.expr.graph.Ex
 import de.sciss.lucre.expr.{Context, Graph, IControl, IExpr, Model}
 import de.sciss.lucre.stm
@@ -60,7 +60,7 @@ object ComboBox {
   private final class ValueOptionExpanded[S <: Sys[S], A](ws: View.T[S, de.sciss.swingplus.ComboBox[A]], value0: Option[A])
                                                          (implicit protected val targets: ITargets[S], cursor: stm.Cursor[S])
     extends IExpr[S, Option[A]]
-      with IGenerator[S, Change[Option[A]]] {
+      with IChangeGenerator[S, Option[A]] {
 
     private def commit(): Unit = {
       val c       = ws.component
@@ -81,10 +81,10 @@ object ComboBox {
 
     def value(implicit tx: S#Tx): Option[A] = txValue.get(tx.peer)
 
-    def changed: IEvent[S, Change[Option[A]]] = this
+    def changed: IChangeEvent[S, Option[A]] = this
 
-    private[lucre] def pullUpdate(pull: IPull[S])(implicit tx: S#Tx): Option[Change[Option[A]]] =
-      Some(pull.resolve)
+    private[lucre] def pullChange(pull: IPull[S])(implicit tx: S#Tx, phase: IPull.Phase): Option[A] =
+      pull.resolveExpr(this)
 
     def init()(implicit tx: S#Tx): this.type = {
       deferTx {

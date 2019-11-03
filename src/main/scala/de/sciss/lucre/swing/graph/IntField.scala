@@ -17,8 +17,8 @@ import java.text.{NumberFormat, ParseException}
 import java.util.Locale
 
 import de.sciss.audiowidgets.{ParamFormat, UnitView, ParamField => Peer}
-import de.sciss.lucre.event.impl.IGenerator
-import de.sciss.lucre.event.{IEvent, IPull, ITargets}
+import de.sciss.lucre.event.impl.IChangeGenerator
+import de.sciss.lucre.event.{IChangeEvent, IPull, ITargets}
 import de.sciss.lucre.expr.graph.{Const, Ex}
 import de.sciss.lucre.expr.{Context, ExSeq, Graph, IExpr, Model}
 import de.sciss.lucre.stm
@@ -71,7 +71,7 @@ object IntField {
   private final class ValueExpanded[S <: Sys[S]](ws: View.T[S, Peer[Int]], value0: Int)
                                                 (implicit protected val targets: ITargets[S], cursor: stm.Cursor[S])
     extends IExpr[S, Int]
-      with IGenerator[S, Change[Int]] {
+      with IChangeGenerator[S, Int] {
 
     private def commit(): scala.Unit = {
       val c       = ws.component
@@ -92,10 +92,10 @@ object IntField {
 
     def value(implicit tx: S#Tx): Int = txValue.get(tx.peer)
 
-    def changed: IEvent[S, Change[Int]] = this
+    def changed: IChangeEvent[S, Int] = this
 
-    private[lucre] def pullUpdate(pull: IPull[S])(implicit tx: S#Tx): Option[Change[Int]] =
-      Some(pull.resolve)
+    private[lucre] def pullChange(pull: IPull[S])(implicit tx: S#Tx, phase: IPull.Phase): Int =
+      pull.resolveExpr(this)
 
     def init()(implicit tx: S#Tx): this.type = {
       deferTx {

@@ -19,7 +19,7 @@ To use the library in your project:
 
     "de.sciss" %% "lucre-swing" % v
 
-The current version `v` is `"1.19.1"`.
+The current version `v` is `"1.20.0"`.
 
 ## contributing
 
