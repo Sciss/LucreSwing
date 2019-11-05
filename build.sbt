@@ -19,7 +19,7 @@ lazy val deps = new {
   val test = new {
     val fileUtil  = "1.1.3"
     val scalaTest = "3.0.8"
-    val submin    = "0.2.5"
+    val submin    = "0.3.3"
   }
 }
 
@@ -43,8 +43,8 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"      %% "model"              % deps.main.model,
       "de.sciss"      %% "lucre-bdb"          % deps.main.lucre     % Test,
       "de.sciss"      %% "fileutil"           % deps.test.fileUtil  % Test,
-//      "de.sciss"      %  "submin"             % deps.test.submin    % Test,
-      "com.weblookandfeel" % "weblaf-ui" % "1.2.10" % Test,
+      "de.sciss"      %  "submin"             % deps.test.submin    % Test,
+//      "com.weblookandfeel" % "weblaf-ui" % "1.2.10" % Test,
     ),
     libraryDependencies += {
       "org.scalatest" %% "scalatest" % deps.test.scalaTest %Test
