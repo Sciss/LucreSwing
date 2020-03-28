@@ -96,7 +96,7 @@ object Button {
     protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
       new Expanded[S](this).initComponent()
 
-    def clicked = Clicked(this)
+    def clicked: Clicked = Clicked(this)
 
     def text: Ex[String] = text0
   }
