@@ -2,7 +2,7 @@
  *  ExprViewFactory.scala
  *  (LucreSwing)
  *
- *  Copyright (c) 2014-2019 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2014-2020 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Affero General Public License v3+
  *
@@ -22,7 +22,6 @@ import de.sciss.model.Change
 import javax.swing.undo.UndoableEdit
 
 import scala.concurrent.stm.Ref
-import scala.language.higherKinds
 
 object CellViewFactory {
   trait View[A] {

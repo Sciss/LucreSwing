@@ -2,7 +2,7 @@
  *  EditVar.scala
  *  (LucreSwing)
  *
- *  Copyright (c) 2014-2019 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2014-2020 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Affero General Public License v3+
  *
@@ -18,8 +18,6 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.serial
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
-
-import scala.language.higherKinds
 
 object EditVar {
   @deprecated("Try to transition to stm.UndoManager", since = "1.17.0")

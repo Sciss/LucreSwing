@@ -2,7 +2,7 @@
  *  EditMutableMap.scala
  *  (LucreSwing)
  *
- *  Copyright (c) 2014-2019 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2014-2020 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Affero General Public License v3+
  *
@@ -17,8 +17,6 @@ import de.sciss.lucre.stm.{Elem, Sys}
 import de.sciss.lucre.{stm, event => evt}
 import de.sciss.serial.Serializer
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
-
-import scala.language.higherKinds
 
 object EditMutableMap {
   @deprecated("Try to transition to stm.UndoManager", since = "1.17.0")

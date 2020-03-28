@@ -2,15 +2,15 @@ lazy val baseName   = "Lucre-Swing"
 lazy val baseNameL  = baseName.toLowerCase
 lazy val gitProject = "LucreSwing"
 
-lazy val projectVersion = "1.20.0"
-lazy val mimaVersion    = "1.20.0"
+lazy val projectVersion = "1.21.0-SNAPSHOT"
+lazy val mimaVersion    = "1.21.0"
 
 // ---- dependencies ----
 
 lazy val deps = new {
   val main = new {
-    val desktop   = "0.10.4"
-    val lucre     = "3.16.0"
+    val desktop   = "0.10.6"
+    val lucre     = "3.17.0-SNAPSHOT"
     val model     = "0.3.4"
     val swingPlus = "0.4.2"
     val treeTable = "1.5.1"
@@ -18,8 +18,8 @@ lazy val deps = new {
   }
   val test = new {
     val fileUtil  = "1.1.3"
-    val scalaTest = "3.0.8"
-    val submin    = "0.3.3"
+    val scalaTest = "3.1.1"
+    val submin    = "0.3.4"
   }
 }
 
@@ -28,8 +28,8 @@ lazy val root = project.withId(baseNameL).in(file("."))
     name                 := baseName,
     version              := projectVersion,
     organization         := "de.sciss",
-    scalaVersion         := "2.12.10",
-    crossScalaVersions   := Seq("2.13.1", "2.12.10"),
+    scalaVersion         := "2.13.1",
+    crossScalaVersions   := Seq("2.13.1", "2.12.11"),
     description          := "Swing support for Lucre, and common views",
     homepage             := Some(url(s"https://git.iem.at/sciss/$gitProject")),
     licenses             := Seq("AGPL v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),

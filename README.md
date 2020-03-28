@@ -1,13 +1,13 @@
 # LucreSwing
 
 [![Build Status](https://travis-ci.org/Sciss/LucreSwing.svg?branch=master)](https://travis-ci.org/Sciss/LucreSwing)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.sciss/lucreswing_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.sciss/lucreswing_2.12)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.sciss/lucreswing_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.sciss/lucreswing_2.13)
 
 ## statement
 
 LucreSwing is a Scala library which bridges between Swing (through 
 the [Desktop](https://git.iem.at/sciss/Desktop/) project) and [Lucre](https://git.iem.at/sciss/Lucre/).
-It is (C)opyright 2014&ndash;2019 by Hanns Holger Rutz. All rights reserved. The project is released under
+It is (C)opyright 2014&ndash;2020 by Hanns Holger Rutz. All rights reserved. The project is released under
 the [GNU Lesser General Public License](https://git.iem.at/sciss/LucreSwing/raw/master/LICENSE) v2.1+ and comes 
 with absolutely no warranties. To contact the author, send an email to `contact at sciss.de`
 
@@ -19,7 +19,7 @@ To use the library in your project:
 
     "de.sciss" %% "lucre-swing" % v
 
-The current version `v` is `"1.20.0"`.
+The current version `v` is `"1.21.0"`.
 
 ## contributing
 
