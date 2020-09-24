@@ -13,13 +13,13 @@
 
 package de.sciss.lucre.swing.graph.impl
 
+import de.sciss.lucre.Txn
 import de.sciss.lucre.expr.Context
-import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.Panel
 
-trait PanelExpandedImpl[S <: Sys[S]] extends ComponentExpandedImpl[S] {
+trait PanelExpandedImpl[T <: Txn[T]] extends ComponentExpandedImpl[T] {
 
-  override def initComponent()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
+  override def initComponent()(implicit tx: T, ctx: Context[T]): this.type = {
     initProperty(Panel.keyBorder, Panel.defaultBorder) {
       c => if (c != Panel.defaultBorder) component.border = c.mkPeer()
     }

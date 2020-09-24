@@ -15,16 +15,14 @@ package de.sciss.lucre.swing.graph
 
 import java.awt.event.{ActionEvent, ActionListener, FocusEvent, FocusListener}
 
-import de.sciss.lucre.event.impl.IChangeGenerator
-import de.sciss.lucre.event.{IChangeEvent, IPull, ITargets}
 import de.sciss.lucre.expr.graph.{Const, Ex}
-import de.sciss.lucre.expr.{Context, Graph, IControl, IExpr, Model}
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.expr.{Context, Graph, IControl, Model}
+import de.sciss.lucre.impl.IChangeGeneratorEvent
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
+import de.sciss.lucre.{Cursor, IChangeEvent, IExpr, IPull, ITargets, Txn}
 import de.sciss.model.Change
 
 import scala.concurrent.stm.Ref
@@ -47,23 +45,23 @@ object TextField {
   private final val defaultEditable = true
 
   final case class Text(w: TextField) extends Ex[String] {
-    type Repr[S <: Sys[S]] = IExpr[S, String]
+    type Repr[T <: Txn[T]] = IExpr[T, String]
 
     override def productPrefix: String = s"TextField$$Text" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       import ctx.{cursor, targets}
-      val ws        = w.expand[S]
+      val ws        = w.expand[T]
       val valueOpt  = ctx.getProperty[Ex[String]](w, keyText)
-      val value0    = valueOpt.fold[String](defaultText)(_.expand[S].value)
-      new TextExpanded[S](ws, value0).init()
+      val value0    = valueOpt.fold[String](defaultText)(_.expand[T].value)
+      new TextExpanded[T](ws, value0).init()
     }
   }
 
-  private final class TextExpanded[S <: Sys[S]](ws: View.T[S, scala.swing.TextField], value0: String)
-                                                (implicit protected val targets: ITargets[S], cursor: stm.Cursor[S])
-    extends IExpr[S, String]
-      with IChangeGenerator[S, String] {
+  private final class TextExpanded[T <: Txn[T]](ws: View.T[T, scala.swing.TextField], value0: String)
+                                                (implicit protected val targets: ITargets[T], cursor: Cursor[T])
+    extends IExpr[T, String]
+      with IChangeGeneratorEvent[T, String] {
 
     private def commit(): Unit = {
       val c       = ws.component
@@ -92,14 +90,14 @@ object TextField {
     private[this] var guiValue: String = _
     private[this] val txValue = Ref(value0)
 
-    def value(implicit tx: S#Tx): String = txValue.get(tx.peer)
+    def value(implicit tx: T): String = txValue.get(tx.peer)
 
-    def changed: IChangeEvent[S, String] = this
+    def changed: IChangeEvent[T, String] = this
 
-    private[lucre] def pullChange(pull: IPull[S])(implicit tx: S#Tx, phase: IPull.Phase): String =
+    private[lucre] def pullChange(pull: IPull[T])(implicit tx: T, phase: IPull.Phase): String =
       pull.resolveExpr(this)
 
-    def init()(implicit tx: S#Tx): this.type = {
+    def init()(implicit tx: T): this.type = {
       deferTx {
         val c = ws.component
         val p = c.peer
@@ -110,7 +108,7 @@ object TextField {
       this
     }
 
-    def dispose()(implicit tx: S#Tx): Unit = {
+    def dispose()(implicit tx: T): Unit = {
       deferTx {
         val c = ws.component
         val p = c.peer
@@ -121,37 +119,37 @@ object TextField {
   }
 
   final case class Columns(w: TextField) extends Ex[Int] {
-    type Repr[S <: Sys[S]] = IExpr[S, Int]
+    type Repr[T <: Txn[T]] = IExpr[T, Int]
 
     override def productPrefix: String = s"TextField$$Columns" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyColumns)
-      valueOpt.getOrElse(Const(defaultColumns)).expand[S]
+      valueOpt.getOrElse(Const(defaultColumns)).expand[T]
     }
   }
 
   final case class Editable(w: TextField) extends Ex[Boolean] {
-    type Repr[S <: Sys[S]] = IExpr[S, Boolean]
+    type Repr[T <: Txn[T]] = IExpr[T, Boolean]
 
     override def productPrefix: String = s"TextField$$Editable" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyEditable)
-      valueOpt.getOrElse(Const(defaultEditable)).expand[S]
+      valueOpt.getOrElse(Const(defaultEditable)).expand[T]
     }
   }
 
-  private final class Expanded[S <: Sys[S]](protected val peer: TextField) extends View[S]
-    with ComponentHolder[scala.swing.TextField] with ComponentExpandedImpl[S] {
+  private final class Expanded[T <: Txn[T]](protected val peer: TextField) extends View[T]
+    with ComponentHolder[scala.swing.TextField] with ComponentExpandedImpl[T] {
 
     type C = scala.swing.TextField
 
-    override def initComponent()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
-      val textOpt   = ctx.getProperty[Ex[String]](peer, keyText).map(_.expand[S].value)
+    override def initComponent()(implicit tx: T, ctx: Context[T]): this.type = {
+      val textOpt   = ctx.getProperty[Ex[String]](peer, keyText).map(_.expand[T].value)
       val text0     = textOpt.orNull
-      val columns   = ctx.getProperty[Ex[Int    ]](peer, keyColumns  ).fold(defaultColumns )(_.expand[S].value)
-      val editable  = ctx.getProperty[Ex[Boolean]](peer, keyEditable ).fold(defaultEditable)(_.expand[S].value)
+      val columns   = ctx.getProperty[Ex[Int    ]](peer, keyColumns  ).fold(defaultColumns )(_.expand[T].value)
+      val editable  = ctx.getProperty[Ex[Boolean]](peer, keyEditable ).fold(defaultEditable)(_.expand[T].value)
 
 //      println(s"text0 '$text0', columns $columns")
 
@@ -167,8 +165,8 @@ object TextField {
   private final case class Impl() extends TextField with ComponentImpl { w =>
     override def productPrefix: String = "TextField" // serialization
     
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
-      new Expanded[S](this).initComponent()
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] =
+      new Expanded[T](this).initComponent()
 
     object text extends Model[String] {
       def apply(): Ex[String] = Text(w)
@@ -197,7 +195,7 @@ object TextField {
 trait TextField extends Component {
   type C = scala.swing.TextField
 
-  type Repr[S <: Sys[S]] = View.T[S, C] with IControl[S]
+  type Repr[T <: Txn[T]] = View.T[T, C] with IControl[T]
 
   var columns: Ex[Int]
 

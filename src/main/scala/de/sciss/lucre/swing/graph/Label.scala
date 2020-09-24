@@ -14,30 +14,30 @@
 package de.sciss.lucre.swing.graph
 
 import de.sciss.lucre.expr.graph.{Const, Ex}
-import de.sciss.lucre.expr.{Context, Graph, IControl, IExpr}
-import de.sciss.lucre.stm.{Disposable, Sys}
+import de.sciss.lucre.expr.{Context, Graph, IControl}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
+import de.sciss.lucre.{Disposable, IExpr, Txn}
 
 import scala.swing.{Swing, Label => Peer}
 
 object Label {
   def apply(text: Ex[String]): Label = Impl(text)
 
-  private final class Expanded[S <: Sys[S]](protected val peer: Label) extends View[S]
-    with ComponentHolder[Peer] with ComponentExpandedImpl[S] {
+  private final class Expanded[T <: Txn[T]](protected val peer: Label) extends View[T]
+    with ComponentHolder[Peer] with ComponentExpandedImpl[T] {
 
     type C = Peer
 
-    private[this] var obs: Disposable[S#Tx] = _
+    private[this] var obs: Disposable[T] = _
 
-    override def initComponent()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
-      val text    = peer.text.expand[S]
+    override def initComponent()(implicit tx: T, ctx: Context[T]): this.type = {
+      val text    = peer.text.expand[T]
       val text0   = text.value
-      val hAlign  = ctx.getProperty[Ex[Int]](peer, keyHAlign).fold(defaultHAlign)(_.expand[S].value)
-      val vAlign  = ctx.getProperty[Ex[Int]](peer, keyVAlign).fold(defaultVAlign)(_.expand[S].value)
+      val hAlign  = ctx.getProperty[Ex[Int]](peer, keyHAlign).fold(defaultHAlign)(_.expand[T].value)
+      val vAlign  = ctx.getProperty[Ex[Int]](peer, keyVAlign).fold(defaultVAlign)(_.expand[T].value)
 
       deferTx {
         val hAlignSwing = hAlign match {
@@ -66,39 +66,39 @@ object Label {
       super.initComponent()
     }
 
-    override def dispose()(implicit tx: S#Tx): Unit = {
+    override def dispose()(implicit tx: T): Unit = {
       obs.dispose()
       super.dispose()
     }
   }
 
   final case class HAlign(w: Component) extends Ex[Int] {
-    type Repr[S <: Sys[S]] = IExpr[S, Int]
+    type Repr[T <: Txn[T]] = IExpr[T, Int]
 
     override def productPrefix: String = s"Label$$HAlign" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyHAlign)
-      valueOpt.fold(Const(defaultHAlign).expand[S])(_.expand[S])
+      valueOpt.fold(Const(defaultHAlign).expand[T])(_.expand[T])
     }
   }
 
   final case class VAlign(w: Component) extends Ex[Int] {
-    type Repr[S <: Sys[S]] = IExpr[S, Int]
+    type Repr[T <: Txn[T]] = IExpr[T, Int]
 
     override def productPrefix: String = s"Label$$VAlign" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyVAlign)
-      valueOpt.fold(Const(defaultVAlign).expand[S])(_.expand[S])
+      valueOpt.fold(Const(defaultVAlign).expand[T])(_.expand[T])
     }
   }
 
   private final case class Impl(text0: Ex[String]) extends Label with ComponentImpl {
     override def productPrefix: String = "Label" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
-      new Expanded[S](this).initComponent()
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] =
+      new Expanded[T](this).initComponent()
 
     def text: Ex[String] = text0
 
@@ -125,7 +125,7 @@ object Label {
 trait Label extends Component {
   type C = Peer
 
-  type Repr[S <: Sys[S]] = View.T[S, C] with IControl[S]
+  type Repr[T <: Txn[T]] = View.T[T, C] with IControl[T]
 
   /** The label's text */
   def text: Ex[String]

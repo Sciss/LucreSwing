@@ -1,11 +1,11 @@
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.expr.{Context, ExImport, IntObj, StringObj}
-import de.sciss.lucre.stm.{InMemory, UndoManager, Workspace}
+import de.sciss.lucre.expr.{Context, ExImport}
+import de.sciss.lucre.{IntObj, StringObj}
 
 import scala.swing.Component
 
-object ExprAttrTest extends AppLike {
+object ExprAttrTest extends InMemoryAppLike {
   protected def mkView(): Component = {
     import ExImport._
     import graph._
@@ -21,31 +21,26 @@ object ExprAttrTest extends AppLike {
       FlowPanel(Label(attr1.toStr), Label(attr2.toStr), sl)
     }
 
-    type              S = InMemory
-    implicit val sys: S = InMemory()
-    implicit val undo: UndoManager[S] = UndoManager()
-    import Workspace.Implicits._
-
-    val (view, selfH) = sys.step { implicit tx =>
-      val self  = StringObj.newConst[S]("foo"): StringObj[S]
+    val (view, selfH) = system.step { implicit tx =>
+      val self  = StringObj.newConst[T]("foo"): StringObj[T]
       val selfH = tx.newHandle(self)
-      implicit val ctx: Context[S] = Context(Some(selfH))
-      val _view = g.expand[S]
+      implicit val ctx: Context[T] = Context(Some(selfH))
+      val _view = g.expand[T]
       _view -> selfH
     }
 
     new scala.swing.FlowPanel(
       view.component,
       scala.swing.Button("Dice") {
-        val i = (math.random * 6).toInt + 1 // Scala 2.11 - random is no-parens!
-        sys.step { implicit tx =>
-          val value = IntObj.newConst[S](i)
+        val i = (math.random() * 6).toInt + 1
+        system.step { implicit tx =>
+          val value = IntObj.newConst[T](i)
           val attr  = selfH().attr
           attr.put(keyDice, value)
         }
       },
       scala.swing.Button("Clear") {
-        sys.step { implicit tx =>
+        system.step { implicit tx =>
           val attr = selfH().attr
           attr.remove(keyDice)
         }

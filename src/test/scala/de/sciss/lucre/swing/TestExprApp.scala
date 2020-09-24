@@ -1,25 +1,25 @@
 package de.sciss.lucre.swing
 
 import de.sciss.audiowidgets.DualRangeModel
-import de.sciss.lucre.expr.{BooleanObj, DoubleObj, IntObj, StringObj}
+import de.sciss.lucre.{BooleanObj, DoubleObj, IntObj, StringObj}
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.{Alignment, Component, GridPanel, Label, Swing}
 
-object TestExprApp extends AppLike {
+object TestExprApp extends DurableAppLike {
   // de.sciss.lucre.event.showLog = true
 
   private val rows = 5
 
-  private lazy val views: Vec[View[S]] = system.step { implicit tx =>
+  private lazy val views: Vec[View[T]] = system.step { implicit tx =>
 //    implicit val doubleEx  = DoubleObj
 //    implicit val booleanEx = BooleanObj
 
-    val exprD1  = DoubleObj .newVar[S](DoubleObj .newConst( 0.0 ))
-    val exprI1  = IntObj    .newVar[S](IntObj    .newConst( 0   ))
-    val exprI2  = IntObj    .newVar[S](IntObj    .newConst(10   ))
-    val exprS1  = StringObj .newVar[S](StringObj .newConst("Foo"))
-    val exprB1  = BooleanObj.newVar[S](BooleanObj.newConst(true ))
+    val exprD1  = DoubleObj .newVar[T](DoubleObj .newConst( 0.0 ))
+    val exprI1  = IntObj    .newVar[T](IntObj    .newConst( 0   ))
+    val exprI2  = IntObj    .newVar[T](IntObj    .newConst(10   ))
+    val exprS1  = StringObj .newVar[T](StringObj .newConst("Foo"))
+    val exprB1  = BooleanObj.newVar[T](BooleanObj.newConst(true ))
     val vD1     = DoubleSpinnerView  (exprD1, "d1")
     val vD2     = DoubleSpinnerView  (exprD1, "d2")
     val vI1     = IntSpinnerView     (exprI1, "i1")
@@ -35,7 +35,7 @@ object TestExprApp extends AppLike {
     vI4.rangeLo = Some(exprI1)
     vI4.rangeHi = Some(exprI2)
 
-    def label(text: String): View.T[S, Label] = View.wrap(new Label(s"$text:", null, Alignment.Trailing))
+    def label(text: String): View.T[T, Label] = View.wrap(new Label(s"$text:", null, Alignment.Trailing))
 
     Vec(
       label("Double"), vD1, vD2,

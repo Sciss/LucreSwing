@@ -13,15 +13,15 @@
 
 package de.sciss.lucre.swing.graph
 
+import de.sciss.lucre.Txn
 import de.sciss.lucre.expr.graph.Ex
 import de.sciss.lucre.expr.{IControl, Model}
-import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.View
 
 trait NumberField[A] extends Component {
   type C = de.sciss.audiowidgets.ParamField[A]
 
-  type Repr[S <: Sys[S]] = View.T[S, C] with IControl[S]
+  type Repr[T <: Txn[T]] = View.T[T, C] with IControl[T]
   
   var min       : Ex[A]
   var max       : Ex[A]

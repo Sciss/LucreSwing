@@ -1,11 +1,10 @@
 package de.sciss.lucre.swing
 
 import de.sciss.lucre.expr.Context
-import de.sciss.lucre.stm.{InMemory, UndoManager, Workspace}
 
 import scala.swing.Component
 
-object BorderPanelTest extends AppLike {
+object BorderPanelTest extends InMemoryAppLike {
   protected def mkView(): Component = {
     import graph._
     val g = Graph {
@@ -22,14 +21,9 @@ object BorderPanelTest extends AppLike {
       bp
     }
 
-    type              S = InMemory
-    implicit val sys: S = InMemory()
-    implicit val undo: UndoManager[S] = UndoManager()
-    import Workspace.Implicits._
-
-    val view = sys.step { implicit tx =>
-      implicit val ctx: Context[S] = Context()
-      val v = g.expand[S]
+    val view = system.step { implicit tx =>
+      implicit val ctx: Context[T] = Context()
+      val v = g.expand[T]
       v.initControl()
       v
     }

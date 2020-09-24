@@ -14,21 +14,20 @@
 package de.sciss.lucre.swing
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
+import de.sciss.lucre.{Disposable, Txn, Cursor => LCursor}
 
 import scala.swing.Component
 
 object View {
-  type T[S <: Sys[S], C1 <: Component] = View[S] { type C = C1 }
+  type T[Tx <: Txn[Tx], C1 <: Component] = View[Tx] { type C = C1 }
 
-  trait Cursor[S <: Sys[S]] extends View[S] {
-    implicit def cursor: stm.Cursor[S]
+  trait Cursor[Tx <: Txn[Tx]] extends View[Tx] {
+    implicit def cursor: LCursor[Tx]
   }
 
-  trait Editable[S <: Sys[S]] extends Cursor[S] {
+  trait Editable[Tx <: Txn[Tx]] extends Cursor[Tx] {
     def undoManager: UndoManager
   }
 
@@ -36,23 +35,23 @@ object View {
     def file: java.io.File
   }
 
-  def wrap[S <: Sys[S], C <: Component](component: => C)(implicit tx: S#Tx): View.T[S, C] = {
-    val res = new Wrap[S, C]
+  def wrap[Tx <: Txn[Tx], C <: Component](component: => C)(implicit tx: Tx): View.T[Tx, C] = {
+    val res = new Wrap[Tx, C]
     deferTx {
       res.guiInit(component)
     }
     res
   }
 
-  private final class Wrap[S <: Sys[S], C1 <: Component] extends View[S] with ComponentHolder[C1] {
+  private final class Wrap[Tx <: Txn[Tx], C1 <: Component] extends View[Tx] with ComponentHolder[C1] {
     type C = C1
 
     def guiInit(c: C1): Unit = component = c
 
-    def dispose()(implicit tx: S#Tx): Unit = ()
+    def dispose()(implicit tx: Tx): Unit = ()
   }
 }
-trait View[S <: Sys[S]] extends Disposable[S#Tx] {
+trait View[T <: Txn[T]] extends Disposable[T] {
   type C <: Component
 
   def component: C

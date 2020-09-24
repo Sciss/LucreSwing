@@ -13,20 +13,20 @@
 
 package de.sciss.lucre.swing.graph
 
+import de.sciss.lucre.expr.Context
 import de.sciss.lucre.expr.graph.{Const, Ex}
-import de.sciss.lucre.expr.{Context, IExpr}
-import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.graph.{Border => _Border}
+import de.sciss.lucre.{IExpr, Txn}
 
 object Panel {
   final case class Border(w: Panel) extends Ex[_Border] {
-    type Repr[S <: Sys[S]] = IExpr[S, _Border]
+    type Repr[T <: Txn[T]] = IExpr[T, _Border]
 
     override def productPrefix: String = s"Panel$$Border" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       val valueOpt = ctx.getProperty[Ex[_Border]](w, keyBorder)
-      valueOpt.fold(Const(defaultBorder).expand[S])(_.expand[S])
+      valueOpt.fold(Const(defaultBorder).expand[T])(_.expand[T])
     }
   }
 

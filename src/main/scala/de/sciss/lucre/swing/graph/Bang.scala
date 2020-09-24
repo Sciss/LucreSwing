@@ -17,18 +17,16 @@ import java.awt.Dimension
 import java.awt.event.{ActionEvent, ActionListener}
 import java.awt.geom.Ellipse2D
 
-import de.sciss.lucre.event.IPush.Parents
-import de.sciss.lucre.event.impl.IGenerator
-import de.sciss.lucre.event.{IEvent, IPull, ITargets}
+import de.sciss.lucre.IPush.Parents
+import de.sciss.lucre.Txn.{peer => txPeer}
 import de.sciss.lucre.expr.graph.{Act, Trig}
 import de.sciss.lucre.expr.{Context, IAction, IControl, ITrigger}
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.TxnLike.{peer => txPeer}
-import de.sciss.lucre.stm.{Disposable, Sys}
+import de.sciss.lucre.impl.IGeneratorEvent
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
+import de.sciss.lucre.{Cursor, Disposable, IEvent, IPull, ITargets, Txn}
 import javax.swing.{JButton, Timer}
 
 import scala.concurrent.stm.Ref
@@ -38,28 +36,28 @@ import scala.swing.event.ButtonClicked
 object Bang {
   def apply(): Bang = Impl()
 
-  private final class Expanded[S <: Sys[S]](protected val peer: Bang)(implicit protected val targets: ITargets[S],
-                                                                      cursor: stm.Cursor[S])
-    extends View[S]
-    with ComponentHolder[scala.swing.Button] with ComponentExpandedImpl[S]
-    with IAction[S] with ITrigger[S]
-    with IGenerator[S, Unit] {
+  private final class Expanded[T <: Txn[T]](protected val peer: Bang)(implicit protected val targets: ITargets[T],
+                                                                      cursor: Cursor[T])
+    extends View[T]
+    with ComponentHolder[scala.swing.Button] with ComponentExpandedImpl[T]
+    with IAction[T] with ITrigger[T]
+    with IGeneratorEvent[T, Unit] {
 
     override def toString: String = s"Bang.Expanded@${hashCode().toHexString}"
 
     type C = scala.swing.Button
 
-    private[this] val disposables = Ref(List.empty[Disposable[S#Tx]])
+    private[this] val disposables = Ref(List.empty[Disposable[T]])
 
-    private def addDisposable(d: Disposable[S#Tx])(implicit tx: S#Tx): Unit =
+    private def addDisposable(d: Disposable[T])(implicit tx: T): Unit =
       disposables.transform(d :: _)
 
-    def executeAction()(implicit tx: S#Tx): Unit = {
+    def executeAction()(implicit tx: T): Unit = {
       fire(())
       activate()
     }
 
-    def addSource(tr: ITrigger[S])(implicit tx: S#Tx): Unit = {
+    def addSource(tr: ITrigger[T])(implicit tx: T): Unit = {
       // ok, this is a bit involved:
       // we must either mixin the trait `Caching` or
       // create an observer to not be eliminated from event
@@ -75,7 +73,7 @@ object Bang {
       addDisposable(obs)
     }
 
-    private def activate()(implicit tx: S#Tx): Unit = {
+    private def activate()(implicit tx: T): Unit = {
       deferTx {
         setActive(true)
         timer.restart()
@@ -93,12 +91,12 @@ object Bang {
         c.toolkit.sync()
       }
 
-    def changed: IEvent[S, Unit] = this
+    def changed: IEvent[T, Unit] = this
 
-    private[lucre] def pullUpdate(pull: IPull[S])(implicit tx: S#Tx) : Option[Unit] = {
+    private[lucre] def pullUpdate(pull: IPull[T])(implicit tx: T) : Option[Unit] = {
       if (pull.isOrigin(this)) Trig.Some
       else {
-        val p: Parents[S] = pull.parents(this)
+        val p: Parents[T] = pull.parents(this)
         if (p.exists(pull(_).isDefined)) Trig.Some else None
       }
     }
@@ -112,7 +110,7 @@ object Bang {
         executeAction()
       }
 
-    override def dispose()(implicit tx: S#Tx): Unit = {
+    override def dispose()(implicit tx: T): Unit = {
       super.dispose()
       disposables.swap(Nil).foreach(_.dispose())
       deferTx {
@@ -120,7 +118,7 @@ object Bang {
       }
     }
 
-    override def initComponent()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
+    override def initComponent()(implicit tx: T, ctx: Context[T]): this.type = {
       deferTx {
         timer = new Timer(200, new ActionListener {
           def actionPerformed(e: ActionEvent): Unit =
@@ -177,14 +175,14 @@ object Bang {
   private final case class Impl() extends Bang with ComponentImpl {
     override def productPrefix = "Bang"   // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       import ctx.{cursor, targets}
-      new Expanded[S](this).initComponent()
+      new Expanded[T](this).initComponent()
     }
   }
 }
 trait Bang extends Component with Act with Trig {
   final type C = scala.swing.Button
 
-  type Repr[S <: Sys[S]] = View.T[S, C] with IControl[S] with ITrigger[S] with IAction[S]
+  type Repr[T <: Txn[T]] = View.T[T, C] with IControl[T] with ITrigger[T] with IAction[T]
 }

@@ -16,19 +16,16 @@ package de.sciss.lucre.swing.graph
 import java.awt.Dimension
 import java.awt.datatransfer.{DataFlavor, Transferable}
 
-import de.sciss.lucre.adjunct.{Adjunct, ProductWithAdjuncts}
-import de.sciss.lucre.event.impl.{IChangeEventImpl, IEventImpl, IGenerator}
-import de.sciss.lucre.event.{Caching, IChangeEvent, IEvent, IPublisher, IPull, IPush, ITargets}
+import de.sciss.lucre.Txn.peer
 import de.sciss.lucre.expr.graph.{Control, Ex, Trig}
 import de.sciss.lucre.expr.impl.IControlImpl
-import de.sciss.lucre.expr.{Context, IControl, IExpr, ITrigger}
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.stm.TxnLike.peer
+import de.sciss.lucre.expr.{Context, IControl, ITrigger}
+import de.sciss.lucre.impl.{IChangeEventImpl, IEventImpl, IGeneratorEvent}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{TargetIcon, View}
+import de.sciss.lucre.{Adjunct, Caching, Cursor, IChangeEvent, IEvent, IExpr, IPublisher, IPull, IPush, ITargets, ProductWithAdjuncts, Txn}
 import de.sciss.model.Change
 import de.sciss.serial.DataInput
 import javax.swing.TransferHandler.TransferSupport
@@ -52,12 +49,12 @@ object DropTarget {
     implicit object String extends Selector[java.lang.String] with Adjunct.Factory {
       final val id = 3000
 
-      def canImport[S <: Sys[S]](t: Transferable)(implicit ctx: Context[S]): Boolean =
+      def canImport[T <: Txn[T]](t: Transferable)(implicit ctx: Context[T]): Boolean =
         t.isDataFlavorSupported(DataFlavor.stringFlavor)
 
       def defaultData: String = ""
 
-      def importData[S <: Sys[S]](t: Transferable)(implicit ctx: Context[S]): String =
+      def importData[T <: Txn[T]](t: Transferable)(implicit ctx: Context[T]): String =
         t.getTransferData(DataFlavor.stringFlavor).asInstanceOf[java.lang.String]
 
       def readIdentifiedAdjunct(in: DataInput): Adjunct = this
@@ -66,12 +63,12 @@ object DropTarget {
     implicit object File extends Selector[java.io.File] with Adjunct.Factory {
       final val id = 3001
 
-      def canImport[S <: Sys[S]](t: Transferable)(implicit ctx: Context[S]): Boolean =
+      def canImport[T <: Txn[T]](t: Transferable)(implicit ctx: Context[T]): Boolean =
         t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
 
       def defaultData: java.io.File = new java.io.File("")
 
-      def importData[S <: Sys[S]](t: Transferable)(implicit ctx: Context[S]): java.io.File = {
+      def importData[T <: Txn[T]](t: Transferable)(implicit ctx: Context[T]): java.io.File = {
         val data = t.getTransferData(DataFlavor.javaFileListFlavor).asInstanceOf[java.util.List[java.io.File]]
         data.get(0)
       }
@@ -80,36 +77,36 @@ object DropTarget {
     }
   }
   trait Selector[+A] extends Adjunct {
-    def canImport[S <: Sys[S]](t: Transferable)(implicit ctx: Context[S]): Boolean
+    def canImport[T <: Txn[T]](t: Transferable)(implicit ctx: Context[T]): Boolean
 
     def defaultData: A
 
     /** May throw an exception. */
-    def importData[S <: Sys[S]](t: Transferable)(implicit ctx: Context[S]): A
+    def importData[T <: Txn[T]](t: Transferable)(implicit ctx: Context[T]): A
   }
 
-  private final class ValueExpanded[S <: Sys[S], A](value0: A, evt: IEvent[S, A], tx0: S#Tx)
-                                                   (implicit protected val targets: ITargets[S])
-    extends IExpr[S, A] with IChangeEventImpl[S, A] with Caching {
+  private final class ValueExpanded[T <: Txn[T], A](value0: A, evt: IEvent[T, A], tx0: T)
+                                                   (implicit protected val targets: ITargets[T])
+    extends IExpr[T, A] with IChangeEventImpl[T, A] with Caching {
 
     private[this] val ref = Ref(value0) // requires caching!
 
     evt.--->(this)(tx0)
 
-    def value(implicit tx: S#Tx): A =
+    def value(implicit tx: T): A =
       IPush.tryPull(this).fold(ref())(_.now)
 
-    def dispose()(implicit tx: S#Tx): Unit =
+    def dispose()(implicit tx: T): Unit =
       evt.-/->(this)
 
-//    private[lucre] def pullChange(pull: IPull[S])(implicit tx: S#Tx, phase: IPull.Phase): A = {
+//    private[lucre] def pullChange(pull: IPull[T])(implicit tx: T, phase: IPull.Phase): A = {
 //      val v = pull.applyChange(evt)
 //    }
 
-    private[lucre] def pullChange(pull: IPull[S])(implicit tx: S#Tx, phase: IPull.Phase): A =
+    private[lucre] def pullChange(pull: IPull[T])(implicit tx: T, phase: IPull.Phase): A =
       if (phase.isBefore) ref() else pull(evt).get
 
-    override private[lucre] def pullUpdate(pull: IPull[S])(implicit tx: S#Tx): Option[Change[A]] =
+    override private[lucre] def pullUpdate(pull: IPull[T])(implicit tx: T): Option[Change[A]] =
       pull(evt).flatMap { aNow =>
         val aBefore = ref()
         if (aBefore != aNow) {
@@ -121,56 +118,56 @@ object DropTarget {
         }
       }
 
-    def changed: IChangeEvent[S, A] = this
+    def changed: IChangeEvent[T, A] = this
   }
 
-  private final class ReceivedExpanded[S <: Sys[S]](evt: IEvent[S, Any], tx0: S#Tx)
-                                                   (implicit protected val targets: ITargets[S])
-    extends ITrigger[S] with IEventImpl[S, Unit] {
+  private final class ReceivedExpanded[T <: Txn[T]](evt: IEvent[T, Any], tx0: T)
+                                                   (implicit protected val targets: ITargets[T])
+    extends ITrigger[T] with IEventImpl[T, Unit] {
 
     evt.--->(this)(tx0)
 
-    def dispose()(implicit tx: S#Tx): Unit =
+    def dispose()(implicit tx: T): Unit =
       evt.-/->(this)
 
-    private[lucre] def pullUpdate(pull: IPull[S])(implicit tx: S#Tx): Option[Unit] = Trig.Some
+    private[lucre] def pullUpdate(pull: IPull[T])(implicit tx: T): Option[Unit] = Trig.Some
 
-    def changed: IEvent[S, Unit] = this
+    def changed: IEvent[T, Unit] = this
   }
 
   final case class Value[A](s: Select[A]) extends Ex[A] {
-    type Repr[S <: Sys[S]] = IExpr[S, A]
+    type Repr[T <: Txn[T]] = IExpr[T, A]
 
     override def productPrefix = s"DropTarget$$Value" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
-      val sEx = s.expand[S]
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
+      val sEx = s.expand[T]
       import ctx.targets
       new ValueExpanded(s.selector.defaultData, sEx.changed, tx)
     }
   }
 
   final case class Received[A](s: Select[A]) extends Trig {
-    type Repr[S <: Sys[S]] = ITrigger[S]
+    type Repr[T <: Txn[T]] = ITrigger[T]
 
     override def productPrefix = s"DropTarget$$Received" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
-      val sEx = s.expand[S]
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
+      val sEx = s.expand[T]
       import ctx.targets
       new ReceivedExpanded(sEx.changed, tx)
     }
   }
 
-  private final class SelectExpanded[S <: Sys[S], A](protected val peer: Select[A], repr: Repr[S])
-                                                    (implicit protected val targets: ITargets[S],
-                                                     cursor: stm.Cursor[S])
-    extends IControlImpl[S] with IGenerator[S, A] with IPublisher[S, A] {
+  private final class SelectExpanded[T <: Txn[T], A](protected val peer: Select[A], repr: Repr[T])
+                                                    (implicit protected val targets: ITargets[T],
+                                                     cursor: Cursor[T])
+    extends IControlImpl[T] with IGeneratorEvent[T, A] with IPublisher[T, A] {
 
-    private[lucre] def pullUpdate(pull: IPull[S])(implicit tx: S#Tx): Option[A] =
+    private[lucre] def pullUpdate(pull: IPull[T])(implicit tx: T): Option[A] =
       Some(pull.resolve)
 
-    def initSelect()(implicit tx: S#Tx): this.type = {
+    def initSelect()(implicit tx: T): this.type = {
       deferTx {
         val p: Peer = repr.component    // IntelliJ highlight bug
         p.addSelector(peer.selector) { value =>
@@ -182,13 +179,13 @@ object DropTarget {
       this
     }
 
-    def changed: IEvent[S, A] = this
+    def changed: IEvent[T, A] = this
   }
 
   final case class Select[A](w: DropTarget)(implicit val selector: Selector[A])
     extends Control with ProductWithAdjuncts {
 
-    type Repr[S <: Sys[S]] = IControl[S] with IPublisher[S, A]
+    type Repr[T <: Txn[T]] = IControl[T] with IPublisher[T, A]
 
     override def productPrefix = s"DropTarget$$Select" // serialization
 
@@ -197,15 +194,15 @@ object DropTarget {
     def received: Trig  = Received(this)
     def value   : Ex[A] = Value   (this)
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       import ctx.{cursor, targets}
-      new SelectExpanded(this, w.expand[S]).initSelect()
+      new SelectExpanded(this, w.expand[T]).initSelect()
     }
   }
 
   private final case class DropEvent[A](s: Selector[A])
 
-  private final class PeerImpl[S <: Sys[S]](implicit ctx: Context[S]) extends Peer {
+  private final class PeerImpl[T <: Txn[T]](implicit ctx: Context[T]) extends Peer {
     private[this] var selectors = List.empty[SelectorFun[_]]
 
     override lazy val peer: JLabel = new JLabel(" ") with SuperMixin {
@@ -265,12 +262,12 @@ object DropTarget {
       selectors :+= new SelectorFun(s, done) // early selectors should come early
   }
 
-  private final class Expanded[S <: Sys[S]](protected val peer: DropTarget) extends View[S]
-    with ComponentHolder[Peer] with ComponentExpandedImpl[S] {
+  private final class Expanded[T <: Txn[T]](protected val peer: DropTarget) extends View[T]
+    with ComponentHolder[Peer] with ComponentExpandedImpl[T] {
 
     type C = Peer
 
-    override def initComponent()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
+    override def initComponent()(implicit tx: T, ctx: Context[T]): this.type = {
       deferTx {
         val c = new PeerImpl
         component = c
@@ -284,20 +281,20 @@ object DropTarget {
 
     def select[A: Selector]: Select[A] = Select(this)
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
-      new Expanded[S](this).initComponent()
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] =
+      new Expanded[T](this).initComponent()
   }
 
   abstract class Peer extends scala.swing.Label {
     def addSelector[A](s: Selector[A])(done: A => Unit): Unit
   }
 
-  type Repr[S <: Sys[S]] = View.T[S, Peer] with IControl[S]
+  type Repr[T <: Txn[T]] = View.T[T, Peer] with IControl[T]
 }
 trait DropTarget extends Component {
   type C = DropTarget.Peer
 
-  type Repr[S <: Sys[S]] = DropTarget.Repr[S]
+  type Repr[T <: Txn[T]] = DropTarget.Repr[T]
 
   def select[A: DropTarget.Selector]: DropTarget.Select[A]
 }

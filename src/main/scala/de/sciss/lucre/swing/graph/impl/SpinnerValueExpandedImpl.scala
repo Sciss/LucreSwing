@@ -13,16 +13,14 @@
 
 package de.sciss.lucre.swing.graph.impl
 
-import de.sciss.lucre.event.ITargets
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.{Cursor, ITargets, Txn}
 import de.sciss.swingplus.{Spinner => Peer}
 
 import scala.swing.event.ValueChanged
 
-final class SpinnerValueExpandedImpl[S <: Sys[S], A](peer: => Peer, value0: A)
-                                                    (implicit targets: ITargets[S], cursor: stm.Cursor[S])
-  extends ComponentPropertyExpandedImpl[S, A](value0) {
+final class SpinnerValueExpandedImpl[T <: Txn[T], A](peer: => Peer, value0: A)
+                                                    (implicit targets: ITargets[T], cursor: Cursor[T])
+  extends ComponentPropertyExpandedImpl[T, A](value0) {
 
   protected def valueOnEDT: A = peer.value.asInstanceOf[A]
 

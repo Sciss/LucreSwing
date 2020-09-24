@@ -17,38 +17,37 @@ import java.awt.event.KeyEvent
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.StringFieldView
+import de.sciss.lucre.{Cursor, Disposable, Txn}
 import javax.swing.KeyStroke
 
 import scala.swing.event.EditDone
 import scala.swing.{Action, TextField}
 
 object StringFieldViewImpl extends CellViewFactory[String] {
-  def apply[S <: Sys[S]](cell: CellView[S#Tx, String], name: String, columns: Int)
-                        (implicit tx: S#Tx, cursor: stm.Cursor[S],
-                         undoManager: UndoManager): StringFieldView[S] = {
-    val res: Impl[S] = new Impl[S](editName = name, columns0 = columns) {
+  def apply[T <: Txn[T]](cell: CellView[T, String], name: String, columns: Int)
+                        (implicit tx: T, cursor: Cursor[T],
+                         undoManager: UndoManager): StringFieldView[T] = {
+    val res: Impl[T] = new Impl[T](editName = name, columns0 = columns) {
       impl =>
       protected var (value, committer)          = CellViewFactory.mkCommitter(cell, name)(tx, cursor)
-      protected val observer: Disposable[S#Tx]  = CellViewFactory.mkObserver (cell, impl)
+      protected val observer: Disposable[T]  = CellViewFactory.mkObserver (cell, impl)
     }
 
     deferTx(res.guiInit())
     res
   }
   
-  private abstract class Impl[S <: Sys[S]](editName: String, columns0: Int)
-                                       (implicit cursor: stm.Cursor[S], undoManager: UndoManager)
-    extends StringFieldView[S] with CellViewEditor[S, String, TextField] {
+  private abstract class Impl[T <: Txn[T]](editName: String, columns0: Int)
+                                       (implicit cursor: Cursor[T], undoManager: UndoManager)
+    extends StringFieldView[T] with CellViewEditor[T, String, TextField] {
 
     override type C = scala.swing.TextField
 
-    protected def observer: Disposable[S#Tx]
+    protected def observer: Disposable[T]
 
-    protected def committer: Option[CellViewFactory.Committer[S, String]]
+    protected def committer: Option[CellViewFactory.Committer[T, String]]
 
     protected def valueToComponent(): Unit = if (component.text != value) component.text = value
 

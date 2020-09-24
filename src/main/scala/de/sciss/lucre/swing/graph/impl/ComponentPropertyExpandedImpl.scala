@@ -13,22 +13,19 @@
 
 package de.sciss.lucre.swing.graph.impl
 
-import de.sciss.lucre.event.impl.IChangeGenerator
-import de.sciss.lucre.event.{IChangeEvent, IPull, ITargets}
-import de.sciss.lucre.expr.IExpr
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.impl.IChangeGeneratorEvent
 import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.{Cursor, IChangeEvent, IExpr, IPull, ITargets, Txn}
 import de.sciss.model.Change
 
 import scala.concurrent.stm.Ref
 
 /** Make sure to call `init()`! */
-abstract class ComponentPropertyExpandedImpl[S <: Sys[S], A](value0: A)
-                                                            (implicit protected val targets: ITargets[S],
-                                                             cursor: stm.Cursor[S])
-  extends IExpr[S, A]
-    with IChangeGenerator[S, A] {
+abstract class ComponentPropertyExpandedImpl[T <: Txn[T], A](value0: A)
+                                                            (implicit protected val targets: ITargets[T],
+                                                             cursor: Cursor[T])
+  extends IExpr[T, A]
+    with IChangeGeneratorEvent[T, A] {
 
   // ---- abstract ----
 
@@ -59,14 +56,14 @@ abstract class ComponentPropertyExpandedImpl[S <: Sys[S], A](value0: A)
   private[this] var _guiValue: A = _
   private[this] val txValue = Ref[A](value0)
 
-  def value(implicit tx: S#Tx): A = txValue.get(tx.peer)
+  def value(implicit tx: T): A = txValue.get(tx.peer)
 
-  def changed: IChangeEvent[S, A] = this
+  def changed: IChangeEvent[T, A] = this
 
-  private[lucre] def pullChange(pull: IPull[S])(implicit tx: S#Tx, phase: IPull.Phase): A =
+  private[lucre] def pullChange(pull: IPull[T])(implicit tx: T, phase: IPull.Phase): A =
     pull.resolveExpr(this)
 
-  def init()(implicit tx: S#Tx): this.type = {
+  def init()(implicit tx: T): this.type = {
     deferTx {
       startListening()
       _guiValue = valueOnEDT
@@ -74,7 +71,7 @@ abstract class ComponentPropertyExpandedImpl[S <: Sys[S], A](value0: A)
     this
   }
 
-  def dispose()(implicit tx: S#Tx): Unit = {
+  def dispose()(implicit tx: T): Unit = {
     deferTx {
       stopListening()
     }

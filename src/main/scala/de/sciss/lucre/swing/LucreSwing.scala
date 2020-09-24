@@ -17,7 +17,7 @@ import java.awt.EventQueue
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
 
-import de.sciss.lucre.stm.TxnLike
+import de.sciss.lucre.TxnLike
 import de.sciss.lucre.swing.graph.DropTarget
 
 import scala.annotation.elidable

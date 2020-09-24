@@ -20,9 +20,9 @@ class SerializationSpec extends AnyFlatSpec with Matchers {
     }
 
     val out = DataOutput()
-    Graph.serializer.write(gIn, out)
+    Graph.format.write(gIn, out)
     val in = DataInput(out.toByteArray)
-    val gOut = Graph.serializer.read(in)
+    val gOut = Graph.format.read(in)
 
     assert(gIn === gOut)
   }
@@ -55,9 +55,9 @@ class SerializationSpec extends AnyFlatSpec with Matchers {
     }
 
     val out = DataOutput()
-    Graph.serializer.write(gIn, out)
+    Graph.format.write(gIn, out)
     val in = DataInput(out.toByteArray)
-    val gOut = Graph.serializer.read(in)
+    val gOut = Graph.format.read(in)
 
     assert(gIn === gOut)
   }

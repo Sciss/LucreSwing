@@ -15,22 +15,22 @@ package de.sciss.lucre.swing.graph.impl
 
 import de.sciss.lucre.expr.graph.Ex
 import de.sciss.lucre.expr.{Context, IControl}
-import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.Component
+import de.sciss.lucre.{Disposable, Txn}
 
-trait ComponentExpandedImpl[S <: Sys[S]] extends View[S] with IControl[S] {
+trait ComponentExpandedImpl[T <: Txn[T]] extends View[T] with IControl[T] {
 
   protected def peer: Component
 
-  private[this] var obs = List.empty[Disposable[S#Tx]]
+  private[this] var obs = List.empty[Disposable[T]]
 
   protected final def initProperty[A](key: String, default: A)(set: A => Unit)
-                                     (implicit tx: S#Tx, ctx: Context[S]): Unit =
+                                     (implicit tx: T, ctx: Context[T]): Unit =
     ctx.getProperty[Ex[A]](peer, key) match {
       case Some(ex) =>
-        val expr    = ex.expand[S]
+        val expr    = ex.expand[T]
         val value0  = expr.value
         if (value0 != default) deferTx {
           set(value0)
@@ -44,15 +44,15 @@ trait ComponentExpandedImpl[S <: Sys[S]] extends View[S] with IControl[S] {
       case _ =>
     }
 
-  def initControl()(implicit tx: S#Tx): Unit = ()
+  def initControl()(implicit tx: T): Unit = ()
 
-  def initComponent()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
+  def initComponent()(implicit tx: T, ctx: Context[T]): this.type = {
     initProperty(Component.keyEnabled   , Component.defaultEnabled  )(component.enabled   = _)
     initProperty(Component.keyFocusable , Component.defaultFocusable)(component.focusable = _)
     initProperty(Component.keyTooltip   , Component.defaultTooltip  )(component.tooltip   = _)
     this
   }
 
-  def dispose()(implicit tx: S#Tx): Unit =
+  def dispose()(implicit tx: T): Unit =
     obs.foreach(_.dispose())
 }

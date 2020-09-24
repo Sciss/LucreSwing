@@ -1,26 +1,25 @@
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.expr.StringObj
-import de.sciss.lucre.stm
+import de.sciss.lucre.{ListObj, StringObj}
 import de.sciss.model.Change
-import de.sciss.serial.Serializer
+import de.sciss.serial.TFormat
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.concurrent.stm.{InTxn, Ref, Txn}
 import scala.swing.{BorderPanel, Button, Component, FlowPanel}
 
-object TestListApp extends AppLike {
-  implicit val listModSer: Serializer[S#Tx, S#Acc, stm.List.Modifiable[S, StringObj[S]]] = stm.List.Modifiable.serializer[S, StringObj[S]]
-  implicit val listSer   : Serializer[S#Tx, S#Acc, stm.List           [S, StringObj[S]]] = stm.List           .serializer[S, StringObj[S]]
+object TestListApp extends DurableAppLike {
+  implicit val listModSer: TFormat[T, ListObj.Modifiable[T, StringObj[T]]] = ListObj.Modifiable.format[T, StringObj[T]]
+  implicit val listSer   : TFormat[T, ListObj           [T, StringObj[T]]] = ListObj           .format[T, StringObj[T]]
 
-  private val h     = ListView.Handler[S, StringObj[S], Change[String]] {
+  private val h     = ListView.Handler[T, StringObj[T], Change[String]] {
     implicit tx => _.value
   } {
     _ => (_, ch) => Some(ch.now)
   }
 
   private lazy val (listH, view) = system.step { implicit tx =>
-    val li = stm.List.Modifiable[S, StringObj]
+    val li = ListObj.Modifiable[T, StringObj]
     tx.newHandle(li) -> ListView(li, h)
   }
 
@@ -28,7 +27,7 @@ object TestListApp extends AppLike {
     val sb  = new StringBuilder
     var bag: Vec[Int] = 0 until s.length
     while (bag.nonEmpty) {
-      val i = (math.random * bag.size).toInt
+      val i = (math.random() * bag.size).toInt
       val j = bag(i)
       bag   = bag.patch(i, Nil, 1)
       sb.append(s.charAt(j))
@@ -41,7 +40,7 @@ object TestListApp extends AppLike {
     val retries = Ref(3)
     system.step { implicit tx =>
       implicit val itx: InTxn = tx.peer
-      val s     = StringObj.newConst[S](text)
+      val s     = StringObj.newConst[T](text)
       val list  = listH()
       list.addLast(s)
       if (retries() > 0) {

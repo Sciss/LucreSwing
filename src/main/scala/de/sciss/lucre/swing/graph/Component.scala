@@ -13,41 +13,41 @@
 
 package de.sciss.lucre.swing.graph
 
+import de.sciss.lucre.expr.Context
 import de.sciss.lucre.expr.graph.{Const, Ex}
-import de.sciss.lucre.expr.{Context, IExpr}
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.{IExpr, Txn}
 
 object Component {
   final case class Enabled(w: Component) extends Ex[Boolean] {
-    type Repr[S <: Sys[S]] = IExpr[S, Boolean]
+    type Repr[T <: Txn[T]] = IExpr[T, Boolean]
 
     override def productPrefix: String = s"Component$$Enabled" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
         val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyEnabled)
-        valueOpt.fold(Const(defaultEnabled).expand[S])(_.expand[S])
+        valueOpt.fold(Const(defaultEnabled).expand[T])(_.expand[T])
     }
   }
 
   final case class Focusable(w: Component) extends Ex[Boolean] {
-    type Repr[S <: Sys[S]] = IExpr[S, Boolean]
+    type Repr[T <: Txn[T]] = IExpr[T, Boolean]
 
     override def productPrefix: String = s"Component$$Focusable" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
         val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyFocusable)
-        valueOpt.fold(Const(defaultFocusable).expand[S])(_.expand[S])
+        valueOpt.fold(Const(defaultFocusable).expand[T])(_.expand[T])
     }
   }
 
   final case class Tooltip(w: Component) extends Ex[String] {
-    type Repr[S <: Sys[S]] = IExpr[S, String]
+    type Repr[T <: Txn[T]] = IExpr[T, String]
 
     override def productPrefix: String = s"Component$$Tooltip" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
         val valueOpt = ctx.getProperty[Ex[String]](w, keyTooltip)
-        valueOpt.fold(Const(defaultTooltip).expand[S])(_.expand[S])
+        valueOpt.fold(Const(defaultTooltip).expand[T])(_.expand[T])
     }
   }
 

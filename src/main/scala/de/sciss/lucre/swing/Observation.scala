@@ -13,38 +13,36 @@
 
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.event.Publisher
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.lucre.swing.LucreSwing.log
-import de.sciss.serial.Serializer
+import de.sciss.lucre.{Disposable, Publisher, Source, Txn}
+import de.sciss.serial.TFormat
 
 object Observation {
-  def apply[S <: Sys[S], U, A](value: A with Publisher[S, U])(
-      observe: S#Tx => U => Unit)
-     (implicit tx: S#Tx, serializer: Serializer[S#Tx, S#Acc, A with Publisher[S, U]]): Observation[S, A] = {
+  def apply[T <: Txn[T], U, A](value: A with Publisher[T, U])(
+      observe: T => U => Unit)
+     (implicit tx: T, format: TFormat[T, A with Publisher[T, U]]): Observation[T, A] = {
     log(s"observation for $value")
     val obs = value.changed.react(observe)
-    new Observation[S, A](tx.newHandle(value), obs)
+    new Observation[T, A](tx.newHandle(value), obs)
   }
 
-  // def option[S <: Sys[S], U, A <: Publisher[S, U]](init: scala.Option[A] = None)(observe: S#Tx => U => Unit)
+  // def option[T <: Txn[T], U, A <: Publisher[T, U]](init: scala.Option[A] = None)(observe: T => U => Unit)
   
-  //  trait Like[S <: Sys[S]] extends Disposable[S#Tx] {
-  //    def observer: Disposable[S#Tx]
+  //  trait Like[T <: Txn[T]] extends Disposable[T] {
+  //    def observer: Disposable[T]
   //
-  //    def dispose()(implicit tx: S#Tx): Unit = observer.dispose()
+  //    def dispose()(implicit tx: T): Unit = observer.dispose()
   //  }
 
-  // type Option[S <: Sys[S], A] = Ref[OptionValue[S, A]]
+  // type Option[T <: Txn[T], A] = Ref[OptionValue[T, A]]
   
-  //  class Option[S <: Sys[S], A](val value: scala.Option[stm.Source[S#Tx, A]], val observer: Disposable[S#Tx])
-  //    extends Observation.Like[S]
+  //  class Option[T <: Txn[T], A](val value: scala.Option[Source[T, A]], val observer: Disposable[T])
+  //    extends Observation.Like[T]
 }
-class Observation[S <: Sys[S], A](val value: stm.Source[S#Tx, A], val observer: Disposable[S#Tx]) 
-  extends Disposable[S#Tx] {
+class Observation[T <: Txn[T], A](val value: Source[T, A], val observer: Disposable[T])
+  extends Disposable[T] {
 
-  def dispose()(implicit tx: S#Tx): Unit = observer.dispose()
+  def dispose()(implicit tx: T): Unit = observer.dispose()
 
   override def toString = s"Observation@${hashCode.toHexString}($value, $observer)"
 }

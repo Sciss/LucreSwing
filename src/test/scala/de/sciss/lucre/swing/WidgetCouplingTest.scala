@@ -1,11 +1,10 @@
 package de.sciss.lucre.swing
 
 import de.sciss.lucre.expr.Context
-import de.sciss.lucre.stm.{InMemory, UndoManager, Workspace}
 
 import scala.swing.Component
 
-object WidgetCouplingTest extends AppLike {
+object WidgetCouplingTest extends InMemoryAppLike {
   protected def mkView(): Component = {
     import graph._
     val g = Graph {
@@ -19,14 +18,9 @@ object WidgetCouplingTest extends AppLike {
       )
     }
 
-    type              S = InMemory
-    implicit val sys: S = InMemory()
-    implicit val undo: UndoManager[S] = UndoManager()
-    import Workspace.Implicits._
-
-    val view = sys.step { implicit tx =>
-      implicit val ctx: Context[S] = Context()
-      g.expand[S]
+    val view = system.step { implicit tx =>
+      implicit val ctx: Context[T] = Context()
+      g.expand[T]
     }
     view.component
   }

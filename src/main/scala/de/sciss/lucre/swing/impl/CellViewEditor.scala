@@ -13,14 +13,14 @@
 
 package de.sciss.lucre.swing.impl
 
-import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.lucre.swing.View
+import de.sciss.lucre.{Disposable, Txn}
 import javax.swing.event.{UndoableEditEvent, UndoableEditListener}
 
 import scala.swing.{Component, TextComponent}
 
-trait CellViewEditor[S <: Sys[S], A, Comp <: Component]
-  extends View[S] with ComponentHolder[Comp] with CellViewFactory.View[A] {
+trait CellViewEditor[T <: Txn[T], A, Comp <: Component]
+  extends View[T] with ComponentHolder[Comp] with CellViewFactory.View[A] {
 
   type C = Comp
 
@@ -36,8 +36,8 @@ trait CellViewEditor[S <: Sys[S], A, Comp <: Component]
   // must be implemented by creating the GUI component
   protected def createComponent(): Comp
 
-  // final var observer: Disposable[S#Tx] = _
-  protected def observer: Disposable[S#Tx]
+  // final var observer: Disposable[T] = _
+  protected def observer: Disposable[T]
 
   // maybe be set by the sub class in `createComponent()`
   final protected var dirty = Option.empty[DirtyBorder]
@@ -85,5 +85,5 @@ trait CellViewEditor[S <: Sys[S], A, Comp <: Component]
     component = createComponent()
 
   // disposes the observer.
-  def dispose()(implicit tx: S#Tx): Unit = observer.dispose()
+  def dispose()(implicit tx: T): Unit = observer.dispose()
 }

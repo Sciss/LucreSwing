@@ -13,16 +13,14 @@
 
 package de.sciss.lucre.swing.graph.impl
 
-import de.sciss.lucre.event.ITargets
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.{Cursor, ITargets, Txn}
 import de.sciss.swingplus.{ComboBox => Peer}
 
 import scala.swing.event.SelectionChanged
 
-final class ComboBoxIndexExpandedImpl[S <: Sys[S], A](peer: => Peer[A], value0: Int)
-                                                     (implicit targets: ITargets[S], cursor: stm.Cursor[S])
-  extends ComponentPropertyExpandedImpl[S, Int](value0) {
+final class ComboBoxIndexExpandedImpl[T <: Txn[T], A](peer: => Peer[A], value0: Int)
+                                                     (implicit targets: ITargets[T], cursor: Cursor[T])
+  extends ComponentPropertyExpandedImpl[T, Int](value0) {
 
   protected def valueOnEDT: Int = peer.selection.index
 

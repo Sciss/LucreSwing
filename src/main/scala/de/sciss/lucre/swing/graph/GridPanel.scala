@@ -14,12 +14,12 @@
 package de.sciss.lucre.swing.graph
 
 import de.sciss.lucre.expr.graph.{Const, Ex}
-import de.sciss.lucre.expr.{Context, Graph, IControl, IExpr}
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.expr.{Context, Graph, IControl}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.impl.{PanelExpandedImpl, PanelImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
+import de.sciss.lucre.{IExpr, Txn}
 import de.sciss.swingplus.{GridPanel => Peer}
 
 object GridPanel {
@@ -41,21 +41,21 @@ object GridPanel {
   private final val defaultHGap           = 4
   private final val defaultVGap           = 2
 
-  private final class Expanded[S <: Sys[S]](protected val peer: GridPanel) extends View[S]
-    with ComponentHolder[Peer] with PanelExpandedImpl[S] {
+  private final class Expanded[T <: Txn[T]](protected val peer: GridPanel) extends View[T]
+    with ComponentHolder[Peer] with PanelExpandedImpl[T] {
 
     type C = Peer
 
-    override def initComponent()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
-      val rows0           = ctx.getProperty[Ex[Int    ]](peer, keyRows    ).fold(defaultRows    )(_.expand[S].value)
-      val columns         = ctx.getProperty[Ex[Int    ]](peer, keyColumns ).fold(defaultColumns )(_.expand[S].value)
-      val compact         = ctx.getProperty[Ex[Boolean]](peer, keyCompact ).exists(_.expand[S].value)
-      val hGap            = ctx.getProperty[Ex[Int    ]](peer, keyHGap    ).fold(defaultHGap    )(_.expand[S].value)
-      val vGap            = ctx.getProperty[Ex[Int    ]](peer, keyVGap    ).fold(defaultVGap    )(_.expand[S].value)
-      val compactRows     = compact || ctx.getProperty[Ex[Boolean]](peer, keyCompactRows   ).exists(_.expand[S].value)
-      val compactColumns  = compact || ctx.getProperty[Ex[Boolean]](peer, keyCompactColumns).exists(_.expand[S].value)
+    override def initComponent()(implicit tx: T, ctx: Context[T]): this.type = {
+      val rows0           = ctx.getProperty[Ex[Int    ]](peer, keyRows    ).fold(defaultRows    )(_.expand[T].value)
+      val columns         = ctx.getProperty[Ex[Int    ]](peer, keyColumns ).fold(defaultColumns )(_.expand[T].value)
+      val compact         = ctx.getProperty[Ex[Boolean]](peer, keyCompact ).exists(_.expand[T].value)
+      val hGap            = ctx.getProperty[Ex[Int    ]](peer, keyHGap    ).fold(defaultHGap    )(_.expand[T].value)
+      val vGap            = ctx.getProperty[Ex[Int    ]](peer, keyVGap    ).fold(defaultVGap    )(_.expand[T].value)
+      val compactRows     = compact || ctx.getProperty[Ex[Boolean]](peer, keyCompactRows   ).exists(_.expand[T].value)
+      val compactColumns  = compact || ctx.getProperty[Ex[Boolean]](peer, keyCompactColumns).exists(_.expand[T].value)
       val rows            = if (rows0 == 0 && columns == 0) 1 else 0  // not allowed to have both zero
-      val contents        = peer.contents.map(_.expand[S])
+      val contents        = peer.contents.map(_.expand[T])
       deferTx {
         val vec           = contents.map(_.component)
         val p             = new Peer(rows0 = rows, cols0 = columns)
@@ -71,87 +71,87 @@ object GridPanel {
   }
 
   final case class Rows(w: GridPanel) extends Ex[Int] {
-    type Repr[S <: Sys[S]] = IExpr[S, Int]
+    type Repr[T <: Txn[T]] = IExpr[T, Int]
 
     override def productPrefix: String = s"GridPanel$$Rows" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyRows)
-      valueOpt.getOrElse(Const(defaultRows)).expand[S]
+      valueOpt.getOrElse(Const(defaultRows)).expand[T]
     }
   }
 
   final case class Columns(w: GridPanel) extends Ex[Int] {
-    type Repr[S <: Sys[S]] = IExpr[S, Int]
+    type Repr[T <: Txn[T]] = IExpr[T, Int]
 
     override def productPrefix: String = s"GridPanel$$Columns" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyColumns)
-      valueOpt.getOrElse(Const(defaultColumns)).expand[S]
+      valueOpt.getOrElse(Const(defaultColumns)).expand[T]
     }
   }
 
   final case class Compact(w: GridPanel) extends Ex[Boolean] {
-    type Repr[S <: Sys[S]] = IExpr[S, Boolean]
+    type Repr[T <: Txn[T]] = IExpr[T, Boolean]
 
     override def productPrefix: String = s"GridPanel$$Compact" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyCompact)
-      valueOpt.getOrElse(Const(defaultCompact)).expand[S]
+      valueOpt.getOrElse(Const(defaultCompact)).expand[T]
     }
   }
 
   final case class CompactRows(w: GridPanel) extends Ex[Boolean] {
-    type Repr[S <: Sys[S]] = IExpr[S, Boolean]
+    type Repr[T <: Txn[T]] = IExpr[T, Boolean]
 
     override def productPrefix: String = s"GridPanel$$CompactRows" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyCompactRows)
-      valueOpt.getOrElse(Const(defaultCompactRows)).expand[S]
+      valueOpt.getOrElse(Const(defaultCompactRows)).expand[T]
     }
   }
 
   final case class CompactColumns(w: GridPanel) extends Ex[Boolean] {
-    type Repr[S <: Sys[S]] = IExpr[S, Boolean]
+    type Repr[T <: Txn[T]] = IExpr[T, Boolean]
 
     override def productPrefix: String = s"GridPanel$$CompactColumns" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyCompactColumns)
-      valueOpt.getOrElse(Const(defaultCompactColumns)).expand[S]
+      valueOpt.getOrElse(Const(defaultCompactColumns)).expand[T]
     }
   }
 
   final case class HGap(w: GridPanel) extends Ex[Int] {
-    type Repr[S <: Sys[S]] = IExpr[S, Int]
+    type Repr[T <: Txn[T]] = IExpr[T, Int]
 
     override def productPrefix: String = s"GridPanel$$HGap" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyHGap)
-      valueOpt.getOrElse(Const(defaultHGap)).expand[S]
+      valueOpt.getOrElse(Const(defaultHGap)).expand[T]
     }
   }
 
   final case class VGap(w: GridPanel) extends Ex[Int] {
-    type Repr[S <: Sys[S]] = IExpr[S, Int]
+    type Repr[T <: Txn[T]] = IExpr[T, Int]
 
     override def productPrefix: String = s"GridPanel$$VGap" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyVGap)
-      valueOpt.getOrElse(Const(defaultVGap)).expand[S]
+      valueOpt.getOrElse(Const(defaultVGap)).expand[T]
     }
   }
 
   private final case class Impl(contents: Seq[Widget]) extends GridPanel with PanelImpl {
     override def productPrefix = "GridPanel" // s"GridPanel$$Impl" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
-      new Expanded[S](this).initComponent()
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] =
+      new Expanded[T](this).initComponent()
 
     def rows: Ex[Int] = Rows(this)
 
@@ -210,7 +210,7 @@ object GridPanel {
 trait GridPanel extends Panel {
   type C = Peer
 
-  type Repr[S <: Sys[S]] = View.T[S, C] with IControl[S]
+  type Repr[T <: Txn[T]] = View.T[T, C] with IControl[T]
 
   /** Number of rows or zero for automatic determination. */
   var rows    : Ex[Int]

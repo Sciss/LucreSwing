@@ -13,21 +13,20 @@
 
 package de.sciss.lucre.swing.edit
 
-import de.sciss.lucre.stm.{Elem, Sys}
-import de.sciss.lucre.{stm, event => evt}
-import de.sciss.serial.Serializer
+import de.sciss.lucre.{Cursor, Elem, MapObj, Source, Txn}
+import de.sciss.serial.TFormat
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 object EditMutableMap {
   @deprecated("Try to transition to stm.UndoManager", since = "1.17.0")
-  def apply[S <: Sys[S], K, Ex[~ <: Sys[~]] <: Elem[~]](name: String, map: evt.Map.Modifiable[S, K, Ex],
-                                         key: K, value: Option[Ex[S]])
-                                        (implicit tx: S#Tx, cursor: stm.Cursor[S],
-                                         keyType: evt.Map.Key[K],
-                                         valueSerializer: Serializer[S#Tx, S#Acc, Ex[S]]): UndoableEdit = {
+  def apply[T <: Txn[T], K, Ex[~ <: Txn[~]] <: Elem[~]](name: String, map: MapObj.Modifiable[T, K, Ex],
+                                         key: K, value: Option[Ex[T]])
+                                        (implicit tx: T, cursor: Cursor[T],
+                                         keyType: MapObj.Key[K],
+                                         valueFormat: TFormat[T, Ex[T]]): UndoableEdit = {
     val before = map.get(key)
 
-    val mapH      = tx.newHandle(map) // (evt.Map.Modifiable.serializer[S, K, Ex])
+    val mapH      = tx.newHandle(map) // (MapObj.Modifiable.format[T, K, Ex])
     val beforeH   = tx.newHandle(before)
     val nowH      = tx.newHandle(value)
     val res       = new Impl(name, key, mapH, beforeH, nowH)
@@ -35,13 +34,13 @@ object EditMutableMap {
     res
   }
 
-  private[edit] final class Impl[S <: Sys[S], A, Repr[~ <: Sys[~]] <: Elem[~], U](name: String, key: A,
-                                                       mapH   : stm.Source[S#Tx, evt.Map.Modifiable[S, A, Repr]],
-                                                       beforeH: stm.Source[S#Tx, Option[Repr[S]]],
-                                                       nowH   : stm.Source[S#Tx, Option[Repr[S]]])(implicit cursor: stm.Cursor[S])
+  private[edit] final class Impl[T <: Txn[T], A, Repr[~ <: Txn[~]] <: Elem[~], U](name: String, key: A,
+                                                       mapH   : Source[T, MapObj.Modifiable[T, A, Repr]],
+                                                       beforeH: Source[T, Option[Repr[T]]],
+                                                       nowH   : Source[T, Option[Repr[T]]])(implicit cursor: Cursor[T])
     extends AbstractUndoableEdit {
 
-    type B = Repr[S]
+    type B = Repr[T]
 
     override def undo(): Unit = {
       super.undo()
@@ -53,7 +52,7 @@ object EditMutableMap {
       cursor.step { implicit tx => perform() }
     }
 
-    private def perform(exprH: stm.Source[S#Tx, Option[B]])(implicit tx: S#Tx): Unit = {
+    private def perform(exprH: Source[T, Option[B]])(implicit tx: T): Unit = {
       val map = mapH()
       exprH().fold {
         map.remove(key)
@@ -62,7 +61,7 @@ object EditMutableMap {
       }
     }
 
-    def perform()(implicit tx: S#Tx): Unit = perform(nowH)
+    def perform()(implicit tx: T): Unit = perform(nowH)
 
     override def getPresentationName: String = name
   }

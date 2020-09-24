@@ -15,9 +15,7 @@ package de.sciss.lucre.swing
 
 import de.sciss.audiowidgets.{DualRangeModel, DualRangeSlider}
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.expr.IntObj
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.{Cursor, IntObj, Txn}
 import de.sciss.lucre.swing.impl.{IntRangeSliderViewImpl => Impl}
 
 object IntRangeSliderView {
@@ -29,33 +27,33 @@ object IntRangeSliderView {
     * @param  name      the name is used as a text string in undoable edits
     * @param  width     the preferred visual extent of the slider in pixels
     */
-  def apply[S <: Sys[S]](model0: DualRangeModel, name: String, width: Int = 160)
-                        (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): IntRangeSliderView[S] =
+  def apply[T <: Txn[T]](model0: DualRangeModel, name: String, width: Int = 160)
+                        (implicit tx: T, cursor: Cursor[T], undoManager: UndoManager): IntRangeSliderView[T] =
     Impl(model0 = model0, name = name, width = width)
 }
-trait IntRangeSliderView[S <: Sys[S]] extends View[S] {
+trait IntRangeSliderView[T <: Txn[T]] extends View[T] {
   type C = DualRangeSlider
 
   /** Gets the expression associated with the single value slider (if any). */
-  def value                                (implicit tx: S#Tx): Option[IntObj[S]]
+  def value                                (implicit tx: T): Option[IntObj[T]]
 
   /** Sets the expression associated with the single value slider. The value `None`
     * can be used to disable the single value slider function (it will be hidden).
     */
-  def value_=  (expr: Option[IntObj[S]])(implicit tx: S#Tx): Unit
+  def value_=  (expr: Option[IntObj[T]])(implicit tx: T): Unit
 
   /** Gets the expression associated with the lower bound of the range slider (if any). */
-  def rangeLo                              (implicit tx: S#Tx): Option[IntObj[S]]
+  def rangeLo                              (implicit tx: T): Option[IntObj[T]]
 
   /** Sets the expression associated with the lower bound of the range slider. The value `None`
     * can be used to disable the range slider function (it will be hidden).
     *
     * If _either of_ `rangeLo` and `rangeHi` / `extent` is `None`, the range functionality is hidden.
     */
-  def rangeLo_=(expr: Option[IntObj[S]])(implicit tx: S#Tx): Unit
+  def rangeLo_=(expr: Option[IntObj[T]])(implicit tx: T): Unit
 
   /** Gets the expression associated with the upper bound of the range slider (if any). */
-  def rangeHi                              (implicit tx: S#Tx): Option[IntObj[S]]
+  def rangeHi                              (implicit tx: T): Option[IntObj[T]]
 
   /** Sets the expression associated with the upper bound of the range slider. The value `None`
     * can be used to disable the range slider function (it will be hidden). If the value is `Some` and
@@ -64,10 +62,10 @@ trait IntRangeSliderView[S <: Sys[S]] extends View[S] {
     *
     * If _either of_ `rangeLo` and `rangeHi` / `extent` is `None`, the range functionality is hidden.
     */
-  def rangeHi_=(expr: Option[IntObj[S]])(implicit tx: S#Tx): Unit
+  def rangeHi_=(expr: Option[IntObj[T]])(implicit tx: T): Unit
 
   /** Gets the expression associated with the extent of the range slider (if any). */
-  def extent                               (implicit tx: S#Tx): Option[IntObj[S]]
+  def extent                               (implicit tx: T): Option[IntObj[T]]
 
   /** Sets the expression associated with the extent the range slider. The value `None`
     * can be used to disable the range slider function (it will be hidden). If the value is `Some` and
@@ -76,5 +74,5 @@ trait IntRangeSliderView[S <: Sys[S]] extends View[S] {
     *
     * If _either of_ `rangeLo` and `rangeHi` / `extent` is `None`, the range functionality is hidden.
     */
-  def extent_= (expr: Option[IntObj[S]])(implicit tx: S#Tx): Unit
+  def extent_= (expr: Option[IntObj[T]])(implicit tx: T): Unit
 }

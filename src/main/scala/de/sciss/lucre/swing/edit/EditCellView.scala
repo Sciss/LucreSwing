@@ -13,25 +13,24 @@
 
 package de.sciss.lucre.swing.edit
 
+import de.sciss.lucre.{Cursor, Source, Txn}
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Sys
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 object EditCellView {
   @deprecated("Try to transition to stm.UndoManager", since = "1.17.0")
-  def apply[S <: Sys[S], A](name: String, cell: CellView.VarR[S, A], value: A)
-                           (implicit tx: S#Tx, cursor: stm.Cursor[S]): UndoableEdit = {
-    import cell.serializer
+  def apply[T <: Txn[T], A](name: String, cell: CellView.VarR[T, A], value: A)
+                           (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
+    import cell.format
     val beforeH = tx.newHandle(cell.repr)
-    val res     = new Impl[S, A, cell.Repr](name, cell)(beforeH = beforeH, now = value) // IntelliJ highlight bug
+    val res     = new Impl[T, A, cell.Repr](name, cell)(beforeH = beforeH, now = value) // IntelliJ highlight bug
     res.perform()
     res
   }
 
-  private final class Impl[S <: Sys[S], A, Repr0](name: String, cell: CellView.VarR[S, A] { type Repr = Repr0 })
-                                                 (beforeH: stm.Source[S#Tx, Repr0], now: A)
-                                                 (implicit cursor: stm.Cursor[S])
+  private final class Impl[T <: Txn[T], A, Repr0](name: String, cell: CellView.VarR[T, A] { type Repr = Repr0 })
+                                                 (beforeH: Source[T, Repr0], now: A)
+                                                 (implicit cursor: Cursor[T])
     extends AbstractUndoableEdit {
 
     override def undo(): Unit = {
@@ -44,7 +43,7 @@ object EditCellView {
       cursor.step { implicit tx => perform() }
     }
 
-    def perform()(implicit tx: S#Tx): Unit = cell.repr = cell.lift(now)
+    def perform()(implicit tx: T): Unit = cell.repr = cell.lift(now)
 
     override def getPresentationName: String = name
   }

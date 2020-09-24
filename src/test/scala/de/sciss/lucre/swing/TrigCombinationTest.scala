@@ -1,7 +1,6 @@
 package de.sciss.lucre.swing
 
 import de.sciss.lucre.expr.Context
-import de.sciss.lucre.stm.{InMemory, UndoManager, Workspace}
 
 import scala.swing.Component
 
@@ -15,9 +14,9 @@ import scala.swing.Component
   illuminated if we click t1.
 
  */
-object TrigCombinationTest extends AppLike {
+object TrigCombinationTest extends InMemoryAppLike {
   protected def mkView(): Component = {
-    de.sciss.lucre.event.showLog = true
+    de.sciss.lucre.Log.showEventLog = true
 
     import de.sciss.lucre.expr.graph._
     import de.sciss.lucre.swing.graph._
@@ -65,14 +64,9 @@ object TrigCombinationTest extends AppLike {
       )
     }
 
-    type              S = InMemory
-    implicit val sys: S = InMemory()
-    implicit val undo: UndoManager[S] = UndoManager()
-    import Workspace.Implicits._
-
-    val view = sys.step { implicit tx =>
-      implicit val ctx: Context[S] = Context()
-      val v = g.expand[S]
+    val view = system.step { implicit tx =>
+      implicit val ctx: Context[T] = Context()
+      val v = g.expand[T]
       v.initControl()
       v
     }

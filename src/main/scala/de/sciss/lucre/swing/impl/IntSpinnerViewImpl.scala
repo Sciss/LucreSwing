@@ -15,46 +15,45 @@ package de.sciss.lucre.swing.impl
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Disposable, Sys}
 import de.sciss.lucre.swing.IntSpinnerView
 import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
+import de.sciss.lucre.{Cursor, Disposable, Txn}
 import de.sciss.swingplus.Spinner
 import javax.swing.{JSpinner, SpinnerNumberModel}
 
 object IntSpinnerViewImpl extends CellViewFactory[Int] {
-  def apply[S <: Sys[S]](cell: CellView[S#Tx, Int], name: String, width: Int)
-                        (implicit tx: S#Tx, cursor: stm.Cursor[S],
-                         undoManager: UndoManager): IntSpinnerView[S] = {
-    val res: Impl[S] = new Impl[S](maxWidth = width) {
+  def apply[T <: Txn[T]](cell: CellView[T, Int], name: String, width: Int)
+                        (implicit tx: T, cursor: Cursor[T],
+                         undoManager: UndoManager): IntSpinnerView[T] = {
+    val res: Impl[T] = new Impl[T](maxWidth = width) {
       impl =>
       protected var (value, committer)          = CellViewFactory.mkCommitter(cell, name)(tx, cursor)
-      protected val observer: Disposable[S#Tx]  = CellViewFactory.mkObserver (cell, impl)
+      protected val observer: Disposable[T]  = CellViewFactory.mkObserver (cell, impl)
     }
 
     deferTx(res.guiInit())
     res
   }
 
-  def optional[S <: Sys[S]](_cell: CellView[S#Tx, Option[Int]], name: String, width: Int, default0: Option[Int])
-                           (implicit tx: S#Tx, cursor: stm.Cursor[S],
-                            undoManager: UndoManager): IntSpinnerView.Optional[S] = {
-    val res: OptionalImpl[S] = new OptionalImpl[S](maxWidth = width) {
+  def optional[T <: Txn[T]](_cell: CellView[T, Option[Int]], name: String, width: Int, default0: Option[Int])
+                           (implicit tx: T, cursor: Cursor[T],
+                            undoManager: UndoManager): IntSpinnerView.Optional[T] = {
+    val res: OptionalImpl[T] = new OptionalImpl[T](maxWidth = width) {
       impl =>
 
       protected var (value, committer)          = CellViewFactory.mkCommitter(_cell, name)(tx, cursor)
-      protected val observer: Disposable[S#Tx]  = CellViewFactory.mkObserver (_cell, impl)
+      protected val observer: Disposable[T]  = CellViewFactory.mkObserver (_cell, impl)
 
-      // private val defaultRef = Ref(Option.empty[S#Tx => Int])
+      // private val defaultRef = Ref(Option.empty[T => Int])
       private var _default = default0
 
-      // def default(implicit tx: S#Tx): Option[S#Tx => Int] = defaultRef.get(tx.peer)
+      // def default(implicit tx: T): Option[T => Int] = defaultRef.get(tx.peer)
       def default: Option[Int] = {
         requireEDT()
         _default
       }
 
-      //      def default_=(option: Option[S#Tx => Int])(implicit tx: S#Tx): Unit =
+      //      def default_=(option: Option[T => Int])(implicit tx: T): Unit =
       //        defaultRef.set(option)(tx.peer)
 
       def default_=(value: Option[Int]): Unit = {
@@ -76,9 +75,9 @@ object IntSpinnerViewImpl extends CellViewFactory[Int] {
     res
   }
 
-  private abstract class Impl[S <: Sys[S]](maxWidth: Int)
-                                          (implicit cursor: stm.Cursor[S], undoManager: UndoManager)
-    extends DefinedNumberSpinnerViewImpl[S, Int](maxWidth) with IntSpinnerView[S] {
+  private abstract class Impl[T <: Txn[T]](maxWidth: Int)
+                                          (implicit cursor: Cursor[T], undoManager: UndoManager)
+    extends DefinedNumberSpinnerViewImpl[T, Int](maxWidth) with IntSpinnerView[T] {
 
     override type C = Spinner
 
@@ -107,9 +106,9 @@ object IntSpinnerViewImpl extends CellViewFactory[Int] {
 
   // XXX TODO --- the overloaded constructor is a hack
   // to preserve binary compatibility with previous release version
-  private abstract class OptionalImpl[S <: Sys[S]](maxWidth: Int)
-                                                  (implicit cursor: stm.Cursor[S], undoManager: UndoManager)
-    extends OptionalNumberSpinnerViewImpl[S, Int](maxWidth, true) with IntSpinnerView.Optional[S] {
+  private abstract class OptionalImpl[T <: Txn[T]](maxWidth: Int)
+                                                  (implicit cursor: Cursor[T], undoManager: UndoManager)
+    extends OptionalNumberSpinnerViewImpl[T, Int](maxWidth, true) with IntSpinnerView.Optional[T] {
 
     override type C = Spinner
 

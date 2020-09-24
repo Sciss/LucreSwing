@@ -13,12 +13,12 @@
 
 package de.sciss.lucre.swing.impl
 
-import de.sciss.lucre.stm.{List, Sys}
+import de.sciss.lucre.{ListObj, Txn}
 import de.sciss.lucre.swing.ListView.Handler
 import de.sciss.lucre.swing.LucreSwing.{deferTx, log, requireEDT}
 import de.sciss.lucre.swing.{ListView, Observation}
 import de.sciss.model.impl.ModelImpl
-import de.sciss.serial.Serializer
+import de.sciss.serial.TFormat
 import de.sciss.swingplus
 
 import scala.collection.immutable.{IndexedSeq => Vec}
@@ -27,44 +27,44 @@ import scala.swing.event.ListSelectionChanged
 import scala.swing.{Component, ScrollPane}
 
 object ListViewImpl {
-  def empty[S <: Sys[S], Elem, U, Data](handler: Handler[S, Elem, U, Data])
-                                       (implicit tx: S#Tx,
-                                        serializer: Serializer[S#Tx, S#Acc, List[S, Elem]]): ListView[S, Elem, U] = {
-    val view = new Impl[S, Elem, U, Data](handler)
+  def empty[T <: Txn[T], Elem, U, Data](handler: Handler[T, Elem, U, Data])
+                                       (implicit tx: T,
+                                        format: TFormat[T, ListObj[T, Elem]]): ListView[T, Elem, U] = {
+    val view = new Impl[T, Elem, U, Data](handler)
     deferTx {
       view.guiInit()
     }
     view
   }
 
-  def apply[S <: Sys[S], Elem, U, Data](list: List[S, Elem], handler: Handler[S, Elem, U, Data])
-                                       (implicit tx: S#Tx,
-                                        serializer: Serializer[S#Tx, S#Acc, List[S, Elem]]): ListView[S, Elem, U] = {
-    val view = empty[S, Elem, U, Data](handler)
+  def apply[T <: Txn[T], Elem, U, Data](list: ListObj[T, Elem], handler: Handler[T, Elem, U, Data])
+                                       (implicit tx: T,
+                                        format: TFormat[T, ListObj[T, Elem]]): ListView[T, Elem, U] = {
+    val view = empty[T, Elem, U, Data](handler)
     view.list_=(Some(list))
     view
   }
 
-  private final class Impl[S <: Sys[S], Elem, U, Data](handler: Handler[S, Elem, U, Data])
-                                                      (implicit listSer: Serializer[S#Tx, S#Acc, List[S, Elem]])
-    extends ListView[S, Elem, U] with ComponentHolder[Component] with ModelImpl[ListView.Update] {
+  private final class Impl[T <: Txn[T], Elem, U, Data](handler: Handler[T, Elem, U, Data])
+                                                      (implicit format: TFormat[T, ListObj[T, Elem]])
+    extends ListView[T, Elem, U] with ComponentHolder[Component] with ModelImpl[ListView.Update] {
     impl =>
 
     private var ggList: swingplus.ListView[Data] = _
     private val mList   = swingplus.ListView.Model.empty[Data]
-    private val current = Ref(Option.empty[Observation[S, List[S, Elem]]])
+    private val current = Ref(Option.empty[Observation[T, ListObj[T, Elem]]])
 
     def view: swingplus.ListView[Data] = ggList
 
-    def list(implicit tx: S#Tx): Option[List[S, Elem]] = current.get(tx.peer).map(_.value())
+    def list(implicit tx: T): Option[ListObj[T, Elem]] = current.get(tx.peer).map(_.value())
 
-    def list_=(newOption: Option[List[S, Elem]])(implicit tx: S#Tx): Unit = {
+    def list_=(newOption: Option[ListObj[T, Elem]])(implicit tx: T): Unit = {
       disposeList()
       val newObsOpt = newOption.map(Observation(_) { implicit tx => upd =>
         log(s"ListView ${impl.hashCode.toHexString} react")
         upd.changes.foreach {
-          case List.Added(  idx, elem)  => val item = handler.data(elem); deferTx(impl.insertItem(idx, item))
-          case List.Removed(idx, _   )  => deferTx(impl.removeItemAt(idx))
+          case ListObj.Added(  idx, elem)  => val item = handler.data(elem); deferTx(impl.insertItem(idx, item))
+          case ListObj.Removed(idx, _   )  => deferTx(impl.removeItemAt(idx))
 // ELEM
 //          case List.Element(elem, eu )  =>
 //            val idx = upd.list.indexOf(elem)
@@ -82,14 +82,14 @@ object ListViewImpl {
       }
     }
 
-    private def disposeList()(implicit tx: S#Tx): Unit = {
+    private def disposeList()(implicit tx: T): Unit = {
       current.swap(None)(tx.peer).foreach { obs =>
         log(s"disposeList(); obs = $obs")
         obs.dispose()
       }
     }
 
-    //    private def createObserver(ll: List[S, Elem, U])(implicit tx: S#Tx): Disposable[S#Tx] = {
+    //    private def createObserver(ll: List[T, Elem, U])(implicit tx: T): Disposable[T] = {
     //      val items = ll.iterator.map(handler.data).toIndexedSeq
     //      deferTx {
     //        view.addAll(items)
@@ -153,7 +153,7 @@ object ListViewImpl {
       mList.update(idx, newItem)
     }
 
-    def dispose()(implicit tx: S#Tx): Unit = {
+    def dispose()(implicit tx: T): Unit = {
       list_=(None)
       deferTx {
         releaseListeners()

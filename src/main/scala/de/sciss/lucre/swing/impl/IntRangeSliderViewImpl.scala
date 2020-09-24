@@ -15,22 +15,20 @@ package de.sciss.lucre.swing.impl
 
 import de.sciss.audiowidgets.{DualRangeModel, DualRangeSlider}
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.expr.IntObj
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.swing.{IntRangeSliderView, Observation}
 import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.edit.EditVar
+import de.sciss.lucre.swing.{IntRangeSliderView, Observation}
+import de.sciss.lucre.{Cursor, IntObj, Txn}
 import javax.swing.undo.UndoableEdit
 
 import scala.concurrent.stm.{InTxn, Ref, TxnLocal}
 import scala.swing.Swing
 
 object IntRangeSliderViewImpl {
-  def apply[S <: Sys[S]](model0: DualRangeModel, name: String, width: Int = 160)
-                        (implicit tx: S#Tx, cursor: stm.Cursor[S], undoManager: UndoManager): IntRangeSliderView[S] = {
+  def apply[T <: Txn[T]](model0: DualRangeModel, name: String, width: Int = 160)
+                        (implicit tx: T, cursor: Cursor[T], undoManager: UndoManager): IntRangeSliderView[T] = {
 
-    val res = new Impl[S](model0, name = name, width = width)
+    val res = new Impl[T](model0, name = name, width = width)
     deferTx(res.guiInit())
     res
   }
@@ -45,11 +43,11 @@ object IntRangeSliderViewImpl {
     def editable: Boolean = lo == ExprWrite && (hi == ExprWrite || ext == ExprWrite)
   }
 
-  private class Impl[S <: Sys[S]](model0: DualRangeModel, name: String, width: Int)
-                                 (implicit cursor: stm.Cursor[S], undo: UndoManager)
-    extends IntRangeSliderView[S] with ComponentHolder[DualRangeSlider] {
+  private class Impl[T <: Txn[T]](model0: DualRangeModel, name: String, width: Int)
+                                 (implicit cursor: Cursor[T], undo: UndoManager)
+    extends IntRangeSliderView[T] with ComponentHolder[DualRangeSlider] {
 
-    type Obs    = Observation[S, IntObj[S]]
+    type Obs    = Observation[T, IntObj[T]]
     type ObsOpt = Option[Obs]
 
     private val _value      = Ref(Option.empty[Obs])
@@ -59,7 +57,7 @@ object IntRangeSliderViewImpl {
     private var _rangeState = RangeState(ExprNone, ExprNone, ExprNone)
 
     // executes the `now` function on the GUI thread
-    private def mkObs(expr: Option[IntObj[S]])(now: Int => Unit)(implicit tx: S#Tx) = expr.map { ex =>
+    private def mkObs(expr: Option[IntObj[T]])(now: Int => Unit)(implicit tx: T) = expr.map { ex =>
       Observation(ex)(tx => upd => if (!eventOrigin.get(tx.peer)) deferTx(now(upd.now))(tx))  // IntelliJ highlight bug
     }
 
@@ -78,14 +76,14 @@ object IntRangeSliderViewImpl {
       component.value = value
     }
 
-    private def examine(expr: Option[IntObj[S]])(implicit tx: S#Tx): (Option[Int], Boolean) = {
+    private def examine(expr: Option[IntObj[T]])(implicit tx: T): (Option[Int], Boolean) = {
       val valOpt    = expr.map(_.value)
       val editable  = expr.flatMap(IntObj.Var.unapply).isDefined
       (valOpt, editable)
     }
 
-    def value(implicit tx: S#Tx): Option[IntObj[S]] = _value.get(tx.peer).map(_.value())
-    def value_=(expr: Option[IntObj[S]])(implicit tx: S#Tx): Unit = {
+    def value(implicit tx: T): Option[IntObj[T]] = _value.get(tx.peer).map(_.value())
+    def value_=(expr: Option[IntObj[T]])(implicit tx: T): Unit = {
       val newObs = mkObs(expr)(setValue)
       _value.swap(newObs)(tx.peer).foreach(_.dispose())
       val (valOpt, editable) = examine(expr)
@@ -106,8 +104,8 @@ object IntRangeSliderViewImpl {
       }
     }
 
-    def rangeLo(implicit tx: S#Tx): Option[IntObj[S]] = _rangeLo.get(tx.peer).map(_.value())
-    def rangeLo_=(expr: Option[IntObj[S]])(implicit tx: S#Tx): Unit = {
+    def rangeLo(implicit tx: T): Option[IntObj[T]] = _rangeLo.get(tx.peer).map(_.value())
+    def rangeLo_=(expr: Option[IntObj[T]])(implicit tx: T): Unit = {
       val newObs = mkObs(expr)(setRangeLo)
       _rangeLo.swap(newObs)(tx.peer).foreach(_.dispose())
       val (valOpt, editable) = examine(expr)
@@ -125,8 +123,8 @@ object IntRangeSliderViewImpl {
       model0.range = (model0.range._1, value)
     }
 
-    def rangeHi(implicit tx: S#Tx): Option[IntObj[S]] = _rangeHi.get(tx.peer).map(_.value())
-    def rangeHi_=(expr: Option[IntObj[S]])(implicit tx: S#Tx): Unit = {
+    def rangeHi(implicit tx: T): Option[IntObj[T]] = _rangeHi.get(tx.peer).map(_.value())
+    def rangeHi_=(expr: Option[IntObj[T]])(implicit tx: T): Unit = {
       val newObs = mkObs(expr)(setRangeHi)
       if (expr.isDefined) _extent.swap(None)(tx.peer).foreach(_.dispose())
       _rangeHi.swap(newObs)(tx.peer).foreach(_.dispose())
@@ -148,8 +146,8 @@ object IntRangeSliderViewImpl {
       model0.extent = value
     }
 
-    def extent(implicit tx: S#Tx): Option[IntObj[S]] = _extent.get(tx.peer).map(_.value())
-    def extent_=(expr: Option[IntObj[S]])(implicit tx: S#Tx): Unit = {
+    def extent(implicit tx: T): Option[IntObj[T]] = _extent.get(tx.peer).map(_.value())
+    def extent_=(expr: Option[IntObj[T]])(implicit tx: T): Unit = {
       val newObs = mkObs(expr)(setRangeExt)
       if (expr.isDefined) _rangeHi.swap(None)(tx.peer).foreach(_.dispose())
       _extent.swap(newObs)(tx.peer).foreach(_.dispose())
@@ -181,9 +179,9 @@ object IntRangeSliderViewImpl {
         def tryEdit(obsRef: Ref[Option[Obs]], modelVal: Int): Option[UndoableEdit] = obsRef().flatMap { obs =>
           IntObj.Var.unapply(obs.value()).flatMap { vr =>
             if (vr.value != modelVal) {
-              val ex   = IntObj.newConst[S](modelVal)
+              val ex   = IntObj.newConst[T](modelVal)
               implicit val intTpe: IntObj.type = IntObj
-              val edit = EditVar.Expr[S, Int, IntObj](editName, vr, ex)
+              val edit = EditVar.Expr[T, Int, IntObj](editName, vr, ex)
               Some(edit)
             }
             else None
@@ -217,7 +215,7 @@ object IntRangeSliderViewImpl {
       component       = sl
     }
 
-    def dispose()(implicit tx: S#Tx): Unit = {
+    def dispose()(implicit tx: T): Unit = {
       implicit val itx: InTxn = tx.peer
       _value  .swap(None).foreach(_.dispose())
       _extent .swap(None).foreach(_.dispose())

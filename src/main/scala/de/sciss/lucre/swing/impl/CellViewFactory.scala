@@ -13,11 +13,10 @@
 
 package de.sciss.lucre.swing.impl
 
-import de.sciss.lucre.expr.{CellView, Expr, Type}
-import de.sciss.lucre.stm.{Disposable, Sys}
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.edit.{EditCellView, EditExprMap}
-import de.sciss.lucre.{stm, event => evt}
+import de.sciss.lucre.{Cursor, Disposable, Expr, MapObj, Txn}
 import de.sciss.model.Change
 import javax.swing.undo.UndoableEdit
 
@@ -28,24 +27,24 @@ object CellViewFactory {
     def update(value: A): Unit
   }
 
-  trait Committer[S <: Sys[S], A] {
-    def commit(newValue: A)(implicit tx: S#Tx): UndoableEdit
+  trait Committer[T <: Txn[T], A] {
+    def commit(newValue: A)(implicit tx: T): UndoableEdit
   }
 
-  def mkCommitter[S <: Sys[S], A](cell: CellView[S#Tx, A], name: String)
-                                 (implicit tx: S#Tx, cursor: stm.Cursor[S]): (A, Option[Committer[S, A]]) = {
+  def mkCommitter[T <: Txn[T], A](cell: CellView[T, A], name: String)
+                                 (implicit tx: T, cursor: Cursor[T]): (A, Option[Committer[T, A]]) = {
     val com = CellView.VarR.unapply(cell).map { vr =>
-      new Committer[S, A] {
-        def commit(newValue: A)(implicit tx: S#Tx): UndoableEdit =
-          EditCellView[S, A](s"Change $name", cell = vr, value = newValue)
+      new Committer[T, A] {
+        def commit(newValue: A)(implicit tx: T): UndoableEdit =
+          EditCellView[T, A](s"Change $name", cell = vr, value = newValue)
       }
     }
     val value0 = cell()
     (value0, com)
   }
 
-  def mkObserver[S <: Sys[S], A](cell: CellView[S#Tx, A], view: CellViewFactory.View[A])
-                                (implicit tx: S#Tx): Disposable[S#Tx] =
+  def mkObserver[T <: Txn[T], A](cell: CellView[T, A], view: CellViewFactory.View[A])
+                                (implicit tx: T): Disposable[T] =
     cell.react {
       implicit tx => upd => deferTx(view.update(upd))
     }
@@ -53,17 +52,17 @@ object CellViewFactory {
 trait CellViewFactory[A] {
   import CellViewFactory.Committer
 
-  protected def mkMapCommitter[S <: Sys[S], K, Ex[~ <: Sys[~]] <: Expr[~, A]](map: evt.Map[S, K, Ex], key: K,
+  protected def mkMapCommitter[T <: Txn[T], K, Ex[~ <: Txn[~]] <: Expr[~, A]](map: MapObj[T, K, Ex], key: K,
                                                                            default: A, name: String)
-                                            (implicit tx: S#Tx, cursor: stm.Cursor[S],
-                                             keyType: evt.Map.Key[K],
-                                             tpe: Type.Expr[A, Ex]): (A, Option[Committer[S, A]]) = {
+                                            (implicit tx: T, cursor: Cursor[T],
+                                             keyType: MapObj.Key[K],
+                                             tpe: Expr.Type[A, Ex]): (A, Option[Committer[T, A]]) = {
     import tpe.newConst
     val com = map.modifiableOption.map { mapMod =>
       val mapH = tx.newHandle(mapMod)
-      new Committer[S, A] {
-        def commit(newValue: A)(implicit tx: S#Tx): UndoableEdit = {
-          EditExprMap[S, K, A, Ex](s"Change $name", map = mapH(), key = key, value = Some(newConst[S](newValue)))
+      new Committer[T, A] {
+        def commit(newValue: A)(implicit tx: T): UndoableEdit = {
+          EditExprMap[T, K, A, Ex](s"Change $name", map = mapH(), key = key, value = Some(newConst[T](newValue)))
         }
       }
     }
@@ -71,25 +70,25 @@ trait CellViewFactory[A] {
     (value0, com)
   }
 
-  protected def mkMapObserver[S <: Sys[S], K, Ex[~ <: Sys[~]] <: Expr[~, A]](map: evt.Map[S, K, Ex], key: K,
+  protected def mkMapObserver[T <: Txn[T], K, Ex[~ <: Txn[~]] <: Expr[~, A]](map: MapObj[T, K, Ex], key: K,
                                               view: CellViewFactory.View[A])
-                                           (implicit tx: S#Tx): Disposable[S#Tx] =
+                                           (implicit tx: T): Disposable[T] =
     new MapObserver(map, key, view, tx)
 
-  private[this] final class MapObserver[S <: Sys[S], K, Ex[~ <: Sys[~]] <: Expr[~, A]](map: evt.Map[S, K, Ex], key: K,
-                                                                                       view: CellViewFactory.View[A], tx0: S#Tx)
-    extends Disposable[S#Tx] {
+  private[this] final class MapObserver[T <: Txn[T], K, Ex[~ <: Txn[~]] <: Expr[~, A]](map: MapObj[T, K, Ex], key: K,
+                                                                                       view: CellViewFactory.View[A], tx0: T)
+    extends Disposable[T] {
 
-    private val valObs = Ref(null: Disposable[S#Tx])
+    private val valObs = Ref(null: Disposable[T])
     private val mapObs = map.changed.react {
       implicit tx => upd => upd.changes.foreach {
-        case evt.Map.Added  (`key`, expr) =>
+        case MapObj.Added  (`key`, expr) =>
           valueAdded(expr)
           // XXX TODO -- if we moved this into `valueAdded`, the contract
           // could be that initially the view is updated
           val now0 = expr.value
           deferTx(view.update(now0))
-        case evt.Map.Removed(`key`, _   ) =>
+        case MapObj.Removed(`key`, _   ) =>
           valueRemoved()
         case _ =>
       }
@@ -97,7 +96,7 @@ trait CellViewFactory[A] {
 
     map.get(key)(tx0).foreach(valueAdded(_)(tx0))
 
-    private def valueAdded(expr: Ex[S])(implicit tx: S#Tx): Unit = {
+    private def valueAdded(expr: Ex[T])(implicit tx: T): Unit = {
       val res = expr.changed.react { implicit tx => {
         case Change(_, now) =>
           deferTx(view.update(now))
@@ -107,14 +106,14 @@ trait CellViewFactory[A] {
       if (v != null) v.dispose()
     }
 
-    private def valueRemoved()(implicit tx: S#Tx): Boolean = {
+    private def valueRemoved()(implicit tx: T): Boolean = {
       val v = valObs.swap(null)(tx.peer)
       val res = v != null
       if (res) v.dispose()
       res
     }
 
-    def dispose()(implicit tx: S#Tx): Unit = {
+    def dispose()(implicit tx: T): Unit = {
       valueRemoved()
       mapObs.dispose()
     }

@@ -17,16 +17,14 @@ import java.text.{NumberFormat, ParseException}
 import java.util.Locale
 
 import de.sciss.audiowidgets.{ParamFormat, UnitView, ParamField => Peer}
-import de.sciss.lucre.event.impl.IChangeGenerator
-import de.sciss.lucre.event.{IChangeEvent, IPull, ITargets}
 import de.sciss.lucre.expr.graph.{Const, Ex}
-import de.sciss.lucre.expr.{Context, ExSeq, Graph, IExpr, Model}
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.expr.{Context, ExSeq, Graph, Model}
+import de.sciss.lucre.impl.IChangeGeneratorEvent
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
+import de.sciss.lucre.{Cursor, IChangeEvent, IExpr, IPull, ITargets, Txn}
 import de.sciss.model.Change
 import de.sciss.numbers
 import javax.swing.text.NumberFormatter
@@ -55,23 +53,23 @@ object IntField {
   private final val defaultEditable = true
 
   final case class Value(w: IntField) extends Ex[Int] {
-    type Repr[S <: Sys[S]] = IExpr[S, Int]
+    type Repr[T <: Txn[T]] = IExpr[T, Int]
 
     override def productPrefix: String = s"IntField$$Value" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
-      import ctx.{cursor, targets}
-      val ws        = w.expand[S]
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
+      import ctx.{targets, cursor}
+      val ws        = w.expand[T]
       val valueOpt  = ctx.getProperty[Ex[Int]](w, keyValue)
-      val value0    = valueOpt.fold[Int](defaultValue)(_.expand[S].value)
-      new ValueExpanded[S](ws, value0).init()
+      val value0    = valueOpt.fold[Int](defaultValue)(_.expand[T].value)
+      new ValueExpanded[T](ws, value0).init()
     }
   }
 
-  private final class ValueExpanded[S <: Sys[S]](ws: View.T[S, Peer[Int]], value0: Int)
-                                                (implicit protected val targets: ITargets[S], cursor: stm.Cursor[S])
-    extends IExpr[S, Int]
-      with IChangeGenerator[S, Int] {
+  private final class ValueExpanded[T <: Txn[T]](ws: View.T[T, Peer[Int]], value0: Int)
+                                                (implicit protected val targets: ITargets[T], cursor: Cursor[T])
+    extends IExpr[T, Int]
+      with IChangeGeneratorEvent[T, Int] {
 
     private def commit(): scala.Unit = {
       val c       = ws.component
@@ -90,14 +88,14 @@ object IntField {
     private[this] var guiValue: Int = _
     private[this] val txValue = Ref(value0)
 
-    def value(implicit tx: S#Tx): Int = txValue.get(tx.peer)
+    def value(implicit tx: T): Int = txValue.get(tx.peer)
 
-    def changed: IChangeEvent[S, Int] = this
+    def changed: IChangeEvent[T, Int] = this
 
-    private[lucre] def pullChange(pull: IPull[S])(implicit tx: S#Tx, phase: IPull.Phase): Int =
+    private[lucre] def pullChange(pull: IPull[T])(implicit tx: T, phase: IPull.Phase): Int =
       pull.resolveExpr(this)
 
-    def init()(implicit tx: S#Tx): this.type = {
+    def init()(implicit tx: T): this.type = {
       deferTx {
         val c = ws.component
         guiValue = c.value
@@ -109,7 +107,7 @@ object IntField {
       this
     }
 
-    def dispose()(implicit tx: S#Tx): scala.Unit = {
+    def dispose()(implicit tx: T): scala.Unit = {
       deferTx {
         val c = ws.component
         c.deafTo(c)
@@ -118,90 +116,90 @@ object IntField {
   }
 
   final case class Min(w: IntField) extends Ex[Int] {
-    type Repr[S <: Sys[S]] = IExpr[S, Int]
+    type Repr[T <: Txn[T]] = IExpr[T, Int]
 
     override def productPrefix: String = s"IntField$$Min" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyMin)
-      valueOpt.getOrElse(Const(defaultMin)).expand[S]
+      valueOpt.getOrElse(Const(defaultMin)).expand[T]
     }
   }
 
   final case class Max(w: IntField) extends Ex[Int] {
-    type Repr[S <: Sys[S]] = IExpr[S, Int]
+    type Repr[T <: Txn[T]] = IExpr[T, Int]
 
     override def productPrefix: String = s"IntField$$Max" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyMax)
-      valueOpt.getOrElse(Const(defaultMax)).expand[S]
+      valueOpt.getOrElse(Const(defaultMax)).expand[T]
     }
   }
 
   final case class Step(w: IntField) extends Ex[Int] {
-    type Repr[S <: Sys[S]] = IExpr[S, Int]
+    type Repr[T <: Txn[T]] = IExpr[T, Int]
 
     override def productPrefix: String = s"IntField$$Step" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       val valueOpt = ctx.getProperty[Ex[Int]](w, keyStep)
-      valueOpt.getOrElse(Const(defaultStep)).expand[S]
+      valueOpt.getOrElse(Const(defaultStep)).expand[T]
     }
   }
 
   final case class Unit(w: IntField) extends Ex[String] {
-    type Repr[S <: Sys[S]] = IExpr[S, String]
+    type Repr[T <: Txn[T]] = IExpr[T, String]
 
     override def productPrefix: String = s"IntField$$Unit" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       val valueOpt = ctx.getProperty[Ex[String]](w, keyUnit)
-      valueOpt.getOrElse(Const(defaultUnit)).expand[S]
+      valueOpt.getOrElse(Const(defaultUnit)).expand[T]
     }
   }
 
-  private def defaultPrototype[S <: Sys[S]](w: IntField)(implicit ctx: Context[S], tx: S#Tx): Ex[Seq[Int]] = {
+  private def defaultPrototype[T <: Txn[T]](w: IntField)(implicit ctx: Context[T], tx: T): Ex[Seq[Int]] = {
     val seq0 = ctx.getProperty[Ex[Int]](w, keyValue).toList
     ExSeq(w.min :: w.max :: seq0: _*)
   }
 
   final case class Prototype(w: IntField) extends Ex[Seq[Int]] {
-    type Repr[S <: Sys[S]] = IExpr[S, Seq[Int]]
+    type Repr[T <: Txn[T]] = IExpr[T, Seq[Int]]
 
     override def productPrefix: String = s"IntField$$Prototype" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       val valueOpt = ctx.getProperty[Ex[Seq[Int]]](w, keyPrototype)
-      valueOpt.getOrElse(defaultPrototype(w)).expand[S]
+      valueOpt.getOrElse(defaultPrototype(w)).expand[T]
     }
   }
 
   final case class Editable(w: IntField) extends Ex[Boolean] {
-    type Repr[S <: Sys[S]] = IExpr[S, Boolean]
+    type Repr[T <: Txn[T]] = IExpr[T, Boolean]
 
     override def productPrefix: String = s"IntField$$Editable" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       val valueOpt = ctx.getProperty[Ex[Boolean]](w, keyEditable)
-      valueOpt.getOrElse(Const(defaultEditable)).expand[S]
+      valueOpt.getOrElse(Const(defaultEditable)).expand[T]
     }
   }
 
-  private final class Expanded[S <: Sys[S]](protected val peer: IntField) extends View[S]
-    with ComponentHolder[Peer[Int]] with ComponentExpandedImpl[S] {
+  private final class Expanded[T <: Txn[T]](protected val peer: IntField) extends View[T]
+    with ComponentHolder[Peer[Int]] with ComponentExpandedImpl[T] {
 
     type C = Peer[Int]
 
-    override def initComponent()(implicit tx: S#Tx, ctx: Context[S]): this.type = {
-      val value0    = ctx.getProperty[Ex[Int    ]](peer, keyValue    ).fold(defaultValue   )(_.expand[S].value)
-      val min       = ctx.getProperty[Ex[Int    ]](peer, keyMin      ).fold(defaultMin     )(_.expand[S].value)
-      val max       = ctx.getProperty[Ex[Int    ]](peer, keyMax      ).fold(defaultMax     )(_.expand[S].value)
-      val step      = ctx.getProperty[Ex[Int    ]](peer, keyStep     ).fold(defaultStep    )(_.expand[S].value)
-      val unitS     = ctx.getProperty[Ex[String ]](peer, keyUnit     ).fold(defaultUnit    )(_.expand[S].value)
-      val editable  = ctx.getProperty[Ex[Boolean]](peer, keyEditable ).fold(defaultEditable)(_.expand[S].value)
+    override def initComponent()(implicit tx: T, ctx: Context[T]): this.type = {
+      val value0    = ctx.getProperty[Ex[Int    ]](peer, keyValue    ).fold(defaultValue   )(_.expand[T].value)
+      val min       = ctx.getProperty[Ex[Int    ]](peer, keyMin      ).fold(defaultMin     )(_.expand[T].value)
+      val max       = ctx.getProperty[Ex[Int    ]](peer, keyMax      ).fold(defaultMax     )(_.expand[T].value)
+      val step      = ctx.getProperty[Ex[Int    ]](peer, keyStep     ).fold(defaultStep    )(_.expand[T].value)
+      val unitS     = ctx.getProperty[Ex[String ]](peer, keyUnit     ).fold(defaultUnit    )(_.expand[T].value)
+      val editable  = ctx.getProperty[Ex[Boolean]](peer, keyEditable ).fold(defaultEditable)(_.expand[T].value)
 
-      val prototype = ctx.getProperty[Ex[Seq[Int]]](peer, keyPrototype).getOrElse(defaultPrototype(peer)).expand[S].value
+      val prototype = ctx.getProperty[Ex[Seq[Int]]](peer, keyPrototype).getOrElse(defaultPrototype(peer)).expand[T].value
 
       deferTx {
         val fmt: ParamFormat[Int] = new ParamFormat[Int] {
@@ -228,11 +226,11 @@ object IntField {
           def format(value: Int): String = formatter.valueToString(value)
 
           def adjust(in: Int, inc: Int): Int = {
-            import numbers.Implicits._
+            import numbers.LongFunctions.clip
             val add = inc.toLong * step
 //            val s: Int = math.signum(inc) * math.signum(step)
 //            if (s == math.signum(add)) {  // detect overflow
-              (in + add).clip(min, max).toInt
+              clip(in + add, min, max).toInt
 //            } else if (s < 0) min else max
           }
         }
@@ -259,8 +257,8 @@ object IntField {
   private final case class Impl() extends IntField with ComponentImpl { w =>
     override def productPrefix: String = "IntField" // serialization
 
-    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] =
-      new Expanded[S](this).initComponent()
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] =
+      new Expanded[T](this).initComponent()
 
     object value extends Model[Int] {
       def apply(): Ex[Int] = Value(w)

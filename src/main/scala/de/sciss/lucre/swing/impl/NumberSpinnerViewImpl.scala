@@ -20,8 +20,7 @@ import java.util.Locale
 
 import de.sciss.audiowidgets
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Disposable, Sys}
+import de.sciss.lucre.{Cursor, Disposable, Txn}
 import de.sciss.swingplus.Spinner
 import javax.swing.JFormattedTextField.AbstractFormatter
 import javax.swing.text.DefaultFormatterFactory
@@ -30,23 +29,23 @@ import javax.swing.{JFormattedTextField, JSpinner, KeyStroke, SpinnerModel, Swin
 import scala.swing.event.{FocusLost, KeyTyped, ValueChanged}
 import scala.swing.{Action, Component, Swing, TextComponent}
 
-trait NumberSpinnerViewImpl[S <: Sys[S], A] // (implicit cursor: stm.Cursor[S], undoManager: UndoManager)
-  extends CellViewEditor[S, A, Spinner] {
+trait NumberSpinnerViewImpl[T <: Txn[T], A] // (implicit cursor: Cursor[T], undoManager: UndoManager)
+  extends CellViewEditor[T, A, Spinner] {
 
   protected def maxWidth: Int
 
-  protected def cursor: stm.Cursor[S]
+  protected def cursor: Cursor[T]
   protected def undoManager: UndoManager
 
   // current display value (GUI threaded)
   protected var value: A
 
   // reactive observer (will be disposed with component)
-  protected def observer: Disposable[S#Tx]
+  protected def observer: Disposable[T]
 
   // final protected val tpe = expr.Int
 
-  protected def committer: Option[CellViewFactory.Committer[S, A]]
+  protected def committer: Option[CellViewFactory.Committer[T, A]]
 
   private var sp: Spinner = _
 
@@ -171,10 +170,10 @@ trait NumberSpinnerViewImpl[S <: Sys[S], A] // (implicit cursor: stm.Cursor[S], 
   }
 }
 
-abstract class DefinedNumberSpinnerViewImpl[S <: Sys[S], A](protected val maxWidth: Int)
-                                                           (implicit protected val cursor: stm.Cursor[S],
+abstract class DefinedNumberSpinnerViewImpl[T <: Txn[T], A](protected val maxWidth: Int)
+                                                           (implicit protected val cursor: Cursor[T],
                                                             protected val undoManager: UndoManager)
-  extends NumberSpinnerViewImpl[S, A] {
+  extends NumberSpinnerViewImpl[T, A] {
 
   final protected def valueToComponent(): Unit =
     if (component.value != value) {
@@ -183,12 +182,12 @@ abstract class DefinedNumberSpinnerViewImpl[S <: Sys[S], A](protected val maxWid
     }
 }
 
-abstract class OptionalNumberSpinnerViewImpl[S <: Sys[S], A](protected val maxWidth: Int, isInteger: Boolean)
-                                                            (implicit protected val cursor: stm.Cursor[S],
+abstract class OptionalNumberSpinnerViewImpl[T <: Txn[T], A](protected val maxWidth: Int, isInteger: Boolean)
+                                                            (implicit protected val cursor: Cursor[T],
                                                              protected val undoManager: UndoManager)
-  extends NumberSpinnerViewImpl[S, Option[A]] {
+  extends NumberSpinnerViewImpl[T, Option[A]] {
 
-  def this(maxWidth: Int)(implicit cursor: stm.Cursor[S], undoManager: UndoManager) =
+  def this(maxWidth: Int)(implicit cursor: Cursor[T], undoManager: UndoManager) =
     this(maxWidth, false)
 
   protected def default: Option[A]
