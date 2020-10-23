@@ -17,10 +17,12 @@ import java.awt.BorderLayout
 
 import de.sciss.lucre.expr.graph.{Const, Ex}
 import de.sciss.lucre.expr.{Context, IControl}
+import de.sciss.lucre.swing.Graph
+import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.LucreSwing.deferTx
-import de.sciss.lucre.swing.graph.impl.{PanelExpandedImpl, PanelImpl}
+import de.sciss.lucre.swing.graph.impl.BorderPanelExpandedImpl
+import de.sciss.lucre.swing.graph.impl.PanelImpl
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.swing.{Graph, View}
 import de.sciss.lucre.{IExpr, Txn}
 
 object BorderPanel {
@@ -31,36 +33,6 @@ object BorderPanel {
             center: Widget = Empty()
            ): BorderPanel =
     Impl(north = north, south = south, west = west, east = east, center = center)
-
-  private final class Expanded[T <: Txn[T]](protected val peer: BorderPanel)
-    extends ComponentHolder[scala.swing.BorderPanel] with PanelExpandedImpl[T] {
-
-    type C = scala.swing.BorderPanel
-
-    override def initComponent()(implicit tx: T, ctx: Context[T]): this.type = {
-      val hGap            = ctx.getProperty[Ex[Int    ]](peer, keyHGap    ).fold(defaultHGap    )(_.expand[T].value)
-      val vGap            = ctx.getProperty[Ex[Int    ]](peer, keyVGap    ).fold(defaultVGap    )(_.expand[T].value)
-      val north : View[T] = if (peer.north .isInstanceOf[Empty]) null else peer.north  .expand[T]
-      val south : View[T] = if (peer.south .isInstanceOf[Empty]) null else peer.south  .expand[T]
-      val west  : View[T] = if (peer.west  .isInstanceOf[Empty]) null else peer.west   .expand[T]
-      val east  : View[T] = if (peer.east  .isInstanceOf[Empty]) null else peer.east   .expand[T]
-      val center: View[T] = if (peer.center.isInstanceOf[Empty]) null else peer.center .expand[T]
-      deferTx {
-        val p     = new scala.swing.BorderPanel
-        val lay   = p.layoutManager
-        lay.setHgap(hGap)
-        lay.setVgap(vGap)
-        val peer  = p.peer
-        if (north   != null) peer.add(north .component.peer, BorderLayout.NORTH )
-        if (south   != null) peer.add(south .component.peer, BorderLayout.SOUTH )
-        if (west    != null) peer.add(west  .component.peer, BorderLayout.WEST  )
-        if (east    != null) peer.add(east  .component.peer, BorderLayout.EAST  )
-        if (center  != null) peer.add(center.component.peer, BorderLayout.CENTER)
-        component = p
-      }
-      super.initComponent()
-    }
-  }
 
   final case class HGap(w: BorderPanel) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
@@ -113,16 +85,16 @@ object BorderPanel {
     }
 
     protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] =
-      new Expanded[T](this).initComponent()
+      new BorderPanelExpandedImpl[T](this).initComponent()
   }
 
-  private final val keyHGap     = "hGap"
-  private final val keyVGap     = "vGap"
-  private final val defaultHGap = 4
-  private final val defaultVGap = 2
+  private[graph] final val keyHGap     = "hGap"
+  private[graph] final val keyVGap     = "vGap"
+  private[graph] final val defaultHGap = 4
+  private[graph] final val defaultVGap = 2
 }
 trait BorderPanel extends Panel {
-  type C = scala.swing.BorderPanel
+  type C = View.Component // scala.swing.BorderPanel
 
   type Repr[T <: Txn[T]] = View.T[T, C] with IControl[T]
 
