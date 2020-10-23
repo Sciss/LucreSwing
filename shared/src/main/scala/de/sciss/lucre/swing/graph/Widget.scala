@@ -19,7 +19,7 @@ import de.sciss.lucre.expr.graph.Control
 import de.sciss.lucre.swing.View
 
 trait Widget extends Control {
-  type C <: scala.swing.Component
+  type C <: View.Component
 
   type Repr[T <: Txn[T]] <: View.T[T, C] with IControl[T]
 }

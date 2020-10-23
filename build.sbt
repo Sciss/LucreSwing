@@ -2,14 +2,15 @@ lazy val baseName   = "Lucre-Swing"
 lazy val baseNameL  = baseName.toLowerCase
 lazy val gitProject = "LucreSwing"
 
-lazy val projectVersion = "2.1.0"
-lazy val mimaVersion    = "2.1.0"
+lazy val projectVersion = "2.2.0-SNAPSHOT"
+lazy val mimaVersion    = "2.2.0"
 
 // ---- dependencies ----
 
 lazy val deps = new {
   val main = new {
     val desktop   = "0.10.7"
+    val laminar   = "0.11.0"
     val lucre     = "4.1.0"
     val model     = "0.3.5"
     val swingPlus = "0.4.2"
@@ -23,37 +24,47 @@ lazy val deps = new {
   }
 }
 
-lazy val root = project.withId(baseNameL).in(file("."))
+lazy val commonJvmSettings = Seq(
+  crossScalaVersions   := Seq("2.13.3", "2.12.12"),
+)
+
+lazy val root = crossProject(JVMPlatform, JSPlatform).in(file("."))
+  .jvmSettings(commonJvmSettings)
   .settings(
     name                 := baseName,
     version              := projectVersion,
     organization         := "de.sciss",
     scalaVersion         := "2.13.3",
-    crossScalaVersions   := Seq("2.13.3", "2.12.12"),
     description          := "Swing support for Lucre, and common views",
     homepage             := Some(url(s"https://git.iem.at/sciss/$gitProject")),
     licenses             := Seq("AGPL v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
 //    resolvers += "Oracle Repository" at "http://download.oracle.com/maven", // required for lucre-bdb
     libraryDependencies ++= Seq(
-      "de.sciss"      %% "lucre-expr"         % deps.main.lucre,
-      "de.sciss"      %% "desktop"            % deps.main.desktop,
-      "de.sciss"      %% "audiowidgets-swing" % deps.main.widgets,   // TODO: should be possible to just depend on the range slider
-      "de.sciss"      %% "swingplus"          % deps.main.swingPlus,
-      "de.sciss"      %% "treetable-scala"    % deps.main.treeTable, // TODO: should be going into a dedicated sub-project?
-      "de.sciss"      %% "model"              % deps.main.model,
-      "de.sciss"      %% "lucre-bdb"          % deps.main.lucre     % Test,
-      "de.sciss"      %% "fileutil"           % deps.test.fileUtil  % Test,
-      "de.sciss"      %  "submin"             % deps.test.submin    % Test,
-//      "com.weblookandfeel" % "weblaf-ui" % "1.2.10" % Test,
+      "de.sciss"      %%% "lucre-expr"   % deps.main.lucre,
+      "de.sciss"      %%% "model"        % deps.main.model,
+      "org.scalatest" %%% "scalatest"    % deps.test.scalaTest % Test,
     ),
-    libraryDependencies += {
-      "org.scalatest" %% "scalatest" % deps.test.scalaTest %Test
-    },
     scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xlint", "-Xsource:2.13"),
     scalacOptions in (Compile, compile) ++= (if (scala.util.Properties.isJavaAtLeast("9")) Seq("-release", "8") else Nil), // JDK >8 breaks API; skip scala-doc
     // ---- compatibility ----
     mimaPreviousArtifacts := Set("de.sciss" %% baseNameL % mimaVersion),
     updateOptions := updateOptions.value.withLatestSnapshots(false)
+  )
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "de.sciss" %% "desktop"            % deps.main.desktop,
+      "de.sciss" %% "audiowidgets-swing" % deps.main.widgets,   // TODO: should be possible to just depend on the range slider
+      "de.sciss" %% "swingplus"          % deps.main.swingPlus,
+      "de.sciss" %% "treetable-scala"    % deps.main.treeTable, // TODO: should be going into a dedicated sub-project?
+      "de.sciss" %% "lucre-bdb"          % deps.main.lucre     % Test,
+      "de.sciss" %% "fileutil"           % deps.test.fileUtil  % Test,
+      "de.sciss" %  "submin"             % deps.test.submin    % Test,
+    ),
+  )
+  .jsSettings(
+    libraryDependencies ++= Seq(
+      "com.raquo" %%% "laminar" % deps.main.laminar,
+    )
   )
   .settings(publishSettings)
 

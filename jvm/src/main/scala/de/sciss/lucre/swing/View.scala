@@ -18,10 +18,10 @@ import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.{Disposable, Txn, Cursor => LCursor}
 
-import scala.swing.Component
-
 object View {
   type T[Tx <: Txn[Tx], C1 <: Component] = View[Tx] { type C = C1 }
+
+  type Component = scala.swing.Component
 
   trait Cursor[Tx <: Txn[Tx]] extends View[Tx] {
     implicit def cursor: LCursor[Tx]
@@ -52,7 +52,7 @@ object View {
   }
 }
 trait View[T <: Txn[T]] extends Disposable[T] {
-  type C <: Component
+  type C <: View.Component
 
   def component: C
 }

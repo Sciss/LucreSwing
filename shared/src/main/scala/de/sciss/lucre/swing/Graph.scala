@@ -13,15 +13,14 @@
 
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.{Txn, expr}
 import de.sciss.lucre.expr.graph.Control
 import de.sciss.lucre.expr.impl.{ExElem, GraphBuilderMixin, GraphFormatMixin}
 import de.sciss.lucre.expr.{Context, IControl}
 import de.sciss.lucre.swing.graph.Widget
+import de.sciss.lucre.{Txn, expr}
 import de.sciss.serial.{ConstFormat, DataInput, DataOutput}
 
 import scala.collection.immutable.{IndexedSeq => Vec, Seq => ISeq}
-import scala.swing.Component
 
 object Graph {
   type Builder = expr.Graph.Builder
@@ -71,9 +70,9 @@ object Graph {
   private final class ExpandedImpl[T <: Txn[T]](val view: View[T], controls: ISeq[IControl[T]])
     extends View[T] with IControl[T] {
 
-    type C = scala.swing.Component
+    type C = View.Component
 
-    def component: Component = view.component
+    def component: C = view.component
 
     def initControl()(implicit tx: T): Unit =
       controls.foreach(_.initControl())

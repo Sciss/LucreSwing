@@ -13,27 +13,20 @@
 
 package de.sciss.lucre.swing
 
-import java.awt.EventQueue
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
 
 import de.sciss.lucre.TxnLike
-import de.sciss.lucre.swing.graph.DropTarget
 
 import scala.annotation.elidable
 import scala.annotation.elidable.CONFIG
 import scala.collection.immutable.{IndexedSeq => Vec}
-import scala.concurrent.stm.{Txn, TxnLocal}
-import scala.swing.Swing
+import scala.concurrent.stm.TxnLocal
 import scala.util.control.NonFatal
 
-object LucreSwing {
+object LucreSwing extends LucreSwingPlatform {
   /** Registers all known types. */
-  def init(): Unit = _init
-
-  private lazy val _init: Unit = {
-    DropTarget.init()
-  }
+  def init(): Unit = initPlatform()
 
   private[this] val guiCode = TxnLocal(init = Vec.empty[() => Unit], afterCommit = handleGUI)
 
@@ -50,14 +43,6 @@ object LucreSwing {
     }
 
     defer(exec())
-  }
-
-  def requireEDT(): Unit = if (!EventQueue.isDispatchThread)
-    throw new IllegalStateException("Should be called on the event dispatch thread")
-
-  def defer(thunk: => Unit): Unit = {
-    if (Txn.findCurrent.isDefined) throw new IllegalStateException("Trying to execute GUI code inside a transaction")
-    if (EventQueue.isDispatchThread) thunk else Swing.onEDT(thunk)
   }
 
   def deferTx(thunk: => Unit)(implicit tx: TxnLike): Unit =

@@ -15,46 +15,26 @@ package de.sciss.lucre.swing.graph
 
 import de.sciss.lucre.Txn
 import de.sciss.lucre.expr.{Context, IControl}
-import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
-import de.sciss.lucre.swing.impl.ComponentHolder
-
-import scala.swing.Dimension
+import de.sciss.lucre.swing.graph.impl.EmptyExpandedImpl
 
 object Empty {
   def apply(): Empty = Impl() // instance
 
 //  private[graph] val instance: Empty = Impl()
 
-  private final class Expanded[T <: Txn[T]] extends View[T] with IControl[T]
-    with ComponentHolder[scala.swing.Component] {
-
-    type C = scala.swing.Component
-
-    def initControl()(implicit tx: T): Unit = ()
-
-    def initComponent()(implicit tx: T): this.type = {
-      deferTx {
-        component = scala.swing.Swing.RigidBox(new Dimension(0, 0))
-      }
-      this
-    }
-
-    def dispose()(implicit tx: T): Unit = ()
-  }
-
   private final case class Impl() extends Empty {
     override def productPrefix = "Empty"  // serialization
 
     protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] =
-      new Expanded[T].initComponent()
+      new EmptyExpandedImpl[T].initComponent()
   }
 }
 /** This is a placeholder widget that can be eliminated in other places of the API,
   * for example `BorderPanel` contents.
   */
 trait Empty extends Widget {
-  type C = scala.swing.Component
+  type C = View.Component
 
   type Repr[T <: Txn[T]] = View.T[T, C] with IControl[T]
 }
