@@ -7,7 +7,7 @@ import de.sciss.lucre.expr.IControl
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 
-import com.raquo.laminar.api.L.{Label => Peer, _}
+import com.raquo.laminar.api.L._
 
 final class EmptyExpandedImpl[T <: Txn[T]] extends View[T] with IControl[T]
   with ComponentHolder[Span] {

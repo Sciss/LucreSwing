@@ -20,8 +20,6 @@ import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.Component
 import de.sciss.lucre.{Disposable, Txn}
 
-import com.raquo.laminar.api.L.{_}
-
 trait ComponentExpandedImpl[T <: Txn[T]] extends View[T] with IControl[T] {
 
   protected def peer: Component

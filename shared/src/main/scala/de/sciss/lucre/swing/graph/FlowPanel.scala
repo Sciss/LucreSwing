@@ -11,54 +11,19 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre.swing.graph
-
-import java.awt.FlowLayout
+package de.sciss.lucre.swing
+package graph
 
 import de.sciss.lucre.expr.graph.{Const, Ex}
 import de.sciss.lucre.expr.{Context, IControl}
-import de.sciss.lucre.swing.LucreSwing.deferTx
-import de.sciss.lucre.swing.graph.impl.{PanelExpandedImpl, PanelImpl}
-import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.swing.{Graph, View, graph}
+import de.sciss.lucre.swing.graph.impl.PanelImpl
 import de.sciss.lucre.{IExpr, Txn}
+import de.sciss.lucre.swing.graph.impl.FlowPanelExpandedImpl
 
-import scala.swing.{FlowPanel => Peer}
+//import scala.swing.{FlowPanel => Peer}
 
 object FlowPanel {
   def apply(contents: Widget*): FlowPanel = Impl(contents)
-
-  private final class Expanded[T <: Txn[T]](protected val peer: FlowPanel) extends View[T]
-    with ComponentHolder[Peer] with PanelExpandedImpl[T] {
-
-    type C = Peer
-
-    override def initComponent()(implicit tx: T, ctx: Context[T]): this.type = {
-      val hGap      = ctx.getProperty[Ex[Int    ]](peer, keyHGap    ).fold(defaultHGap    )(_.expand[T].value)
-      val vGap      = ctx.getProperty[Ex[Int    ]](peer, keyVGap    ).fold(defaultVGap    )(_.expand[T].value)
-      val align     = ctx.getProperty[Ex[Int    ]](peer, keyAlign   ).fold(defaultAlign   )(_.expand[T].value)
-      val contentsV = peer.contents.map(_.expand[T])
-      deferTx {
-        val alignSwing = align match {
-          case graph.Align.Left     => Peer.Alignment.Left
-          case graph.Align.Right    => Peer.Alignment.Right
-          case graph.Align.Trailing => Peer.Alignment.Trailing
-          case graph.Align.Leading  => Peer.Alignment.Leading
-          case _                    => Peer.Alignment.Center
-        }
-        val vec = contentsV.map(_.component)
-        val c = new Peer(alignSwing)(vec: _*)
-        c.hGap = hGap
-        c.vGap = vGap
-        c.peer.getLayout match {
-          case fl: FlowLayout => fl.setAlignOnBaseline(true)
-          case _ =>
-        }
-        component = c
-      }
-      super.initComponent()
-    }
-  }
 
   final case class HGap(w: FlowPanel) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
@@ -97,7 +62,7 @@ object FlowPanel {
     override def productPrefix = "FlowPanel" // s"FlowPanel$$Impl" // serialization
 
     protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] =
-      new Expanded[T](this).initComponent()
+      new FlowPanelExpandedImpl[T](this).initComponent()
 
     def hGap: Ex[Int] = HGap(this)
 
@@ -121,15 +86,15 @@ object FlowPanel {
     }
   }
 
-  private final val keyHGap               = "hGap"
-  private final val keyVGap               = "vGap"
-  private final val keyAlign              = "align"
-  private final val defaultHGap           = 4
-  private final val defaultVGap           = 2
-  private       def defaultAlign: Int     = graph.Align.Center
+  private[graph] final val keyHGap               = "hGap"
+  private[graph] final val keyVGap               = "vGap"
+  private[graph] final val keyAlign              = "align"
+  private[graph] final val defaultHGap           = 4
+  private[graph] final val defaultVGap           = 2
+  private[graph]       def defaultAlign: Int     = graph.Align.Center
 }
 trait FlowPanel extends Panel {
-  type C = Peer
+  type C = View.Component // Peer
 
   type Repr[T <: Txn[T]] = View.T[T, C] with IControl[T]
 

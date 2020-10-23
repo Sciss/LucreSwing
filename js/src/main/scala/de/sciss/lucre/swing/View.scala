@@ -13,13 +13,13 @@
 
 package de.sciss.lucre.swing
 
-import com.raquo.laminar.nodes.ReactiveElement
+import com.raquo.laminar.nodes.ReactiveHtmlElement
 import de.sciss.lucre.{Disposable, Txn}
 
 object View {
   type T[Tx <: Txn[Tx], C1 <: Component] = View[Tx] { type C = C1 }
 
-  type Component = ReactiveElement.Base
+  type Component = ReactiveHtmlElement.Base
 }
 trait View[T <: Txn[T]] extends Disposable[T] {
   type C <: View.Component

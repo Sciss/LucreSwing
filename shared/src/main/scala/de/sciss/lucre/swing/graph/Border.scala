@@ -14,9 +14,6 @@
 package de.sciss.lucre.swing.graph
 
 import de.sciss.lucre.expr.graph.Ex
-import javax.swing.border.{Border => Peer}
-
-import scala.swing.Swing
 
 object Border {
   object Empty {
@@ -24,21 +21,29 @@ object Border {
 
     def apply(top: Int, left: Int, bottom: Int, right: Int): Border =
       EmptyImpl(top = top, left = left, bottom = bottom, right = right)
+
+//    def unapply(b: Empty): Option[Empty] = Some(b)
+  }
+  trait Empty extends Border {
+    def top   : Int
+    def left  : Int
+    def bottom: Int
+    def right : Int
   }
 
   private final case class EmptyImpl(top: Int, left: Int, bottom: Int, right: Int)
-    extends Border {
+    extends Empty {
 
     override def productPrefix: String = s"Border$$Empty" // serialization
 
-    private[swing] def mkPeer(): Peer = {
-      // if (top == 0 && left == 0 && bottom == 0 && right == 0)
-      Swing.EmptyBorder(top = top, left = left, bottom = bottom, right = right)
-    }
+//    private[swing] def mkPeer(): Peer = {
+//      // if (top == 0 && left == 0 && bottom == 0 && right == 0)
+//      Swing.EmptyBorder(top = top, left = left, bottom = bottom, right = right)
+//    }
   }
 
   implicit object ExValue extends Ex.Value[Border]
 }
-trait Border extends Product {
-  private[swing] def mkPeer(): Peer
+sealed trait Border extends Product {
+  // private[swing] def mkPeer(): Peer
 }
