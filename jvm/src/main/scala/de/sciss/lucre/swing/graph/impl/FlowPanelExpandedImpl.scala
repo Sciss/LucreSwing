@@ -9,7 +9,6 @@ import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.{View, graph}
 import de.sciss.lucre.swing.graph.FlowPanel
 import de.sciss.lucre.swing.graph.FlowPanel.{defaultAlign, defaultHGap, defaultVGap, keyAlign, keyHGap, keyVGap}
-import de.sciss.lucre.swing.graph.impl.PanelExpandedImpl
 import de.sciss.lucre.swing.impl.ComponentHolder
 
 import scala.swing.{FlowPanel => Peer}

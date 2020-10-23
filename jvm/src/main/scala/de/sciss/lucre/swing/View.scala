@@ -21,7 +21,8 @@ import de.sciss.lucre.{Disposable, Txn, Cursor => LCursor}
 object View {
   type T[Tx <: Txn[Tx], C1 <: Component] = View[Tx] { type C = C1 }
 
-  type Component = scala.swing.Component
+  type Component  = scala.swing.Component
+  type Button     = scala.swing.Button
 
   trait Cursor[Tx <: Txn[Tx]] extends View[Tx] {
     implicit def cursor: LCursor[Tx]
