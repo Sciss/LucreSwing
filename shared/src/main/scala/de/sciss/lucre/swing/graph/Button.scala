@@ -14,16 +14,12 @@
 package de.sciss.lucre.swing
 package graph
 
-import java.awt.event.{ActionEvent, ActionListener}
-
 import de.sciss.lucre.expr.graph.{Ex, Trig}
 import de.sciss.lucre.expr.{Context, IControl, ITrigger}
-import de.sciss.lucre.impl.IGeneratorEvent
-import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.graph.impl.ComponentImpl
 import de.sciss.lucre.swing.graph.impl.ButtonExpandedImpl
 import de.sciss.lucre.swing.graph.impl.ButtonClickedExpandedImpl
-import de.sciss.lucre.{Cursor, IEvent, IPull, ITargets, Txn}
+import de.sciss.lucre.Txn
 
 object Button {
 
@@ -37,6 +33,8 @@ object Button {
     protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       import ctx.{cursor, targets}
       val ws = w.expand[T]
+      // XXX TODO: we should only keep one instance of `ButtonClickedExpandedImpl`
+      // i.e. add `clicked` to `Repr`
       new ButtonClickedExpandedImpl[T](ws).init()
     }
   }

@@ -22,6 +22,7 @@ object View {
 
   type Component  = ReactiveHtmlElement.Base
   type Button     = L.Button
+  type CheckBox   = L.Input
 }
 trait View[T <: Txn[T]] extends Disposable[T] {
   type C <: View.Component

@@ -13,16 +13,12 @@
 
 package de.sciss.lucre.swing.graph
 
-import java.awt.BorderLayout
-
 import de.sciss.lucre.expr.graph.{Const, Ex}
 import de.sciss.lucre.expr.{Context, IControl}
 import de.sciss.lucre.swing.Graph
 import de.sciss.lucre.swing.View
-import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.graph.impl.BorderPanelExpandedImpl
 import de.sciss.lucre.swing.graph.impl.PanelImpl
-import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.{IExpr, Txn}
 
 object BorderPanel {
