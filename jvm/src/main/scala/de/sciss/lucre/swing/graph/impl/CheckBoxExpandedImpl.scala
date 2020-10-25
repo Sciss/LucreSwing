@@ -58,6 +58,6 @@ final class CheckBoxExpandedImpl[T <: Txn[T]](protected val peer: CheckBox, tx0:
 
   override def dispose()(implicit tx: T): Unit = {
     super.dispose()
-    _selected.dispose()
+    selected.dispose()
   }
 }

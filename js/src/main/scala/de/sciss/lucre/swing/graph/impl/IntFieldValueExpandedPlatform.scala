@@ -1,5 +1,5 @@
 /*
- *  SliderValueExpandedPlatform.scala
+ *  IntFieldValueExpandedPlatform.scala
  *  (LucreSwing)
  *
  *  Copyright (c) 2014-2020 Hanns Holger Rutz. All rights reserved.
@@ -18,8 +18,8 @@ package impl
 import com.raquo.laminar.api.L
 import de.sciss.lucre.Txn
 
-trait SliderValueExpandedPlatform[T <: Txn[T]] extends  IntFieldLikeValueExpandedPlatform[T] {
-  protected def view: Slider.Repr[T]
+trait IntFieldValueExpandedPlatform[T <: Txn[T]] extends IntFieldLikeValueExpandedPlatform[T] {
+  protected def view: IntField.Repr[T]
 
-  protected def input: L.Input = view.slider
+  protected def input: L.Input = view.intField
 }

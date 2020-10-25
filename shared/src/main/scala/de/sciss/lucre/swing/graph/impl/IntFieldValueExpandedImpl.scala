@@ -1,5 +1,5 @@
 /*
- *  SliderValueExpandedImpl.scala
+ *  IntFieldValueExpandedImpl.scala
  *  (LucreSwing)
  *
  *  Copyright (c) 2014-2020 Hanns Holger Rutz. All rights reserved.
@@ -22,11 +22,12 @@ import de.sciss.model.Change
 
 import scala.concurrent.stm.Ref
 
-final class SliderValueExpandedImpl[T <: Txn[T]](protected val view: Slider.Repr[T], value0: Int)
-                                                (implicit protected val targets: ITargets[T], cursor: Cursor[T])
+// XXX TODO DRY with SliderValueExpandedImpl
+final class IntFieldValueExpandedImpl[T <: Txn[T]](protected val view: IntField.Repr[T], value0: Int)
+                                              (implicit protected val targets: ITargets[T], cursor: Cursor[T])
   extends IExpr[T, Int]
     with IChangeGeneratorEvent[T, Int]
-    with SliderValueExpandedPlatform[T]
+    with IntFieldValueExpandedPlatform[T]
     with TxnInit[T] {
 
   protected def viewUpdated(): Unit = {
@@ -60,9 +61,9 @@ final class SliderValueExpandedImpl[T <: Txn[T]](protected val view: Slider.Repr
     this
   }
 
-
-  def dispose()(implicit tx: T): Unit =
+  def dispose()(implicit tx: T): scala.Unit = {
     deferTx {
       guiDispose()
     }
+  }
 }

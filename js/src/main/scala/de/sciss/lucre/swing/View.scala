@@ -24,6 +24,7 @@ object View {
   type Button     = L.Button
   type CheckBox   = L.Input
   type Slider     = L.Input
+  type IntField   = L.Input
 }
 trait View[T <: Txn[T]] extends Disposable[T] {
   type C <: View.Component

@@ -18,7 +18,7 @@ import java.util.Locale
 
 import de.sciss.audiowidgets.{ParamFormat, UnitView, ParamField => Peer}
 import de.sciss.lucre.expr.graph.{Const, Ex}
-import de.sciss.lucre.expr.{Context, ExSeq, Graph, Model}
+import de.sciss.lucre.expr.{Context, ExSeq, Graph, IControl, Model}
 import de.sciss.lucre.impl.IChangeGeneratorEvent
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
@@ -333,4 +333,8 @@ object DoubleField {
 }
 trait DoubleField extends NumberField[Double] {
   var decimals: Ex[Int]
+
+  type Repr[T <: Txn[T]] = View.T[T, C] with IControl[T]
+
+  type C = de.sciss.audiowidgets.ParamField[Double]
 }

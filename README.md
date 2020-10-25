@@ -13,18 +13,25 @@ with absolutely no warranties. To contact the author, send an e-mail to `contact
 
 ## requirements / building
 
-This project builds with sbt against Scala 2.13, 2.12.
+This project builds with sbt against Scala 2.13, 2.12 (JVM) and Scala 2.13 (JS).
 The last version to support Scala 2.11 was 1.17.2.
 
 To use the library in your project:
 
     "de.sciss" %% "lucre-swing" % v
 
-The current version `v` is `"2.1.0"`.
+The current version `v` is `"2.2.0"`.
 
 ## contributing
 
 Please see the file [CONTRIBUTING.md](CONTRIBUTING.md)
+
+## notes
+
+The desktop application's widgets in package `de.sciss.lucre.swing` are not available on Scala.js. Instead, the
+graph construction element in `de.sciss.lucre.swing.graph` are (with few unsupported exceptions) available both
+for the JVM and for JS, making it thus possible to render the `Widget` contents both on the desktop and inside
+the browser.
 
 ## todo
 
