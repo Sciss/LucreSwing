@@ -29,3 +29,4 @@ Please see the file [CONTRIBUTING.md](CONTRIBUTING.md)
 ## todo
 
 - collapse multiple undoable edits, especially with things like slider movements which produce many subsequent and related edits
+- Scala.js rendering: styling - have a look at https://css-tricks.com/custom-styling-form-inputs-with-modern-css-features/

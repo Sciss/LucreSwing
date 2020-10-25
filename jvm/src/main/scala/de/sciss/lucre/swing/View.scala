@@ -24,6 +24,7 @@ object View {
   type Component  = scala.swing.Component
   type Button     = scala.swing.Button
   type CheckBox   = scala.swing.CheckBox
+  type Slider     = scala.swing.Slider
 
   trait Cursor[Tx <: Txn[Tx]] extends View[Tx] {
     implicit def cursor: LCursor[Tx]

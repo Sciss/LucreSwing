@@ -16,7 +16,7 @@ package de.sciss.lucre.swing.graph
 import de.sciss.lucre.expr.graph.Ex
 import de.sciss.lucre.expr.{Context, Graph, IControl, Model}
 import de.sciss.lucre.swing.View
-import de.sciss.lucre.swing.graph.impl.{CheckBoxExpandedImpl, CheckBoxSelectedExpandedImpl, ComponentImpl}
+import de.sciss.lucre.swing.graph.impl.{CheckBoxExpandedImpl, ComponentImpl}
 import de.sciss.lucre.{IExpr, Txn}
 
 object CheckBox {

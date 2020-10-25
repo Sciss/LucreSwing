@@ -2,7 +2,7 @@ package de.sciss.lucre.swing
 package graph
 package impl
 
-import de.sciss.lucre.{Disposable, IExpr, Txn}
+import de.sciss.lucre.{IExpr, Txn}
 import de.sciss.lucre.expr.Context
 import de.sciss.lucre.expr.graph.Ex
 import de.sciss.lucre.swing.LucreSwing.deferTx
@@ -11,9 +11,9 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 
 final class CheckBoxExpandedImpl[T <: Txn[T]](protected val peer: CheckBox, tx0: T)(implicit protected val ctx: Context[T])
   extends CheckBox.Repr[T]
-    with ComponentHolder[View.Component] with ComponentExpandedImpl[T] {
+    with ComponentHolder[View.CheckBox] with ComponentExpandedImpl[T] {
 
-  var checkBox: View.CheckBox = _
+  def checkBox: View.CheckBox = component
 
   def selected: IExpr[T, Boolean] = _selected
 
@@ -33,7 +33,6 @@ final class CheckBoxExpandedImpl[T <: Txn[T]](protected val peer: CheckBox, tx0:
     deferTx {
       val c = new scala.swing.CheckBox(text1)
       component = c
-      checkBox  = c
     }
 
     initProperty(keySelected, defaultSelected)(checkBox.selected = _)
