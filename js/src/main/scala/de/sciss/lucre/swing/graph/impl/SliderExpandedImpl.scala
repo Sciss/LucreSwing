@@ -1,15 +1,29 @@
+/*
+ *  SliderExpandedImpl.scala
+ *  (LucreSwing)
+ *
+ *  Copyright (c) 2014-2020 Hanns Holger Rutz. All rights reserved.
+ *
+ *	This software is published under the GNU Affero General Public License v3+
+ *
+ *
+ *	For further information, please contact Hanns Holger Rutz at
+ *	contact@sciss.de
+ */
+
 package de.sciss.lucre.swing
 package graph
 package impl
 
-import de.sciss.lucre.{IExpr, Txn}
-import de.sciss.lucre.expr.Context
-import de.sciss.lucre.swing.LucreSwing.deferTx
-import de.sciss.lucre.swing.graph.Slider.{defaultMax, defaultMin, defaultValue, keyMax, keyMin, keyValue}
-import de.sciss.lucre.swing.impl.ComponentHolder
 import com.raquo.laminar.api.L
 import com.raquo.laminar.api.L._
+import de.sciss.lucre.expr.Context
 import de.sciss.lucre.expr.graph.Ex
+import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.graph.Component.{defaultEnabled, keyEnabled}
+import de.sciss.lucre.swing.graph.Slider.{defaultMax, defaultMin, defaultValue, keyMax, keyMin, keyValue}
+import de.sciss.lucre.swing.impl.ComponentHolder
+import de.sciss.lucre.{IExpr, Txn}
 
 final class SliderExpandedImpl[T <: Txn[T]](protected val peer: Slider, tx0: T)(implicit ctx: Context[T])
   extends Slider.Repr[T]
@@ -37,9 +51,10 @@ final class SliderExpandedImpl[T <: Txn[T]](protected val peer: Slider, tx0: T)(
       component = c
     }
 
-    initProperty(keyMin   , defaultMin  )(v => component.ref.min    = v.toString)
-    initProperty(keyMax   , defaultMax  )(v => component.ref.max    = v.toString)
-    initProperty(keyValue , defaultValue)(v => component.ref.value  = v.toString)
+    initProperty(keyMin     , defaultMin    )(v => component.ref.min      = v.toString)
+    initProperty(keyMax     , defaultMax    )(v => component.ref.max      = v.toString)
+    initProperty(keyValue   , defaultValue  )(v => component.ref.value    = v.toString)
+    initProperty(keyEnabled , defaultEnabled)(v => component.ref.disabled = !v)
 
     super.initComponent()
 

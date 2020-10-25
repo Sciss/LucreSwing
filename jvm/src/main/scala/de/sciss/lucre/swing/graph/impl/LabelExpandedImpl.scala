@@ -1,5 +1,5 @@
 /*
- *  Label.scala
+ *  LabelExpandedImpl.scala
  *  (LucreSwing)
  *
  *  Copyright (c) 2014-2020 Hanns Holger Rutz. All rights reserved.
