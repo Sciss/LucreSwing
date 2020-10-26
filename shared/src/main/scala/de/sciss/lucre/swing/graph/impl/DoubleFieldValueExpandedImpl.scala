@@ -1,5 +1,5 @@
 /*
- *  IntFieldValueExpandedImpl.scala
+ *  DoubleFieldValueExpandedImpl.scala
  *  (LucreSwing)
  *
  *  Copyright (c) 2014-2020 Hanns Holger Rutz. All rights reserved.
@@ -17,7 +17,7 @@ package impl
 
 import de.sciss.lucre.{Cursor, ITargets, Txn}
 
-final class IntFieldValueExpandedImpl[T <: Txn[T]](view: IntField.Repr[T], value0: Int)
-                                              (implicit targets: ITargets[T], cursor: Cursor[T])
-  extends NumberValueExpandedImpl[T, Int, IntField.Repr](view, value0)
-    with IntFieldValueExpandedPlatform[T]
+final class DoubleFieldValueExpandedImpl[T <: Txn[T]](view: DoubleField.Repr[T], value0: Double)
+                                                  (implicit targets: ITargets[T], cursor: Cursor[T])
+  extends NumberValueExpandedImpl[T, Double, DoubleField.Repr](view, value0)
+    with DoubleFieldValueExpandedPlatform[T]

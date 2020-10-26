@@ -1,5 +1,5 @@
 /*
- *  IntFieldExpandedImpl.scala
+ *  DoubleFieldExpandedImpl.scala
  *  (LucreSwing)
  *
  *  Copyright (c) 2014-2020 Hanns Holger Rutz. All rights reserved.
@@ -24,7 +24,7 @@ import de.sciss.lucre.{IExpr, Txn}
 import de.sciss.lucre.expr.Context
 import de.sciss.lucre.expr.graph.Ex
 import de.sciss.lucre.swing.LucreSwing.deferTx
-import de.sciss.lucre.swing.graph.IntField.{defaultEditable, defaultMax, defaultMin, defaultPrototype, defaultStep, defaultUnit, defaultValue, keyEditable, keyMax, keyMin, keyPrototype, keyStep, keyUnit, keyValue}
+import de.sciss.lucre.swing.graph.DoubleField.{defaultDecimals, defaultEditable, defaultMax, defaultMin, defaultPrototype, defaultStep, defaultUnit, defaultValue, keyDecimals, keyEditable, keyMax, keyMin, keyPrototype, keyStep, keyUnit, keyValue}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.numbers
 import javax.swing.text.NumberFormatter
@@ -32,20 +32,20 @@ import javax.swing.text.NumberFormatter
 import scala.collection.immutable.{Seq => ISeq}
 import scala.util.Try
 
-final class IntFieldExpandedImpl[T <: Txn[T]](protected val peer: IntField, tx0: T)(implicit ctx: Context[T])
+final class DoubleFieldExpandedImpl[T <: Txn[T]](protected val peer: DoubleField, tx0: T)(implicit ctx: Context[T])
   extends View[T]
-  with ComponentHolder[View.IntField] with ComponentExpandedImpl[T] with IntField.Repr[T] {
+    with ComponentHolder[View.DoubleField] with ComponentExpandedImpl[T] with DoubleField.Repr[T] {
 
-  def intField: View.IntField = component
+  def doubleField: View.DoubleField = component
 
-  def value: IExpr[T, Int] = _value
+  def value: IExpr[T, Double] = _value
 
   private[this] val _value = {
     implicit val tx: T = tx0
-    val valueOpt  = ctx.getProperty[Ex[Int]](peer, keyValue)
-    val value0    = valueOpt.fold[Int](defaultValue)(_.expand[T].value)
+    val valueOpt  = ctx.getProperty[Ex[Double]](peer, keyValue)
+    val value0    = valueOpt.fold[Double](defaultValue)(_.expand[T].value)
     import ctx.{cursor, targets}
-    new IntFieldValueExpandedImpl[T](this, value0).init()
+    new DoubleFieldValueExpandedImpl[T](this, value0).init()
   }
 
   private def immutable[A](in: Seq[A]): ISeq[A] =
@@ -55,21 +55,24 @@ final class IntFieldExpandedImpl[T <: Txn[T]](protected val peer: IntField, tx0:
     }
 
   override def initComponent()(implicit tx: T, ctx: Context[T]): this.type = {
-    val value0    = ctx.getProperty[Ex[Int    ]](peer, keyValue    ).fold(defaultValue   )(_.expand[T].value)
-    val min       = ctx.getProperty[Ex[Int    ]](peer, keyMin      ).fold(defaultMin     )(_.expand[T].value)
-    val max       = ctx.getProperty[Ex[Int    ]](peer, keyMax      ).fold(defaultMax     )(_.expand[T].value)
-    val step      = ctx.getProperty[Ex[Int    ]](peer, keyStep     ).fold(defaultStep    )(_.expand[T].value)
+    val value0    = ctx.getProperty[Ex[Double ]](peer, keyValue    ).fold(defaultValue   )(_.expand[T].value)
+    val min       = ctx.getProperty[Ex[Double ]](peer, keyMin      ).fold(defaultMin     )(_.expand[T].value)
+    val max       = ctx.getProperty[Ex[Double ]](peer, keyMax      ).fold(defaultMax     )(_.expand[T].value)
+    val step      = ctx.getProperty[Ex[Double ]](peer, keyStep     ).fold(defaultStep    )(_.expand[T].value)
     val unitS     = ctx.getProperty[Ex[String ]](peer, keyUnit     ).fold(defaultUnit    )(_.expand[T].value)
     val editable  = ctx.getProperty[Ex[Boolean]](peer, keyEditable ).fold(defaultEditable)(_.expand[T].value)
+    val decimals  = ctx.getProperty[Ex[Int    ]](peer, keyDecimals ).fold(defaultDecimals)(_.expand[T].value)
 
-    val prototype = ctx.getProperty[Ex[Seq[Int]]](peer, keyPrototype).getOrElse(defaultPrototype(peer)).expand[T].value
+    val prototype = ctx.getProperty[Ex[Seq[Double]]](peer, keyPrototype).getOrElse(defaultPrototype(peer)).expand[T].value
 
     deferTx {
-      val fmt: ParamFormat[Int] = new ParamFormat[Int] {
+      val fmt: ParamFormat[Double] = new ParamFormat[Double] {
         def unit: UnitView = if (unitS.isEmpty) UnitView.empty else UnitView(unitS, unitS)
 
         private[this] val numFmt = NumberFormat.getIntegerInstance(Locale.US)
         numFmt.setGroupingUsed(false)
+        numFmt.setMinimumFractionDigits(decimals)
+        numFmt.setMaximumFractionDigits(decimals)
         val formatter: NumberFormatter = new NumberFormatter(numFmt) {
           // override def valueToString(value: Any   ): String = format  (value.asInstanceOf[Long])
           override def stringToValue(text : String): AnyRef = tryParse(text).asInstanceOf[AnyRef]
@@ -77,35 +80,32 @@ final class IntFieldExpandedImpl[T <: Txn[T]](protected val peer: IntField, tx0:
         formatter.setMinimum(min)
         formatter.setMaximum(max)
 
-        private def tryParse(s: String): Int =
+        private def tryParse(s: String): Double =
           try {
-            s.toInt
+            s.toDouble
           } catch {
             case _: NumberFormatException => throw new ParseException(s, 0)
           }
 
-        def parse(s: String): Option[Int] = Try(tryParse(s)).toOption
+        def parse(s: String): Option[Double] = Try(tryParse(s)).toOption
 
-        def format(value: Int): String = formatter.valueToString(value)
+        def format(value: Double): String = formatter.valueToString(value)
 
-        def adjust(in: Int, inc: Int): Int = {
-          import numbers.LongFunctions.clip
-          val add = inc.toLong * step
-          //            val s: Int = math.signum(inc) * math.signum(step)
-          //            if (s == math.signum(add)) {  // detect overflow
-          clip(in + add, min, max).toInt
-          //            } else if (s < 0) min else max
+        def adjust(in: Double, inc: Int): Double = {
+          import numbers.Implicits._
+          val add = inc * step
+          (in + add).clip(min, max)
         }
       }
 
-      val c = new Peer[Int](value0, fmt :: Nil)
+      val c = new Peer[Double](value0, fmt :: Nil)
       c.prototypeDisplayValues = immutable(prototype)
       if (editable != defaultEditable) c.editable = editable
       component = c
     }
 
     //      initProperty(keyMin   , defaultMin  )(component.min   = _)
-//    initProperty(keyValue , defaultValue)(component.value = _)
+    initProperty(keyValue , defaultValue)(component.value = _)
 
     super.initComponent()
 

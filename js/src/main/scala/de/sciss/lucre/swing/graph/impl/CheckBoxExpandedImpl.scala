@@ -27,7 +27,7 @@ import de.sciss.lucre.{IExpr, Txn}
 
 final class CheckBoxExpandedImpl[T <: Txn[T]](protected val peer: CheckBox, tx0: T)(implicit ctx: Context[T])
   extends CheckBox.Repr[T]
-    with ComponentHolder[L.Label] with ComponentExpandedImpl[T] {
+    with ComponentHolder[L.HtmlElement] with ComponentExpandedImpl[T] {
 
   var checkBox: View.CheckBox = _
 
@@ -44,25 +44,32 @@ final class CheckBoxExpandedImpl[T <: Txn[T]](protected val peer: CheckBox, tx0:
   override def initComponent()(implicit tx: T, ctx: Context[T]): this.type = {
     val text      = peer.text.expand[T]
     val text0     = text.value
-    val text1     = if (text0.isEmpty) null else text0
+    val value0    = ctx.getProperty[Ex[Boolean]](peer, keySelected).fold(defaultSelected)(_.expand[T].value)
 
     deferTx {
       val c = input(
-        cls     := "lucre-checkbox",
-        `type`  := "checkbox",
+        cls             := "lucre-checkbox",
+        `type`          := "checkbox",
+        defaultChecked  := value0,
       )
 
-      val lb = label(
-        text1,
-        cls := "lucre-checkbox",
-        c
-      )
+//      val lb = label(
+//        text1,
+//        cls := "lucre-checkbox",
+//        c
+//      )
 
-      component = lb
+      val el = if (text0.isEmpty) c else
+        span(
+          c,
+          text0,
+          cls := "lucre-checkbox",
+        )
+
+      component = el
       checkBox  = c
     }
 
-    initProperty(keySelected, defaultSelected)(v => checkBox.ref.checked  = v)
     initProperty(keyEnabled , defaultEnabled )(v => checkBox.ref.disabled = !v)
 
     super.initComponent()

@@ -18,7 +18,7 @@ package impl
 import com.raquo.laminar.api.L
 import de.sciss.lucre.Txn
 
-trait SliderValueExpandedPlatform[T <: Txn[T]] extends  IntFieldLikeValueExpandedPlatform[T] {
+trait SliderValueExpandedPlatform[T <: Txn[T]] extends IntFieldLikeValueExpandedPlatform[T] {
   protected def view: Slider.Repr[T]
 
   protected def input: L.Input = view.slider

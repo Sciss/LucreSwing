@@ -21,11 +21,12 @@ import de.sciss.lucre.{Disposable, Txn, Cursor => LCursor}
 object View {
   type T[Tx <: Txn[Tx], C1 <: Component] = View[Tx] { type C = C1 }
 
-  type Component  = scala.swing.Component
-  type Button     = scala.swing.Button
-  type CheckBox   = scala.swing.CheckBox
-  type Slider     = scala.swing.Slider
-  type IntField   = de.sciss.audiowidgets.ParamField[Int]
+  type Component    = scala.swing.Component
+  type Button       = scala.swing.Button
+  type CheckBox     = scala.swing.CheckBox
+  type Slider       = scala.swing.Slider
+  type IntField     = de.sciss.audiowidgets.ParamField[Int]
+  type DoubleField  = de.sciss.audiowidgets.ParamField[Double]
 
   trait Cursor[Tx <: Txn[Tx]] extends View[Tx] {
     implicit def cursor: LCursor[Tx]
