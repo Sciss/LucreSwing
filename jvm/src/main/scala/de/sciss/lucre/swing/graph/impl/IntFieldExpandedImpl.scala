@@ -45,7 +45,7 @@ final class IntFieldExpandedImpl[T <: Txn[T]](protected val peer: IntField, tx0:
     val valueOpt  = ctx.getProperty[Ex[Int]](peer, keyValue)
     val value0    = valueOpt.fold[Int](defaultValue)(_.expand[T].value)
     import ctx.{cursor, targets}
-    new IntFieldValueExpandedImpl[T](this, value0).init()
+    new IntFieldValueExpandedImpl[T](this, value0)
   }
 
   private def immutable[A](in: Seq[A]): ISeq[A] =
@@ -60,7 +60,7 @@ final class IntFieldExpandedImpl[T <: Txn[T]](protected val peer: IntField, tx0:
     val max       = ctx.getProperty[Ex[Int    ]](peer, keyMax      ).fold(defaultMax     )(_.expand[T].value)
     val step      = ctx.getProperty[Ex[Int    ]](peer, keyStep     ).fold(defaultStep    )(_.expand[T].value)
     val unitS     = ctx.getProperty[Ex[String ]](peer, keyUnit     ).fold(defaultUnit    )(_.expand[T].value)
-    val editable  = ctx.getProperty[Ex[Boolean]](peer, keyEditable ).fold(defaultEditable)(_.expand[T].value)
+//    val editable  = ctx.getProperty[Ex[Boolean]](peer, keyEditable ).fold(defaultEditable)(_.expand[T].value)
 
     val prototype = ctx.getProperty[Ex[Seq[Int]]](peer, keyPrototype).getOrElse(defaultPrototype(peer)).expand[T].value
 
@@ -100,12 +100,13 @@ final class IntFieldExpandedImpl[T <: Txn[T]](protected val peer: IntField, tx0:
 
       val c = new Peer[Int](value0, fmt :: Nil)
       c.prototypeDisplayValues = immutable(prototype)
-      if (editable != defaultEditable) c.editable = editable
+//      if (editable != defaultEditable) c.editable = editable
       component = c
     }
 
     //      initProperty(keyMin   , defaultMin  )(component.min   = _)
-//    initProperty(keyValue , defaultValue)(component.value = _)
+    initProperty(keyValue   , defaultValue    )(component.value     = _)
+    initProperty(keyEditable, defaultEditable )(component.editable  = _)
 
     super.initComponent()
 

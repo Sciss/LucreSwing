@@ -68,6 +68,8 @@ final class IntFieldExpandedImpl[T <: Txn[T]](peer: IntField, tx0: T)(implicit c
       intField  = c
     }
 
+    initProperty(keyValue   , defaultValue    )(v => input.ref.valueAsNumber   = v)
+    initProperty(keyEditable, defaultEditable )(v => input.ref.contentEditable = v.toString)
     super.initComponent()
   }
 

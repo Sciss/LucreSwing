@@ -25,6 +25,7 @@ object View {
   type Slider       = L.Input
   type IntField     = L.Input
   type DoubleField  = L.Input
+  type ComboBox[A]  = L.Select
 }
 trait View[T <: Txn[T]] extends Disposable[T] {
   type C <: View.Component

@@ -45,7 +45,7 @@ final class DoubleFieldExpandedImpl[T <: Txn[T]](protected val peer: DoubleField
     val valueOpt  = ctx.getProperty[Ex[Double]](peer, keyValue)
     val value0    = valueOpt.fold[Double](defaultValue)(_.expand[T].value)
     import ctx.{cursor, targets}
-    new DoubleFieldValueExpandedImpl[T](this, value0).init()
+    new DoubleFieldValueExpandedImpl[T](this, value0)
   }
 
   private def immutable[A](in: Seq[A]): ISeq[A] =
@@ -60,7 +60,7 @@ final class DoubleFieldExpandedImpl[T <: Txn[T]](protected val peer: DoubleField
     val max       = ctx.getProperty[Ex[Double ]](peer, keyMax      ).fold(defaultMax     )(_.expand[T].value)
     val step      = ctx.getProperty[Ex[Double ]](peer, keyStep     ).fold(defaultStep    )(_.expand[T].value)
     val unitS     = ctx.getProperty[Ex[String ]](peer, keyUnit     ).fold(defaultUnit    )(_.expand[T].value)
-    val editable  = ctx.getProperty[Ex[Boolean]](peer, keyEditable ).fold(defaultEditable)(_.expand[T].value)
+//    val editable  = ctx.getProperty[Ex[Boolean]](peer, keyEditable ).fold(defaultEditable)(_.expand[T].value)
     val decimals  = ctx.getProperty[Ex[Int    ]](peer, keyDecimals ).fold(defaultDecimals)(_.expand[T].value)
 
     val prototype = ctx.getProperty[Ex[Seq[Double]]](peer, keyPrototype).getOrElse(defaultPrototype(peer)).expand[T].value
@@ -100,12 +100,13 @@ final class DoubleFieldExpandedImpl[T <: Txn[T]](protected val peer: DoubleField
 
       val c = new Peer[Double](value0, fmt :: Nil)
       c.prototypeDisplayValues = immutable(prototype)
-      if (editable != defaultEditable) c.editable = editable
+//      if (editable != defaultEditable) c.editable = editable
       component = c
     }
 
-    //      initProperty(keyMin   , defaultMin  )(component.min   = _)
-    initProperty(keyValue , defaultValue)(component.value = _)
+//    initProperty(keyMin   , defaultMin  )(component.min   = _)
+    initProperty(keyValue   , defaultValue    )(component.value     = _)
+    initProperty(keyEditable, defaultEditable )(component.editable  = _)
 
     super.initComponent()
 

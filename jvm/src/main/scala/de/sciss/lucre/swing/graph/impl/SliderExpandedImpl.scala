@@ -51,6 +51,7 @@ final class SliderExpandedImpl[T <: Txn[T]](protected val peer: Slider, tx0: T)(
       component = c
     }
 
+    initProperty(keyValue   , defaultValue    )(component.value     = _)
     super.initComponent()
 
     _value.init()

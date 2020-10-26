@@ -25,7 +25,7 @@ abstract class ComponentPropertyExpandedImpl[T <: Txn[T], A](value0: A)
                                                             (implicit protected val targets: ITargets[T],
                                                              cursor: Cursor[T])
   extends IExpr[T, A]
-    with IChangeGeneratorEvent[T, A] {
+    with IChangeGeneratorEvent[T, A] with TxnInit[T] {
 
   // ---- abstract ----
 

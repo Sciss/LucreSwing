@@ -11,35 +11,35 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre.swing.graph.impl
+package de.sciss.lucre.swing
+package graph
+package impl
 
+import com.raquo.laminar.api.L._
 import de.sciss.lucre.{Cursor, ITargets, Txn}
-import de.sciss.swingplus.{ComboBox => Peer}
+import org.scalajs.dom
 
-import scala.swing.event.SelectionChanged
-
-final class ComboBoxValueExpandedImpl[T <: Txn[T], A](peer: => Peer[A], value0: (Int, Option[A]))
+final class ComboBoxValueExpandedImpl[T <: Txn[T], A](peer: => View.ComboBox[A], items: Seq[A],
+                                                      value0: (Int, Option[A]))
                                                      (implicit targets: ITargets[T], cursor: Cursor[T])
   extends ComponentPropertyExpandedImpl[T, (Int, Option[A])](value0) {
 
   protected def valueOnEDT: (Int, Option[A]) = {
-    val s = peer.selection
-    (s.index, Option(s.item)) // .getOrElse(value0)
+    val s       = peer.ref
+    val idx     = s.selectedIndex
+    val valOpt  = if (idx < 0 || idx > items.size) None else Some(items(idx))
+    (idx, valOpt)
   }
 
   protected def startListening(): Unit = {
     val c = peer
-    c.listenTo(c.selection)
-    c.reactions += {
-      case SelectionChanged(_) => commit()
+    val obs = Observer[dom.Event] { _ =>
+      commit()
     }
+    c.amend(
+      onChange --> obs
+    )
   }
 
-  protected def stopListening(): Unit = {
-    val c = peer
-    // N.B.: this will stop delivering events to _any_ listener,
-    // however `dispose()` will be called for the entire graph,
-    // so that is not a problem
-    c.deafTo(c.selection)
-  }
+  protected def stopListening(): Unit = ()
 }

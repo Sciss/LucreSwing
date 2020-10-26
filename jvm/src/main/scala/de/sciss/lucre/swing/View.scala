@@ -27,6 +27,8 @@ object View {
   type Slider       = scala.swing.Slider
   type IntField     = de.sciss.audiowidgets.ParamField[Int]
   type DoubleField  = de.sciss.audiowidgets.ParamField[Double]
+  type ComboBox[A]  = de.sciss.swingplus.ComboBox[A]
+
 
   trait Cursor[Tx <: Txn[Tx]] extends View[Tx] {
     implicit def cursor: LCursor[Tx]

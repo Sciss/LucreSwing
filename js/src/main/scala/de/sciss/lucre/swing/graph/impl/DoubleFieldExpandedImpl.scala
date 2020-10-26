@@ -20,7 +20,7 @@ import com.raquo.laminar.api.L._
 import de.sciss.lucre.expr.Context
 import de.sciss.lucre.expr.graph.Ex
 import de.sciss.lucre.swing.LucreSwing.deferTx
-import de.sciss.lucre.swing.graph.DoubleField.{defaultEditable, defaultMax, defaultMin, defaultStep, defaultUnit, keyEditable, keyMax, keyMin, keyStep, keyUnit}
+import de.sciss.lucre.swing.graph.DoubleField.{defaultEditable, defaultMax, defaultMin, defaultUnit, keyEditable, keyMax, keyMin, keyUnit}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.{Cursor, IExpr, ITargets, Txn}
 
@@ -69,6 +69,8 @@ final class DoubleFieldExpandedImpl[T <: Txn[T]](peer: DoubleField, tx0: T)(impl
       doubleField = c
     }
 
+    initProperty(keyValue   , defaultValue    )(v => input.ref.valueAsNumber   = v)
+    initProperty(keyEditable, defaultEditable )(v => input.ref.contentEditable = v.toString)
     super.initComponent()
   }
 

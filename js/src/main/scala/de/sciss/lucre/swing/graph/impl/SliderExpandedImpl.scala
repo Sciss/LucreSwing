@@ -55,6 +55,7 @@ final class SliderExpandedImpl[T <: Txn[T]](peer: Slider, tx0: T)(implicit ctx: 
       component = c
     }
 
+    initProperty(keyValue   , defaultValue    )(v => input.ref.valueAsNumber   = v)
     super.initComponent()
     this
   }

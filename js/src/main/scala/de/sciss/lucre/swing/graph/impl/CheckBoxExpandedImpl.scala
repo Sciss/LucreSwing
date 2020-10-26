@@ -48,7 +48,7 @@ final class CheckBoxExpandedImpl[T <: Txn[T]](protected val peer: CheckBox, tx0:
 
     deferTx {
       val c = input(
-        cls             := "lucre-checkbox",
+        cls             := "lucre-check-box",
         `type`          := "checkbox",
         defaultChecked  := value0,
       )
@@ -63,13 +63,14 @@ final class CheckBoxExpandedImpl[T <: Txn[T]](protected val peer: CheckBox, tx0:
         span(
           c,
           text0,
-          cls := "lucre-checkbox",
+          cls := "lucre-check-box",
         )
 
       component = el
       checkBox  = c
     }
 
+    initProperty(keySelected, defaultSelected)(v => checkBox.ref.checked  = v)
     initProperty(keyEnabled , defaultEnabled )(v => checkBox.ref.disabled = !v)
 
     super.initComponent()
