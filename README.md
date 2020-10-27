@@ -1,7 +1,7 @@
 # LucreSwing
 
 [![Build Status](https://travis-ci.org/Sciss/LucreSwing.svg?branch=main)](https://travis-ci.org/Sciss/LucreSwing)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.sciss/lucreswing_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.sciss/lucreswing_2.13)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.sciss/lucre-swing_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.sciss/lucre-swing_2.13)
 
 ## statement
 
