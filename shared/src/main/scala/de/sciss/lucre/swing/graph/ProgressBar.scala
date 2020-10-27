@@ -13,47 +13,26 @@
 
 package de.sciss.lucre.swing.graph
 
-import de.sciss.lucre.{IExpr, Txn}
 import de.sciss.lucre.expr.graph.{Const, Ex}
 import de.sciss.lucre.expr.{Context, Graph, IControl}
-import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.graph.impl.ComponentImpl
+import de.sciss.lucre.swing.graph.impl.ProgressBarExpandedImpl
 import de.sciss.lucre.swing.View
-import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl}
-import de.sciss.lucre.swing.impl.ComponentHolder
+import de.sciss.lucre.{IExpr, Txn}
 
 object ProgressBar {
   def apply(): ProgressBar = Impl()
 
-  private final class Expanded[T <: Txn[T]](protected val peer: ProgressBar) extends View[T]
-    with ComponentHolder[scala.swing.ProgressBar] with ComponentExpandedImpl[T] {
+  private[graph] final val keyValue            = "value"
+  private[graph] final val keyMin              = "min"
+  private[graph] final val keyMax              = "max"
+  private[graph] final val keyLabel            = "label"
+  private[graph] final val keyLabelPainted     = "labelPainted"
 
-    type C = scala.swing.ProgressBar
-
-    override def initComponent()(implicit tx: T, ctx: Context[T]): this.type = {
-      deferTx {
-        val c = new scala.swing.ProgressBar
-        component = c
-      }
-      initProperty(keyMin         , defaultMin          )(component.min           = _)
-      initProperty(keyMax         , defaultMax          )(component.max           = _)
-      initProperty(keyValue       , defaultMin          )(component.value         = _)
-      initProperty(keyLabel       , defaultLabel        )(component.label         = _)
-      initProperty(keyLabelPainted, defaultLabelPainted )(component.labelPainted  = _)
-
-      super.initComponent()
-    }
-  }
-
-  private final val keyValue            = "value"
-  private final val keyMin              = "min"
-  private final val keyMax              = "max"
-  private final val keyLabel            = "label"
-  private final val keyLabelPainted     = "labelPainted"
-
-  private final val defaultMin          =   0
-  private final val defaultMax          = 100
-  private final val defaultLabel        = ""
-  private final val defaultLabelPainted = false
+  private[graph] final val defaultMin          =   0
+  private[graph] final val defaultMax          = 100
+  private[graph] final val defaultLabel        = ""
+  private[graph] final val defaultLabelPainted = false
 
   final case class Value(w: ProgressBar) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
@@ -114,7 +93,7 @@ object ProgressBar {
     override def productPrefix = "ProgressBar"   // serialization
 
     protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] =
-      new Expanded[T](this).initComponent()
+      new ProgressBarExpandedImpl[T](this).initComponent()
 
     def min: Ex[Int] = Min(this)
 
@@ -153,7 +132,7 @@ object ProgressBar {
   }
 }
 trait ProgressBar extends Component {
-  type C = scala.swing.ProgressBar
+  type C = View.Component // scala.swing.ProgressBar
 
   type Repr[T <: Txn[T]] = View.T[T, C] with IControl[T]
 

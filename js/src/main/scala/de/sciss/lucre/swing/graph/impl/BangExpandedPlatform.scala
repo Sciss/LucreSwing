@@ -41,8 +41,6 @@ trait BangExpandedPlatform[T <: Txn[T]]
 
   private[this] var timerHandle: timers.SetTimeoutHandle = null
   private[this] var active: L.Var[Boolean] = _
-//  private[this] var active = false
-//  private[this] var bangCircle: L.SvgElement = null
 
   protected def activate()(implicit tx: T): Unit = {
     deferTx {
@@ -57,19 +55,6 @@ trait BangExpandedPlatform[T <: Txn[T]]
   private def setActive(value: Boolean): Unit =
     active.set(value)
 
-//  private def setActive(value: Boolean): Unit = {
-//    if (active != value) {
-//      active = value
-//      bangCircle.amend(
-//        if (value) {
-//          svg.className.apply ("lucre-bang-flash")
-//        } else {
-//          svg.className.remove("lucre-bang-flash")
-//        }
-//      )
-//    }
-//  }
-
   protected def guiDispose(): Unit =
     if (timerHandle != null) {
       timers.clearTimeout(timerHandle)
@@ -80,8 +65,8 @@ trait BangExpandedPlatform[T <: Txn[T]]
     deferTx {
       active = L.Var(false)
       val circ = svg.circle(
-        svg.className.toggle("lucre-bang-flash") <-- active.signal,
         svg.className := "lucre-bang",
+        svg.className.toggle("lucre-bang-flash") <-- active.signal,
       )
 
       val obs = Observer[dom.MouseEvent] { _ =>
@@ -100,7 +85,6 @@ trait BangExpandedPlatform[T <: Txn[T]]
       )
 
       component   = c
-//      bangCircle  = circ
     }
     super.initComponent()
   }
