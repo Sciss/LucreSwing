@@ -33,6 +33,9 @@ graph construction element in `de.sciss.lucre.swing.graph` are (with few unsuppo
 for the JVM and for JS, making it thus possible to render the `Widget` contents both on the desktop and inside
 the browser.
 
+We have yet to determine how to "export" a widget to Scala.js. For an example and minimum CSS, see
+[SoundProcessesJSTest](https://github.com/Sciss/SoundProcessesJSTest/blob/main/lucre-swing.css).
+
 ## todo
 
 - collapse multiple undoable edits, especially with things like slider movements which produce many subsequent and related edits

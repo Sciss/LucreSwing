@@ -1,0 +1,38 @@
+/*
+ *  SeparatorExpandedImpl.scala
+ *  (LucreSwing)
+ *
+ *  Copyright (c) 2014-2020 Hanns Holger Rutz. All rights reserved.
+ *
+ *	This software is published under the GNU Affero General Public License v3+
+ *
+ *
+ *	For further information, please contact Hanns Holger Rutz at
+ *	contact@sciss.de
+ */
+
+package de.sciss.lucre.swing
+package graph
+package impl
+
+import de.sciss.lucre.Txn
+import de.sciss.lucre.expr.IControl
+import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.impl.ComponentHolder
+
+final class SeparatorExpandedImpl[T <: Txn[T]] extends View[T] with IControl[T]
+  with ComponentHolder[scala.swing.Separator] {
+
+  type C = View.Component // scala.swing.Separator
+
+  def initControl()(implicit tx: T): Unit = ()
+
+  def initComponent()(implicit tx: T): this.type = {
+    deferTx {
+      component = new scala.swing.Separator
+    }
+    this
+  }
+
+  def dispose()(implicit tx: T): Unit = ()
+}

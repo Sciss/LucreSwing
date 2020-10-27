@@ -38,23 +38,27 @@ final class BorderPanelExpandedImpl[T <: Txn[T]](protected val peer: BorderPanel
     val center: View[T] = if (peer.center.isInstanceOf[Empty]) null else peer.center .expand[T]
     deferTx {
       val p = div(
-        cls := "lucre-border-panel"
+        cls := "lucre-border-panel",
+        styleAttr :=
+          s"""grid-column-gap: ${hGap}px;
+             |grid-row-gap: ${vGap}px;
+             |""".stripMargin,
       )
 
       def mkField(orient: String, child: View[T]): Unit =
         if (child != null) {
           val cc = div(
             child.component,
-            cls := s"lucre-border-panel-$orient",
+            cls := s"lucre-border-panel-child lucre-border-panel-$orient",
           )
-          if (hGap == 0 && vGap == 0) cc else {
-            cc.amend(
-              marginLeft    := s"${hGap}px",
-              marginLeft    := s"${hGap}px",
-              marginTop     := s"${vGap}px",
-              marginBottom  := s"${vGap}px",
-            )
-          }
+//          if (hGap != 0 || vGap != 0) {
+//            cc.amend(
+//              marginLeft    := s"${hGap}px",
+//              marginRight   := s"${hGap}px",
+//              marginTop     := s"${vGap}px",
+//              marginBottom  := s"${vGap}px",
+//            )
+//          }
           p.amend(cc)
         }
 

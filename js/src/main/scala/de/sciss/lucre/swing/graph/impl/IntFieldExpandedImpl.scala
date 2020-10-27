@@ -60,8 +60,11 @@ final class IntFieldExpandedImpl[T <: Txn[T]](peer: IntField, tx0: T)(implicit c
       val el = if (unitS.isEmpty) c else
         span(
           c,
-          unitS,
           cls := "lucre-int-field",
+          span(
+            cls := "lucre-unit",
+            unitS,
+          ),
         )
 
       component = el

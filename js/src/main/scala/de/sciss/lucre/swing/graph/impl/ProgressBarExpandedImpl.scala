@@ -15,7 +15,6 @@ package de.sciss.lucre.swing
 package graph
 package impl
 
-import com.raquo.laminar.api.L
 import com.raquo.laminar.api.L._
 import com.raquo.laminar.nodes.ReactiveHtmlElement
 import de.sciss.lucre.Txn

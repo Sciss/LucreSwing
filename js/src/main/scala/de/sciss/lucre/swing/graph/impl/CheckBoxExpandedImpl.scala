@@ -62,8 +62,11 @@ final class CheckBoxExpandedImpl[T <: Txn[T]](protected val peer: CheckBox, tx0:
       val el = if (text0.isEmpty) c else
         span(
           c,
-          text0,
           cls := "lucre-check-box",
+          span(
+            cls := "lucre-unit",
+            text0,
+          ),
         )
 
       component = el

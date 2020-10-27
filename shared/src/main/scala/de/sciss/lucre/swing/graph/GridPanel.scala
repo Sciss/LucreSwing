@@ -15,60 +15,29 @@ package de.sciss.lucre.swing.graph
 
 import de.sciss.lucre.expr.graph.{Const, Ex}
 import de.sciss.lucre.expr.{Context, Graph, IControl}
-import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
-import de.sciss.lucre.swing.graph.impl.{PanelExpandedImpl, PanelImpl}
-import de.sciss.lucre.swing.impl.ComponentHolder
+import de.sciss.lucre.swing.graph.impl.GridPanelExpandedImpl
+import de.sciss.lucre.swing.graph.impl.PanelImpl
 import de.sciss.lucre.{IExpr, Txn}
-import de.sciss.swingplus.{GridPanel => Peer}
 
 object GridPanel {
   def apply(contents: Widget*): GridPanel = Impl(contents)
 
-  private final val keyRows               = "rows"
-  private final val keyColumns            = "columns"
-  private final val keyCompact            = "compact"
-  private final val keyCompactRows        = "compactRows"
-  private final val keyCompactColumns     = "compactColumns"
-  private final val keyHGap               = "hGap"
-  private final val keyVGap               = "vGap"
+  private[graph] final val keyRows               = "rows"
+  private[graph] final val keyColumns            = "columns"
+  private[graph] final val keyCompact            = "compact"
+  private[graph] final val keyCompactRows        = "compactRows"
+  private[graph] final val keyCompactColumns     = "compactColumns"
+  private[graph] final val keyHGap               = "hGap"
+  private[graph] final val keyVGap               = "vGap"
 
-  private final val defaultRows           = 0 // 1
-  private final val defaultColumns        = 0
-  private final val defaultCompact        = false
-  private final val defaultCompactRows    = false
-  private final val defaultCompactColumns = false
-  private final val defaultHGap           = 4
-  private final val defaultVGap           = 2
-
-  private final class Expanded[T <: Txn[T]](protected val peer: GridPanel) extends View[T]
-    with ComponentHolder[Peer] with PanelExpandedImpl[T] {
-
-    type C = Peer
-
-    override def initComponent()(implicit tx: T, ctx: Context[T]): this.type = {
-      val rows0           = ctx.getProperty[Ex[Int    ]](peer, keyRows    ).fold(defaultRows    )(_.expand[T].value)
-      val columns         = ctx.getProperty[Ex[Int    ]](peer, keyColumns ).fold(defaultColumns )(_.expand[T].value)
-      val compact         = ctx.getProperty[Ex[Boolean]](peer, keyCompact ).exists(_.expand[T].value)
-      val hGap            = ctx.getProperty[Ex[Int    ]](peer, keyHGap    ).fold(defaultHGap    )(_.expand[T].value)
-      val vGap            = ctx.getProperty[Ex[Int    ]](peer, keyVGap    ).fold(defaultVGap    )(_.expand[T].value)
-      val compactRows     = compact || ctx.getProperty[Ex[Boolean]](peer, keyCompactRows   ).exists(_.expand[T].value)
-      val compactColumns  = compact || ctx.getProperty[Ex[Boolean]](peer, keyCompactColumns).exists(_.expand[T].value)
-      val rows            = if (rows0 == 0 && columns == 0) 1 else 0  // not allowed to have both zero
-      val contents        = peer.contents.map(_.expand[T])
-      deferTx {
-        val vec           = contents.map(_.component)
-        val p             = new Peer(rows0 = rows, cols0 = columns)
-        p.compactRows     = compactRows
-        p.compactColumns  = compactColumns
-        p.hGap            = hGap
-        p.vGap            = vGap
-        p.contents      ++= vec
-        component         = p
-      }
-      super.initComponent()
-    }
-  }
+  private[graph] final val defaultRows           = 0 // 1
+  private[graph] final val defaultColumns        = 0
+  private[graph] final val defaultCompact        = false
+  private[graph] final val defaultCompactRows    = false
+  private[graph] final val defaultCompactColumns = false
+  private[graph] final val defaultHGap           = 4
+  private[graph] final val defaultVGap           = 2
 
   final case class Rows(w: GridPanel) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
@@ -151,7 +120,7 @@ object GridPanel {
     override def productPrefix = "GridPanel" // s"GridPanel$$Impl" // serialization
 
     protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] =
-      new Expanded[T](this).initComponent()
+      new GridPanelExpandedImpl[T](this).initComponent()
 
     def rows: Ex[Int] = Rows(this)
 
@@ -208,7 +177,7 @@ object GridPanel {
   * Note that components run from left to right, top to bottom.
   */
 trait GridPanel extends Panel {
-  type C = Peer
+  type C = View.Component // Peer
 
   type Repr[T <: Txn[T]] = View.T[T, C] with IControl[T]
 

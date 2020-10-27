@@ -61,8 +61,11 @@ final class DoubleFieldExpandedImpl[T <: Txn[T]](peer: DoubleField, tx0: T)(impl
       val el = if (unitS.isEmpty) c else
         span(
           c,
-          unitS,
           cls := "lucre-double-field",
+          span(
+            cls := "lucre-unit",
+            unitS,
+          ),
         )
 
       component   = el
