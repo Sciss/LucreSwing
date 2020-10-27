@@ -41,6 +41,12 @@ The following graph elements are currently not supported in Scala.js:
 - `DropTarget`
 - `PathField` (we have not yet settled on a notion of "file" in the browser)
 
+## publishing releases
+
+There is a [bug in sbt-crossproject](https://github.com/portable-scala/sbt-crossproject/issues/130), 
+when running `sbt +publishSigned` we end up with error "Repository for publishing is not specified." 
+Instead, sbt has to be run with `sbt +rootJVM/publishSigned +rootJS/publishSigned`.
+
 ## todo
 
 - collapse multiple undoable edits, especially with things like slider movements which produce many subsequent and related edits

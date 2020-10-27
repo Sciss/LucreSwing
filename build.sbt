@@ -2,7 +2,7 @@ lazy val baseName   = "Lucre-Swing"
 lazy val baseNameL  = baseName.toLowerCase
 lazy val gitProject = "LucreSwing"
 
-lazy val projectVersion = "2.2.0-SNAPSHOT"
+lazy val projectVersion = "2.2.0"
 lazy val mimaVersion    = "2.2.0"
 
 // ---- dependencies ----
