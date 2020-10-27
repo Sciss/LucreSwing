@@ -36,6 +36,11 @@ the browser.
 We have yet to determine how to "export" a widget to Scala.js. For an example and minimum CSS, see
 [SoundProcessesJSTest](https://github.com/Sciss/SoundProcessesJSTest/blob/main/lucre-swing.css).
 
+The following graph elements are currently not supported in Scala.js:
+
+- `DropTarget`
+- `PathField` (we have not yet settled on a notion of "file" in the browser)
+
 ## todo
 
 - collapse multiple undoable edits, especially with things like slider movements which produce many subsequent and related edits

@@ -66,7 +66,7 @@ final class ProgressBarExpandedImpl[T <: Txn[T]](protected val peer: ProgressBar
     }
     initProperty(keyValue, defaultMin) { v =>
       curVal = v
-      println("curVal = " + v)
+//      println("curVal = " + v)
       component.ref.value = (curVal - minVal).toDouble
 //      component.amend(
 //        L.value := (curVal - minVal).toString,

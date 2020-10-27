@@ -28,7 +28,7 @@ object View {
   type IntField     = de.sciss.audiowidgets.ParamField[Int]
   type DoubleField  = de.sciss.audiowidgets.ParamField[Double]
   type ComboBox[A]  = de.sciss.swingplus.ComboBox[A]
-
+  type TextField    = scala.swing.TextField
 
   trait Cursor[Tx <: Txn[Tx]] extends View[Tx] {
     implicit def cursor: LCursor[Tx]
