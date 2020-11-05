@@ -2,8 +2,8 @@ lazy val baseName   = "Lucre-Swing"
 lazy val baseNameL  = baseName.toLowerCase
 lazy val gitProject = "LucreSwing"
 
-lazy val projectVersion = "2.2.0"
-lazy val mimaVersion    = "2.2.0"
+lazy val projectVersion = "2.3.0-SNAPSHOT"
+lazy val mimaVersion    = "2.3.0"
 
 // ---- dependencies ----
 
@@ -11,7 +11,7 @@ lazy val deps = new {
   val main = new {
     val desktop   = "0.10.7"
     val laminar   = "0.11.0"
-    val lucre     = "4.1.0"
+    val lucre     = "4.2.0-SNAPSHOT"
     val model     = "0.3.5"
     val swingPlus = "0.4.2"
     val treeTable = "1.5.1"

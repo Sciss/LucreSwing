@@ -14,16 +14,15 @@
 package de.sciss.lucre.swing.graph.impl
 
 import de.sciss.desktop.{PathField => Peer}
-import de.sciss.file.File
-import de.sciss.lucre.{Cursor, ITargets, Txn}
+import de.sciss.lucre.{Artifact, Cursor, ITargets, Txn}
 
 import scala.swing.event.ValueChanged
 
-final class PathFieldValueExpandedImpl[T <: Txn[T]](peer: => Peer, value0: File)
+final class PathFieldValueExpandedImpl[T <: Txn[T]](peer: => Peer, value0: Artifact.Value)
                                                    (implicit targets: ITargets[T], cursor: Cursor[T])
-  extends ComponentPropertyExpandedImpl[T, File](value0) {
+  extends ComponentPropertyExpandedImpl[T, Artifact.Value](value0) {
 
-  protected def valueOnEDT: File = peer.value
+  protected def valueOnEDT: Artifact.Value = peer.value.toURI
 
   protected def startListening(): Unit = {
     val c = peer

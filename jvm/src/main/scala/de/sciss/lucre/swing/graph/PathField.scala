@@ -21,7 +21,7 @@ import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl, PathFieldValueExpandedImpl}
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.{IExpr, Txn}
+import de.sciss.lucre.{Artifact, IExpr, Txn}
 
 object PathField {
   def apply(): PathField = Impl()
@@ -39,18 +39,18 @@ object PathField {
   private[graph] final val keyValue        = "value"
   private[graph] final val keyTitle        = "title"
   private[graph] final val keyMode         = "mode"
-  private[graph] final val defaultValue    = new File("")
+  private[graph] final val defaultValue    = Artifact.Value.empty // new File("")
   private[graph] final val defaultMode     = 0
 
-  final case class Value(w: PathField) extends Ex[File] {
-    type Repr[T <: Txn[T]] = IExpr[T, File]
+  final case class Value(w: PathField) extends Ex[Artifact.Value] {
+    type Repr[T <: Txn[T]] = IExpr[T, Artifact.Value]
 
     override def productPrefix: String = s"PathField$$Value" // serialization
 
     protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] = {
       val ws        = w.expand[T]
-      val valueOpt  = ctx.getProperty[Ex[File]](w, keyValue)
-      val value0    = valueOpt.fold[File](defaultValue)(_.expand[T].value)
+      val valueOpt  = ctx.getProperty[Ex[Artifact.Value]](w, keyValue)
+      val value0    = valueOpt.fold[Artifact.Value](defaultValue)(_.expand[T].value)
       import ctx.{cursor, targets}
       new PathFieldValueExpandedImpl[T](ws.component, value0).init()  // IntelliJ highlight bug
     }
@@ -94,9 +94,9 @@ object PathField {
     type C = Peer
 
     override def initComponent()(implicit tx: T, ctx: Context[T]): this.type = {
-      val valueOpt  = ctx.getProperty[Ex[File   ]](peer, keyValue).map(_.expand[T].value)
-      val titleOpt  = ctx.getProperty[Ex[String ]](peer, keyTitle).map(_.expand[T].value)
-      val mode      = ctx.getProperty[Ex[Int    ]](peer, keyMode ).fold(defaultMode)(_.expand[T].value) match {
+      val valueOpt  = ctx.getProperty[Ex[Artifact.Value ]](peer, keyValue).map(_.expand[T].value)
+      val titleOpt  = ctx.getProperty[Ex[String         ]](peer, keyTitle).map(_.expand[T].value)
+      val mode      = ctx.getProperty[Ex[Int            ]](peer, keyMode ).fold(defaultMode)(_.expand[T].value) match {
         case 0 => FileDialog.Open
         case 1 => FileDialog.Save
         case 2 => FileDialog.Folder
@@ -105,8 +105,8 @@ object PathField {
 
       deferTx {
         val c = new Peer
-        valueOpt.foreach(c.value = _)
-        titleOpt.foreach(c.title = _)
+        valueOpt.foreach(v => c.value = new File(v))
+        titleOpt.foreach(v => c.title = v)
         c.mode    = mode
         component = c
       }
@@ -120,10 +120,10 @@ object PathField {
     protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] =
       new Expanded[T](this).initComponent()
 
-    object value extends Model[File] {
-      def apply(): Ex[File] = Value(w)
+    object value extends Model[Artifact.Value] {
+      def apply(): Ex[Artifact.Value] = Value(w)
 
-      def update(value: Ex[File]): Unit = {
+      def update(value: Ex[Artifact.Value]): Unit = {
         val b = Graph.builder
         b.putProperty(w, keyValue, value)
       }
@@ -152,5 +152,5 @@ trait PathField extends Component {
   var title : Ex[String]
   var mode  : Ex[Int]
 
-  def value : Model[File]
+  def value : Model[Artifact.Value]
 }

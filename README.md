@@ -20,7 +20,7 @@ To use the library in your project:
 
     "de.sciss" %% "lucre-swing" % v
 
-The current version `v` is `"2.2.0"`.
+The current version `v` is `"2.3.0"`.
 
 ## contributing
 
@@ -39,7 +39,7 @@ We have yet to determine how to "export" a widget to Scala.js. For an example an
 The following graph elements are currently not supported in Scala.js:
 
 - `DropTarget`
-- `PathField` (we have not yet settled on a notion of "file" in the browser)
+- `PathField` (the peer still uses `File` instead of `URI`)
 
 ## publishing releases
 
