@@ -9,17 +9,17 @@ lazy val mimaVersion    = "2.3.0"
 
 lazy val deps = new {
   val main = new {
-    val desktop   = "0.10.7"
+    val desktop   = "0.11.1"
     val laminar   = "0.11.0"
     val lucre     = "4.2.0-SNAPSHOT"
     val model     = "0.3.5"
-    val swingPlus = "0.4.2"
-    val treeTable = "1.5.1"
-    val widgets   = "2.0.0"
+    val swingPlus = "0.5.0"
+    val treeTable = "1.6.0"
+    val widgets   = "2.1.0"
   }
   val test = new {
     val fileUtil  = "1.1.5"
-    val scalaTest = "3.2.2"
+    val scalaTest = "3.2.3"
     val submin    = "0.3.4"
   }
 }
