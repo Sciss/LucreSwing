@@ -14,8 +14,8 @@ lazy val deps = new {
     val lucre     = "4.2.0-SNAPSHOT"
     val model     = "0.3.5"
     val swingPlus = "0.5.0"
-    val treeTable = "1.6.0"
-    val widgets   = "2.1.0"
+    val treeTable = "1.6.1"
+    val widgets   = "2.2.0"
   }
   val test = new {
     val fileUtil  = "1.1.5"
