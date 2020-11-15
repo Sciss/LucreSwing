@@ -23,6 +23,8 @@ import de.sciss.lucre.swing.graph.impl.{ComponentExpandedImpl, ComponentImpl, Pa
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.{Artifact, IExpr, Txn}
 
+import scala.util.Try
+
 object PathField {
   def apply(): PathField = Impl()
 
@@ -105,7 +107,10 @@ object PathField {
 
       deferTx {
         val c = new Peer
-        valueOpt.foreach(v => c.value = new File(v))
+        valueOpt.foreach { uri =>
+          val fileOpt   = if (!uri.isAbsolute) None else Try(new File(uri)).toOption
+          c.valueOption = fileOpt
+        }
         titleOpt.foreach(v => c.title = v)
         c.mode    = mode
         component = c

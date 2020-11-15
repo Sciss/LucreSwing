@@ -22,7 +22,11 @@ final class PathFieldValueExpandedImpl[T <: Txn[T]](peer: => Peer, value0: Artif
                                                    (implicit targets: ITargets[T], cursor: Cursor[T])
   extends ComponentPropertyExpandedImpl[T, Artifact.Value](value0) {
 
-  protected def valueOnEDT: Artifact.Value = peer.value.toURI
+  protected def valueOnEDT: Artifact.Value =
+    peer.valueOption match {
+      case Some(f)  => f.toURI
+      case None     => Artifact.Value.empty
+    }
 
   protected def startListening(): Unit = {
     val c = peer
