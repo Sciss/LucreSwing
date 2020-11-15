@@ -1,5 +1,6 @@
 package de.sciss.lucre.swing
 
+import de.sciss.log.Level
 import de.sciss.lucre.expr.Context
 
 import scala.swing.Component
@@ -16,7 +17,7 @@ import scala.swing.Component
  */
 object TrigCombinationTest extends InMemoryAppLike {
   protected def mkView(): Component = {
-    de.sciss.lucre.Log.showEventLog = true
+    de.sciss.lucre.Log.event.level = Level.Debug
 
     import de.sciss.lucre.expr.graph._
     import de.sciss.lucre.swing.graph._

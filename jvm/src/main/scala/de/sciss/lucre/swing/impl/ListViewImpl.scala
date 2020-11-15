@@ -15,7 +15,8 @@ package de.sciss.lucre.swing.impl
 
 import de.sciss.lucre.{ListObj, Txn}
 import de.sciss.lucre.swing.ListView.Handler
-import de.sciss.lucre.swing.LucreSwing.{deferTx, log, requireEDT}
+import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
+import de.sciss.lucre.Log.{swing => log}
 import de.sciss.lucre.swing.{ListView, Observation}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.serial.TFormat
@@ -61,7 +62,7 @@ object ListViewImpl {
     def list_=(newOption: Option[ListObj[T, Elem]])(implicit tx: T): Unit = {
       disposeList()
       val newObsOpt = newOption.map(Observation(_) { implicit tx => upd =>
-        log(s"ListView ${impl.hashCode.toHexString} react")
+        log.debug(s"ListView ${impl.hashCode.toHexString} react")
         upd.changes.foreach {
           case ListObj.Added(  idx, elem)  => val item = handler.data(elem); deferTx(impl.insertItem(idx, item))
           case ListObj.Removed(idx, _   )  => deferTx(impl.removeItemAt(idx))
@@ -84,7 +85,7 @@ object ListViewImpl {
 
     private def disposeList()(implicit tx: T): Unit = {
       current.swap(None)(tx.peer).foreach { obs =>
-        log(s"disposeList(); obs = $obs")
+        log.debug(s"disposeList(); obs = $obs")
         obs.dispose()
       }
     }

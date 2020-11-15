@@ -13,13 +13,9 @@
 
 package de.sciss.lucre.swing
 
-import java.text.SimpleDateFormat
-import java.util.{Date, Locale}
-
+import de.sciss.lucre.Log.{swing => log}
 import de.sciss.lucre.TxnLike
 
-import scala.annotation.elidable
-import scala.annotation.elidable.CONFIG
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.concurrent.stm.TxnLocal
 import scala.util.control.NonFatal
@@ -32,7 +28,7 @@ object LucreSwing extends LucreSwingPlatform {
 
   private[this] def handleGUI(seq: Vec[() => Unit]): Unit = {
     def exec(): Unit = {
-      log(s"handleGUI(seq.size = ${seq.size})")
+      log.debug(s"handleGUI(seq.size = ${seq.size})")
       seq.foreach { fun =>
         try {
           fun()
@@ -47,10 +43,4 @@ object LucreSwing extends LucreSwingPlatform {
 
   def deferTx(thunk: => Unit)(implicit tx: TxnLike): Unit =
     guiCode.transform(_ :+ (() => thunk))(tx.peer)
-
-  private[this] lazy val logHeader = new SimpleDateFormat("[d MMM yyyy, HH:mm''ss.SSS] 'Lucre' - 'swing' ", Locale.US)
-  var showLog = false
-
-  @elidable(CONFIG) private[lucre] def log(what: => String): Unit =
-    if (showLog) println(logHeader.format(new Date()) + what)
 }

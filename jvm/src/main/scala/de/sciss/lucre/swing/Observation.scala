@@ -13,7 +13,7 @@
 
 package de.sciss.lucre.swing
 
-import de.sciss.lucre.swing.LucreSwing.log
+import de.sciss.lucre.Log.{swing => log}
 import de.sciss.lucre.{Disposable, Publisher, Source, Txn}
 import de.sciss.serial.TFormat
 
@@ -21,7 +21,7 @@ object Observation {
   def apply[T <: Txn[T], U, A](value: A with Publisher[T, U])(
       observe: T => U => Unit)
      (implicit tx: T, format: TFormat[T, A with Publisher[T, U]]): Observation[T, A] = {
-    log(s"observation for $value")
+    log.debug(s"observation for $value")
     val obs = value.changed.react(observe)
     new Observation[T, A](tx.newHandle(value), obs)
   }
