@@ -32,13 +32,13 @@ lazy val commonJvmSettings = Seq(
 ThisBuild / version      := projectVersion
 ThisBuild / organization := "de.sciss"
 
-lazy val root = crossProject(JVMPlatform /*, JSPlatform */).in(file("."))
+lazy val root = crossProject(JVMPlatform, JSPlatform).in(file("."))
   .jvmSettings(commonJvmSettings)
   .settings(
     name                 := baseName,
 //    version              := projectVersion,
 //    organization         := "de.sciss",
-    scalaVersion         := "3.0.0-M2", // "2.13.4",
+    scalaVersion         := "2.13.4",
     description          := "Swing support for Lucre, and common views",
     homepage             := Some(url(s"https://git.iem.at/sciss/$gitProject")),
     licenses             := Seq("AGPL v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
@@ -64,11 +64,11 @@ lazy val root = crossProject(JVMPlatform /*, JSPlatform */).in(file("."))
       "de.sciss" %  "submin"             % deps.test.submin    % Test,
     ),
   )
-//  .jsSettings(
-//    libraryDependencies ++= Seq(
-//      "com.raquo" %%% "laminar" % deps.main.laminar,
-//    )
-//  )
+  .jsSettings(
+    libraryDependencies ++= Seq(
+      "com.raquo" %%% "laminar" % deps.main.laminar,
+    )
+  )
   .settings(publishSettings)
 
 // ---- publishing ----
