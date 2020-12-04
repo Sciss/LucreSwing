@@ -122,7 +122,7 @@ object IntField {
   private final case class Impl() extends IntField with ComponentImpl { w =>
     override def productPrefix: String = "IntField" // serialization
 
-    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] =
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): IntField.Repr[T] =
       new IntFieldExpandedImpl[T](this, tx).initComponent()
 
     object value extends Model[Int] {

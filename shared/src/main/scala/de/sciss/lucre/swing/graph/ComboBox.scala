@@ -52,7 +52,7 @@ object ComboBox {
   private final case class Impl[A](items: Ex[Seq[A]]) extends ComboBox[A] with ComponentImpl { w =>
     override def productPrefix = "ComboBox"   // serialization
 
-    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] =
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): ComboBox.Repr[T, A] =
       new ComboBoxExpandedPlatform[T, A](this, tx).initComponent()
 
     object index extends Model[Int] {

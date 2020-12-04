@@ -18,7 +18,7 @@ import de.sciss.lucre.expr.graph.Ex
 import de.sciss.lucre.swing.graph.Component
 
 trait ComponentImpl {
-  _: Component =>
+  self: Component =>
 
   def enabled: Ex[Boolean] = Component.Enabled(this)
 

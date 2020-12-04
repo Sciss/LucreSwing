@@ -40,7 +40,7 @@ object CheckBox {
   private final case class Impl(text0: Ex[String]) extends CheckBox with ComponentImpl { w =>
     override def productPrefix = "CheckBox"   // serialization
 
-    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] =
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): CheckBox.Repr[T] =
       new CheckBoxExpandedImpl[T](this, tx).initComponent()
 
     object selected extends Model[Boolean] {

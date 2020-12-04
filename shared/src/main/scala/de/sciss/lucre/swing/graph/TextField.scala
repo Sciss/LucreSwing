@@ -77,7 +77,7 @@ object TextField {
   private final case class Impl() extends TextField with ComponentImpl { w =>
     override def productPrefix: String = "TextField" // serialization
     
-    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] =
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): TextField.Repr[T] =
       new TextFieldExpandedImpl[T](this, tx).initComponent()
 
     object text extends Model[String] {

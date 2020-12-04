@@ -281,7 +281,7 @@ object DropTarget {
 
     def select[A: Selector]: Select[A] = Select(this)
 
-    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] =
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): DropTarget.Repr[T] =
       new Expanded[T](this).initComponent()
   }
 

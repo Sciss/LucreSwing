@@ -28,7 +28,7 @@ object BooleanCheckBoxViewImpl extends CellViewFactory[Boolean] {
                             undoManager: UndoManager): BooleanCheckBoxView[T] = {
     val res: Impl[T] = new Impl[T](editName = name) {
       impl =>
-      protected var (value, committer)          = CellViewFactory.mkCommitter(cell, name)(tx, cursor)
+      protected var (value, committer)       = CellViewFactory.mkCommitter(cell, name)(tx, impl.cursor)
       protected val observer: Disposable[T]  = CellViewFactory.mkObserver (cell, impl)
     }
 
@@ -41,7 +41,7 @@ object BooleanCheckBoxViewImpl extends CellViewFactory[Boolean] {
                             undoManager: UndoManager): BooleanCheckBoxView[T] = {
     val res: OptionalImpl[T] = new OptionalImpl[T](editName = name, default = default) {
       impl =>
-      protected var (value, committer)          = CellViewFactory.mkCommitter(cell, name)(tx, cursor)
+      protected var (value, committer)       = CellViewFactory.mkCommitter(cell, name)(tx, impl.cursor)
       protected val observer: Disposable[T]  = CellViewFactory.mkObserver (cell, impl)
     }
 

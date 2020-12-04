@@ -13,14 +13,17 @@ with absolutely no warranties. To contact the author, send an e-mail to `contact
 
 ## requirements / building
 
-This project builds with sbt against Scala 2.13, 2.12 (JVM) and Scala 2.13 (JS).
+This project builds with sbt against Scala 2.12, 2.13,TestTreeTableApp Dotty (JVM) and Scala 2.13 (JS).
 The last version to support Scala 2.11 was 1.17.2.
 
 To use the library in your project:
 
     "de.sciss" %% "lucre-swing" % v
 
-The current version `v` is `"2.4.1"`.
+The current version `v` is `"2.5.0"`.
+
+Note that you cannot compile with the combination of Dotty and JDK 9 or greater, because the
+`-release` scalac option is not supported.
 
 ## contributing
 

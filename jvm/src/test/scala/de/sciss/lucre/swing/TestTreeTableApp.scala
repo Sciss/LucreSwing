@@ -370,9 +370,9 @@ class TestTreeTableApp[T1 <: Txn[T1]]()(implicit val cursor: Cursor[T1]) { app =
     }
   }
 
-  protected def mkView(): Component = new BorderPanel {
-    add(view.component, BorderPanel.Position.Center)
-    add(new FlowPanel(
+  protected def mkView(): Component = new BorderPanel { me =>
+    me.add(view.component, BorderPanel.Position.Center)
+    me.add(new FlowPanel(
       Button("Add Branch")(addBranchAction()),
       Button("Add Leaf"  )(addLeafAction()),
       Button("Modify"    )(modifyAction()),

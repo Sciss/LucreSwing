@@ -32,7 +32,7 @@ object EditVar {
     val exprH   = tx.newHandle(expr)
     val beforeH = tx.newHandle(expr())
     val nowH    = tx.newHandle(value)
-    val res     = new Impl(name, exprH, beforeH, nowH)
+    val res     = new Impl[T, Elem, Vr](name, exprH, beforeH, nowH)
     res.perform()
     res
   }

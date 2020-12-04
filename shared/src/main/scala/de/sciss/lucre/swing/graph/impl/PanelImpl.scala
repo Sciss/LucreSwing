@@ -18,7 +18,7 @@ import de.sciss.lucre.swing.Graph
 import de.sciss.lucre.swing.graph.{Border, Panel}
 
 trait PanelImpl extends ComponentImpl {
-  _: Panel =>
+  self: Panel =>
 
   def border: Ex[Border] = Panel.Border(this)
 

@@ -27,7 +27,7 @@ object DoubleSpinnerViewImpl {
                             undoManager: UndoManager): DoubleSpinnerView[T] = {
     val res: Impl[T] = new Impl[T](maxWidth = width) {
       impl =>
-      protected var (value, committer)          = CellViewFactory.mkCommitter(_cell, name)(tx, cursor)
+      protected var (value, committer)       = CellViewFactory.mkCommitter(_cell, name)(tx, impl.cursor)
       protected val observer: Disposable[T]  = CellViewFactory.mkObserver (_cell, impl)
     }
 
@@ -41,7 +41,7 @@ object DoubleSpinnerViewImpl {
     val res: OptionalImpl[T] = new OptionalImpl[T](maxWidth = width) {
       impl =>
 
-      protected var (value, committer)          = CellViewFactory.mkCommitter(_cell, name)(tx, cursor)
+      protected var (value, committer)       = CellViewFactory.mkCommitter(_cell, name)(tx, impl.cursor)
       protected val observer: Disposable[T]  = CellViewFactory.mkObserver (_cell, impl)
 
       // private val defaultRef = Ref(Option.empty[T => Double])

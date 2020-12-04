@@ -67,7 +67,7 @@ object Slider {
   private final case class Impl() extends Slider with ComponentImpl { w =>
     override def productPrefix = "Slider"   // serialization
 
-    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Repr[T] =
+    protected def mkRepr[T <: Txn[T]](implicit ctx: Context[T], tx: T): Slider.Repr[T] =
       new SliderExpandedImpl[T](this, tx).initComponent()
 
     def min: Ex[Int] = Min(this)
