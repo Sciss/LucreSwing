@@ -1,6 +1,6 @@
 # LucreSwing
 
-[![Build Status](https://travis-ci.org/Sciss/LucreSwing.svg?branch=main)](https://travis-ci.org/Sciss/LucreSwing)
+[![Build Status](https://github.com/Sciss/LucreSwing/workflows/Scala%20CI/badge.svg?branch=main)](https://github.com/Sciss/LucreSwing/actions?query=workflow%3A%22Scala+CI%22)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.sciss/lucre-swing_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.sciss/lucre-swing_2.13)
 
 ## statement
@@ -13,7 +13,7 @@ with absolutely no warranties. To contact the author, send an e-mail to `contact
 
 ## requirements / building
 
-This project builds with sbt against Scala 2.12, 2.13,TestTreeTableApp Dotty (JVM) and Scala 2.13 (JS).
+This project builds with sbt against Scala 2.12, 2.13, Dotty (JVM) and Scala 2.13 (JS).
 The last version to support Scala 2.11 was 1.17.2.
 
 To use the library in your project:
