@@ -7,5 +7,4 @@ then
    exit 1
 fi
 
-sbt +rootJS/publishSigned +rootJVM/publishSigned
-
+sbt "; + rootJVM/publishSigned ; + rootJS/publishSigned ; sonatypeBundleRelease"
