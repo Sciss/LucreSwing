@@ -7,7 +7,7 @@
 
 LucreSwing is a Scala library which bridges between Swing (through 
 the [Desktop](https://git.iem.at/sciss/Desktop/) project) and [Lucre](https://git.iem.at/sciss/Lucre/).
-It is (C)opyright 2014&ndash;2020 by Hanns Holger Rutz. All rights reserved. The project is released under
+It is (C)opyright 2014&ndash;2021 by Hanns Holger Rutz. All rights reserved. The project is released under
 the [GNU Affero General Public License](https://git.iem.at/sciss/LucreSwing/raw/main/LICENSE) v3+ and comes 
 with absolutely no warranties. To contact the author, send an e-mail to `contact at sciss.de`.
 
@@ -20,7 +20,7 @@ To use the library in your project:
 
     "de.sciss" %% "lucre-swing" % v
 
-The current version `v` is `"2.5.0"`.
+The current version `v` is `"2.6.0"`.
 
 Note that you cannot compile with the combination of Dotty and JDK 9 or greater, because the
 `-release` scalac option is not supported.

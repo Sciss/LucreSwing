@@ -2,8 +2,8 @@ lazy val baseName   = "Lucre-Swing"
 lazy val baseNameL  = baseName.toLowerCase
 lazy val gitProject = "LucreSwing"
 
-lazy val projectVersion = "2.5.0"
-lazy val mimaVersion    = "2.5.0"
+lazy val projectVersion = "2.6.0-SNAPSHOT"
+lazy val mimaVersion    = "2.6.0"
 
 // ---- dependencies ----
 
@@ -11,7 +11,7 @@ lazy val deps = new {
   val main = new {
     val desktop   = "0.11.3"
     val laminar   = "0.11.0"
-    val lucre     = "4.3.0"
+    val lucre     = "4.4.0-SNAPSHOT"
     val model     = "0.3.5"
     val swingPlus = "0.5.0"
     val treeTable = "1.6.1"
@@ -47,7 +47,10 @@ lazy val root = crossProject(JVMPlatform, JSPlatform).in(file("."))
       "de.sciss"      %%% "model"        % deps.main.model,
       "org.scalatest" %%% "scalatest"    % deps.test.scalaTest % Test,
     ),
-    scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xlint", "-Xsource:2.13"),
+    scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8"),
+    scalacOptions ++= {
+      if (isDotty.value) Nil else Seq("-Xlint", "-Xsource:2.13")
+    },
     scalacOptions in (Compile, compile) ++= (if (!isDotty.value && scala.util.Properties.isJavaAtLeast("9")) Seq("-release", "8") else Nil), // JDK >8 breaks API; skip scala-doc
     // ---- compatibility ----
     mimaPreviousArtifacts := Set("de.sciss" %% baseNameL % mimaVersion),

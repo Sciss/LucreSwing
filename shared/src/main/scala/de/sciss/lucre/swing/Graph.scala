@@ -2,7 +2,7 @@
  *  Graph.scala
  *  (LucreSwing)
  *
- *  Copyright (c) 2014-2020 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2014-2021 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Affero General Public License v3+
  *
@@ -14,8 +14,8 @@
 package de.sciss.lucre.swing
 
 import de.sciss.lucre.expr.graph.Control
-import de.sciss.lucre.expr.impl.{ExElem, GraphBuilderMixin, GraphFormatMixin}
-import de.sciss.lucre.expr.{Context, IControl}
+import de.sciss.lucre.expr.impl.{GraphBuilderMixin, GraphFormatMixin}
+import de.sciss.lucre.expr.{Context, ExElem, IControl}
 import de.sciss.lucre.swing.graph.Widget
 import de.sciss.lucre.{Txn, expr}
 import de.sciss.serial.{ConstFormat, DataInput, DataOutput}
@@ -51,18 +51,20 @@ object Graph {
 
     def write(g: Graph, out: DataOutput): Unit = {
       out.writeShort(SER_VERSION)
-      var ref = null: ExElem.RefMapOut
-      ref = ExElem.write(g.widget, out, ref)
-      val cx = g.controls
-      writeControls(cx, out, ref)
+
+      val ref = new ExElem.RefMapOut(out)
+      ref.writeProduct(g.widget)
+      val cx  = g.controls
+      writeControls(cx, ref)
     }
 
     def read(in: DataInput): Graph = {
       val cookie = in.readShort()
       require(cookie == SER_VERSION, s"Unexpected cookie $cookie")
-      val ref = new ExElem.RefMapIn
-      val w   = ExElem.read (in, ref).asInstanceOf[Widget]
-      val cx  = readControls(in, ref)
+
+      val ref = new ExElem.RefMapIn(in)
+      val w   = ref.readProductT[Widget]()
+      val cx  = readControls(ref)
       Graph(w, cx)
     }
   }
