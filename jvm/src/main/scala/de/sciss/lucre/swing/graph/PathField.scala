@@ -15,6 +15,7 @@ package de.sciss.lucre.swing.graph
 
 import de.sciss.desktop.{FileDialog, PathField => Peer}
 import de.sciss.file.File
+import de.sciss.lucre.expr.ExElem.{ProductReader, RefMapIn}
 import de.sciss.lucre.expr.graph.{Const, Ex}
 import de.sciss.lucre.expr.{Context, Graph, IControl, Model}
 import de.sciss.lucre.swing.LucreSwing.deferTx
@@ -25,13 +26,18 @@ import de.sciss.lucre.{Artifact, IExpr, Txn}
 
 import scala.util.Try
 
-object PathField {
+object PathField extends ProductReader[PathField] {
   def apply(): PathField = Impl()
 
   def apply(mode: Ex[Int]): PathField = {
     val res   = apply()
     res.mode  = mode
     res
+  }
+
+  override def read(in: RefMapIn, key: String, arity: Int, adj: Int): PathField = {
+    require (arity == 0 && adj == 0)
+    PathField()
   }
 
   val Open  : Ex[Int] = 0
@@ -44,6 +50,13 @@ object PathField {
   private[graph] final val defaultValue    = Artifact.Value.empty // new File("")
   private[graph] final val defaultMode     = 0
 
+  object Value extends ProductReader[Value] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Value = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[PathField]()
+      new Value(_w)
+    }
+  }
   final case class Value(w: PathField) extends Ex[Artifact.Value] {
     type Repr[T <: Txn[T]] = IExpr[T, Artifact.Value]
 
@@ -68,6 +81,13 @@ object PathField {
     Const(titleSeq).applyOption(mode).getOrElse("Choose")
   }
 
+  object Title extends ProductReader[Title] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Title = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[PathField]()
+      new Title(_w)
+    }
+  }
   final case class Title(w: PathField) extends Ex[String] {
     type Repr[T <: Txn[T]] = IExpr[T, String]
 
@@ -79,6 +99,13 @@ object PathField {
     }
   }
 
+  object Mode extends ProductReader[Mode] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Mode = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[PathField]()
+      new Mode(_w)
+    }
+  }
   final case class Mode(w: PathField) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
 

@@ -11,17 +11,17 @@
  *	contact@sciss.de
  */
 
-package de.sciss.lucre.swing.graph
+package de.sciss.lucre.swing
+package graph
 
+import de.sciss.lucre.expr.ExElem.{ProductReader, RefMapIn}
 import de.sciss.lucre.expr.graph.{Const, Ex}
 import de.sciss.lucre.expr.{Context, IControl}
-import de.sciss.lucre.swing.Graph
-import de.sciss.lucre.swing.View
-import de.sciss.lucre.swing.graph.impl.BorderPanelExpandedImpl
 import de.sciss.lucre.swing.graph.impl.PanelImpl
 import de.sciss.lucre.{IExpr, Txn}
+import de.sciss.lucre.swing.graph.impl.BorderPanelExpandedImpl
 
-object BorderPanel {
+object BorderPanel extends ProductReader[BorderPanel] {
   def apply(north : Widget = Empty(),
             south : Widget = Empty(),
             west  : Widget = Empty(),
@@ -30,6 +30,23 @@ object BorderPanel {
            ): BorderPanel =
     Impl(north = north, south = south, west = west, east = east, center = center)
 
+  override def read(in: RefMapIn, key: String, arity: Int, adj: Int): BorderPanel = {
+    require (arity == 5 && adj == 0)
+    val _north  = in.readProductT[Widget]()
+    val _south  = in.readProductT[Widget]()
+    val _west   = in.readProductT[Widget]()
+    val _east   = in.readProductT[Widget]()
+    val _center = in.readProductT[Widget]()
+    BorderPanel(_north, _south, _west, _east, _center)
+  }
+
+  object HGap extends ProductReader[HGap] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): HGap = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[BorderPanel]()
+      new HGap(_w)
+    }
+  }
   final case class HGap(w: BorderPanel) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
 
@@ -41,6 +58,13 @@ object BorderPanel {
     }
   }
 
+  object VGap extends ProductReader[VGap] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): VGap = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[BorderPanel]()
+      new VGap(_w)
+    }
+  }
   final case class VGap(w: BorderPanel) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
 

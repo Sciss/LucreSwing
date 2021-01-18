@@ -13,19 +13,26 @@
 
 package de.sciss.lucre.swing.graph
 
+import de.sciss.lucre.expr.ExElem.{ProductReader, RefMapIn}
 import de.sciss.lucre.expr.graph.Ex
 import de.sciss.lucre.expr.{Context, Graph, IControl, Model}
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.impl.{CheckBoxExpandedImpl, ComponentImpl}
 import de.sciss.lucre.{IExpr, Txn}
 
-object CheckBox {
-
+object CheckBox extends ProductReader[CheckBox] {
   def apply(text: Ex[String] = ""): CheckBox = Impl(text)
 
   private[graph] final val defaultSelected = false
   private[graph] final val keySelected     = "selected"
 
+  object Selected extends ProductReader[Selected] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Selected = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[CheckBox]()
+      new Selected(_w)
+    }
+  }
   final case class Selected(w: CheckBox) extends Ex[Boolean] {
     type Repr[T <: Txn[T]] = IExpr[T, Boolean]
 
@@ -61,6 +68,12 @@ object CheckBox {
     def checkBox: View.CheckBox
 
     private[graph] def selected: IExpr[T, Boolean]
+  }
+
+  override def read(in: RefMapIn, key: String, arity: Int, adj: Int): CheckBox = {
+    require (arity == 1 && adj == 0)
+    val _text = in.readEx[String]()
+    CheckBox(_text)
   }
 }
 trait CheckBox extends Component {

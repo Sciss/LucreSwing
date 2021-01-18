@@ -14,10 +14,18 @@
 package de.sciss.lucre.swing.graph
 
 import de.sciss.lucre.expr.Context
+import de.sciss.lucre.expr.ExElem.{ProductReader, RefMapIn}
 import de.sciss.lucre.expr.graph.{Const, Ex}
 import de.sciss.lucre.{IExpr, Txn}
 
 object Component {
+  object Enabled extends ProductReader[Enabled] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Enabled = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[Component]()
+      new Enabled(_w)
+    }
+  }
   final case class Enabled(w: Component) extends Ex[Boolean] {
     type Repr[T <: Txn[T]] = IExpr[T, Boolean]
 
@@ -29,6 +37,13 @@ object Component {
     }
   }
 
+  object Focusable extends ProductReader[Focusable] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Focusable = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[Component]()
+      new Focusable(_w)
+    }
+  }
   final case class Focusable(w: Component) extends Ex[Boolean] {
     type Repr[T <: Txn[T]] = IExpr[T, Boolean]
 
@@ -40,6 +55,13 @@ object Component {
     }
   }
 
+  object Tooltip extends ProductReader[Tooltip] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Tooltip = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[Component]()
+      new Tooltip(_w)
+    }
+  }
   final case class Tooltip(w: Component) extends Ex[String] {
     type Repr[T <: Txn[T]] = IExpr[T, String]
 

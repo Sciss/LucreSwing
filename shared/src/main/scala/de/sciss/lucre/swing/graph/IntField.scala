@@ -13,14 +13,33 @@
 
 package de.sciss.lucre.swing.graph
 
+import de.sciss.lucre.expr.ExElem.{ProductReader, RefMapIn}
 import de.sciss.lucre.expr.graph.{Const, Ex}
 import de.sciss.lucre.expr.{Context, ExSeq, Graph, IControl, Model}
 import de.sciss.lucre.swing.graph.impl.{ComponentImpl, IntFieldExpandedImpl}
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.{IExpr, Txn}
 
-object IntField {
+object IntField extends ProductReader[IntField] {
   def apply(): IntField = Impl()
+
+  def apply(min : Ex[Int]     = defaultMin,
+            max : Ex[Int]     = defaultMax,
+            step: Ex[Int]     = defaultStep,
+            unit: Ex[String]  = defaultUnit,
+           ): IntField = {
+    val res = IntField()
+    if (min  != Const(defaultMin  )) res.min  = min
+    if (max  != Const(defaultMax  )) res.max  = max
+    if (step != Const(defaultStep )) res.step = step
+    if (unit != Const(defaultUnit )) res.unit = unit
+    res
+  }
+
+  override def read(in: RefMapIn, key: String, arity: Int, adj: Int): IntField = {
+    require (arity == 0 && adj == 0)
+    IntField()
+  }
 
   private[graph] final val keyValue        = "value"
   private[graph] final val keyMin          = "min"
@@ -37,6 +56,13 @@ object IntField {
   private[graph] final val defaultUnit     = ""
   private[graph] final val defaultEditable = true
 
+  object Value extends ProductReader[Value] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Value = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[IntField]()
+      new Value(_w)
+    }
+  }
   final case class Value(w: IntField) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
 
@@ -48,6 +74,13 @@ object IntField {
     }
   }
 
+  object Min extends ProductReader[Min] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Min = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[IntField]()
+      new Min(_w)
+    }
+  }
   final case class Min(w: IntField) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
 
@@ -59,6 +92,13 @@ object IntField {
     }
   }
 
+  object Max extends ProductReader[Max] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Max = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[IntField]()
+      new Max(_w)
+    }
+  }
   final case class Max(w: IntField) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
 
@@ -70,6 +110,13 @@ object IntField {
     }
   }
 
+  object Step extends ProductReader[Step] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Step = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[IntField]()
+      new Step(_w)
+    }
+  }
   final case class Step(w: IntField) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
 
@@ -81,6 +128,13 @@ object IntField {
     }
   }
 
+  object Unit extends ProductReader[Unit] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Unit = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[IntField]()
+      new Unit(_w)
+    }
+  }
   final case class Unit(w: IntField) extends Ex[String] {
     type Repr[T <: Txn[T]] = IExpr[T, String]
 
@@ -97,6 +151,13 @@ object IntField {
     ExSeq(w.min :: w.max :: seq0: _*)
   }
 
+  object Prototype extends ProductReader[Prototype] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Prototype = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[IntField]()
+      new Prototype(_w)
+    }
+  }
   final case class Prototype(w: IntField) extends Ex[Seq[Int]] {
     type Repr[T <: Txn[T]] = IExpr[T, Seq[Int]]
 
@@ -108,6 +169,13 @@ object IntField {
     }
   }
 
+  object Editable extends ProductReader[Editable] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Editable = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[IntField]()
+      new Editable(_w)
+    }
+  }
   final case class Editable(w: IntField) extends Ex[Boolean] {
     type Repr[T <: Txn[T]] = IExpr[T, Boolean]
 

@@ -14,11 +14,19 @@
 package de.sciss.lucre.swing.graph
 
 import de.sciss.lucre.expr.Context
+import de.sciss.lucre.expr.ExElem.{ProductReader, RefMapIn}
 import de.sciss.lucre.expr.graph.{Const, Ex}
 import de.sciss.lucre.swing.graph.{Border => _Border}
 import de.sciss.lucre.{IExpr, Txn}
 
 object Panel {
+  object Border extends ProductReader[Border] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Border = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[Panel]()
+      new Border(_w)
+    }
+  }
   final case class Border(w: Panel) extends Ex[_Border] {
     type Repr[T <: Txn[T]] = IExpr[T, _Border]
 

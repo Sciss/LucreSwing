@@ -13,6 +13,7 @@
 
 package de.sciss.lucre.swing.graph
 
+import de.sciss.lucre.expr.ExElem.{ProductReader, RefMapIn}
 import de.sciss.lucre.expr.graph.{Const, Ex}
 import de.sciss.lucre.expr.{Context, Graph, IControl}
 import de.sciss.lucre.swing.View
@@ -20,8 +21,14 @@ import de.sciss.lucre.swing.graph.impl.GridPanelExpandedImpl
 import de.sciss.lucre.swing.graph.impl.PanelImpl
 import de.sciss.lucre.{IExpr, Txn}
 
-object GridPanel {
+object GridPanel extends ProductReader[GridPanel] {
   def apply(contents: Widget*): GridPanel = Impl(contents)
+
+  override def read(in: RefMapIn, key: String, arity: Int, adj: Int): GridPanel = {
+    require (arity == 1 && adj == 0)
+    val _contents = in.readVec(in.readProductT[Widget]())
+    GridPanel(_contents: _*)
+  }
 
   private[graph] final val keyRows               = "rows"
   private[graph] final val keyColumns            = "columns"
@@ -39,6 +46,13 @@ object GridPanel {
   private[graph] final val defaultHGap           = 4
   private[graph] final val defaultVGap           = 2
 
+  object Rows extends ProductReader[Rows] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Rows = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[GridPanel]()
+      new Rows(_w)
+    }
+  }
   final case class Rows(w: GridPanel) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
 
@@ -50,6 +64,13 @@ object GridPanel {
     }
   }
 
+  object Columns extends ProductReader[Columns] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Columns = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[GridPanel]()
+      new Columns(_w)
+    }
+  }
   final case class Columns(w: GridPanel) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
 
@@ -61,6 +82,13 @@ object GridPanel {
     }
   }
 
+  object Compact extends ProductReader[Compact] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Compact = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[GridPanel]()
+      new Compact(_w)
+    }
+  }
   final case class Compact(w: GridPanel) extends Ex[Boolean] {
     type Repr[T <: Txn[T]] = IExpr[T, Boolean]
 
@@ -72,6 +100,13 @@ object GridPanel {
     }
   }
 
+  object CompactRows extends ProductReader[CompactRows] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): CompactRows = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[GridPanel]()
+      new CompactRows(_w)
+    }
+  }
   final case class CompactRows(w: GridPanel) extends Ex[Boolean] {
     type Repr[T <: Txn[T]] = IExpr[T, Boolean]
 
@@ -83,6 +118,13 @@ object GridPanel {
     }
   }
 
+  object CompactColumns extends ProductReader[CompactColumns] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): CompactColumns = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[GridPanel]()
+      new CompactColumns(_w)
+    }
+  }
   final case class CompactColumns(w: GridPanel) extends Ex[Boolean] {
     type Repr[T <: Txn[T]] = IExpr[T, Boolean]
 
@@ -94,6 +136,13 @@ object GridPanel {
     }
   }
 
+  object HGap extends ProductReader[HGap] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): HGap = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[GridPanel]()
+      new HGap(_w)
+    }
+  }
   final case class HGap(w: GridPanel) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
 
@@ -105,6 +154,13 @@ object GridPanel {
     }
   }
 
+  object VGap extends ProductReader[VGap] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): VGap = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[GridPanel]()
+      new VGap(_w)
+    }
+  }
   final case class VGap(w: GridPanel) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
 

@@ -73,7 +73,7 @@ object TreeTableViewImpl {
 
       def getIndex(node: TreeNode): Int = -1
 
-      def children(): util.Enumeration[_] = {
+      def children(): util.Enumeration[_ <: TreeNode] = {
         import scala.collection.JavaConverters._
         childSeq.iterator.asJavaEnumeration
       }
@@ -112,7 +112,7 @@ object TreeTableViewImpl {
 
       def getIndex(node: TreeNode): Int = -1
 
-      def children(): util.Enumeration[_] = DefaultMutableTreeNode.EMPTY_ENUMERATION
+      def children(): util.Enumeration[_ <: TreeNode] = DefaultMutableTreeNode.EMPTY_ENUMERATION
     }
 
     class Root[T <: Txn[T], Node, Branch, Data](val branchH: Source[T, Branch],

@@ -20,11 +20,19 @@ import de.sciss.lucre.swing.graph.impl.ComponentImpl
 import de.sciss.lucre.swing.graph.impl.ButtonExpandedImpl
 import de.sciss.lucre.swing.graph.impl.ButtonClickedExpandedImpl
 import de.sciss.lucre.Txn
+import de.sciss.lucre.expr.ExElem.{ProductReader, RefMapIn}
 
-object Button {
+object Button extends ProductReader[Button] {
 
   def apply(text: Ex[String] = ""): Button = Impl(text)
 
+  object Clicked extends ProductReader[Clicked] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Clicked = {
+      require (arity == 1 && adj == 0)
+      val _b = in.readProductT[Button]()
+      new Clicked(_b)
+    }
+  }
   final case class Clicked(w: Button) extends Trig {
     type Repr[T <: Txn[T]] = ITrigger[T]
 
@@ -48,6 +56,12 @@ object Button {
     def clicked: Clicked = Clicked(this)
 
     def text: Ex[String] = text0
+  }
+
+  override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Button = {
+    require (arity == 1 && adj == 0)
+    val _text = in.readEx[String]()
+    Button(_text)
   }
 }
 trait Button extends Component {

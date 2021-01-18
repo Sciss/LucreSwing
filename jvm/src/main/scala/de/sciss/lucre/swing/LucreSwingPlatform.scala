@@ -13,8 +13,10 @@
 
 package de.sciss.lucre.swing
 
-import java.awt.EventQueue
+import de.sciss.lucre.expr.ExElem
+import de.sciss.lucre.expr.ExElem.ProductReader
 
+import java.awt.EventQueue
 import de.sciss.lucre.swing.graph.DropTarget
 
 import scala.concurrent.stm.Txn
@@ -25,6 +27,14 @@ trait LucreSwingPlatform {
 
   private lazy val _initPlatform: Unit = {
     DropTarget.init()
+
+    ExElem.addProductReaderSq({
+      import graph._
+      Seq[ProductReader[Product]](
+        DropTarget, DropTarget.Value, DropTarget.Received, DropTarget.Select,
+        PathField, PathField.Value, PathField.Title, PathField.Mode,
+      )
+    })
   }
 
   def requireEDT(): Unit = if (!EventQueue.isDispatchThread)

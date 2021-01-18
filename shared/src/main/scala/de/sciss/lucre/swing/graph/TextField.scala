@@ -13,6 +13,7 @@
 
 package de.sciss.lucre.swing.graph
 
+import de.sciss.lucre.expr.ExElem.{ProductReader, RefMapIn}
 import de.sciss.lucre.expr.graph.{Const, Ex}
 import de.sciss.lucre.expr.{Context, Graph, IControl, Model}
 import de.sciss.lucre.swing.View
@@ -20,7 +21,7 @@ import de.sciss.lucre.swing.graph.impl.ComponentImpl
 import de.sciss.lucre.swing.graph.impl.TextFieldExpandedImpl
 import de.sciss.lucre.{IExpr, Txn}
 
-object TextField {
+object TextField extends ProductReader[TextField] {
 
   def apply(): TextField = Impl()
 
@@ -30,6 +31,11 @@ object TextField {
     res
   }
 
+  override def read(in: RefMapIn, key: String, arity: Int, adj: Int): TextField = {
+    require (arity == 0 && adj == 0)
+    TextField()
+  }
+
   private[graph] final val keyText         = "text"
   private[graph] final val keyColumns      = "columns"
   private[graph] final val keyEditable     = "editable"
@@ -37,6 +43,13 @@ object TextField {
   private[graph] final val defaultColumns  = 0
   private[graph] final val defaultEditable = true
 
+  object Text extends ProductReader[Text] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Text = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[TextField]()
+      new Text(_w)
+    }
+  }
   final case class Text(w: TextField) extends Ex[String] {
     type Repr[T <: Txn[T]] = IExpr[T, String]
 
@@ -52,6 +65,13 @@ object TextField {
     }
   }
 
+  object Columns extends ProductReader[Columns] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Columns = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[TextField]()
+      new Columns(_w)
+    }
+  }
   final case class Columns(w: TextField) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
 
@@ -63,6 +83,13 @@ object TextField {
     }
   }
 
+  object Editable extends ProductReader[Editable] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Editable = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[TextField]()
+      new Editable(_w)
+    }
+  }
   final case class Editable(w: TextField) extends Ex[Boolean] {
     type Repr[T <: Txn[T]] = IExpr[T, Boolean]
 

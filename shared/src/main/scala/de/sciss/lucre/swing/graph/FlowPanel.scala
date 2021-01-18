@@ -14,17 +14,29 @@
 package de.sciss.lucre.swing
 package graph
 
+import de.sciss.lucre.expr.ExElem.{ProductReader, RefMapIn}
 import de.sciss.lucre.expr.graph.{Const, Ex}
 import de.sciss.lucre.expr.{Context, IControl}
 import de.sciss.lucre.swing.graph.impl.PanelImpl
 import de.sciss.lucre.{IExpr, Txn}
 import de.sciss.lucre.swing.graph.impl.FlowPanelExpandedImpl
 
-//import scala.swing.{FlowPanel => Peer}
-
-object FlowPanel {
+object FlowPanel extends ProductReader[FlowPanel] {
   def apply(contents: Widget*): FlowPanel = Impl(contents)
 
+  override def read(in: RefMapIn, key: String, arity: Int, adj: Int): FlowPanel = {
+    require (arity == 1 && adj == 0)
+    val _contents = in.readVec(in.readProductT[Widget]())
+    FlowPanel(_contents: _*)
+  }
+
+  object HGap extends ProductReader[HGap] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): HGap = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[FlowPanel]()
+      new HGap(_w)
+    }
+  }
   final case class HGap(w: FlowPanel) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
 
@@ -36,6 +48,13 @@ object FlowPanel {
     }
   }
 
+  object VGap extends ProductReader[VGap] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): VGap = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[FlowPanel]()
+      new VGap(_w)
+    }
+  }
   final case class VGap(w: FlowPanel) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
 
@@ -47,6 +66,13 @@ object FlowPanel {
     }
   }
 
+  object Align extends ProductReader[Align] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Align = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[FlowPanel]()
+      new Align(_w)
+    }
+  }
   final case class Align(w: Component) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
 

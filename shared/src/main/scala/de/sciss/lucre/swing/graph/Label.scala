@@ -14,14 +14,28 @@
 package de.sciss.lucre.swing
 package graph
 
+import de.sciss.lucre.expr.ExElem.{ProductReader, RefMapIn}
 import de.sciss.lucre.expr.graph.{Const, Ex}
 import de.sciss.lucre.swing.graph.impl.{ComponentImpl, LabelExpandedImpl}
 import de.sciss.lucre.expr.{Context, Graph, IControl}
 import de.sciss.lucre.{IExpr, Txn}
 
-object Label {
+object Label extends ProductReader[Label] {
   def apply(text: Ex[String]): Label = Impl(text)
 
+  override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Label = {
+    require (arity == 1 && adj == 0)
+    val _text = in.readEx[String]()
+    Label(_text)
+  }
+
+  object HAlign extends ProductReader[HAlign] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): HAlign = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[Component]()
+      new HAlign(_w)
+    }
+  }
   final case class HAlign(w: Component) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
 
@@ -33,6 +47,13 @@ object Label {
     }
   }
 
+  object VAlign extends ProductReader[VAlign] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): VAlign = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[Component]()
+      new VAlign(_w)
+    }
+  }
   final case class VAlign(w: Component) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
 

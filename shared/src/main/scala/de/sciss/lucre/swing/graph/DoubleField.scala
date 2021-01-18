@@ -13,14 +13,35 @@
 
 package de.sciss.lucre.swing.graph
 
+import de.sciss.lucre.expr.ExElem.{ProductReader, RefMapIn}
 import de.sciss.lucre.expr.graph.{Const, Ex}
 import de.sciss.lucre.expr.{Context, ExSeq, Graph, IControl, Model}
 import de.sciss.lucre.swing.graph.impl.{ComponentImpl, DoubleFieldExpandedImpl, DoubleFieldValueExpandedImpl}
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.{IExpr, Txn}
 
-object DoubleField {
+object DoubleField extends ProductReader[DoubleField] {
   def apply(): DoubleField = Impl()
+
+  def apply(min     : Ex[Double]  = defaultMin,
+            max     : Ex[Double]  = defaultMax,
+            step    : Ex[Double]  = defaultStep,
+            decimals: Ex[Int]     = defaultDecimals,
+            unit    : Ex[String]  = defaultUnit,
+           ): DoubleField = {
+    val res = DoubleField()
+    if (min       != Const(defaultMin     )) res.min       = min
+    if (max       != Const(defaultMax     )) res.max       = max
+    if (step      != Const(defaultStep    )) res.step      = step
+    if (decimals  != Const(defaultDecimals)) res.decimals  = decimals
+    if (unit      != Const(defaultUnit    )) res.unit      = unit
+    res
+  }
+
+  override def read(in: RefMapIn, key: String, arity: Int, adj: Int): DoubleField = {
+    require (arity == 0 && adj == 0)
+    DoubleField()
+  }
 
   private[graph] final val keyValue        = "value"
   private[graph] final val keyMin          = "min"
@@ -39,6 +60,13 @@ object DoubleField {
   private[graph] final val defaultUnit     = ""
   private[graph] final val defaultEditable = true
 
+  object Value extends ProductReader[Value] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Value = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[DoubleField]()
+      new Value(_w)
+    }
+  }
   final case class Value(w: DoubleField) extends Ex[Double] {
     type Repr[T <: Txn[T]] = IExpr[T, Double]
 
@@ -53,6 +81,13 @@ object DoubleField {
     }
   }
 
+  object Min extends ProductReader[Min] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Min = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[DoubleField]()
+      new Min(_w)
+    }
+  }
   final case class Min(w: DoubleField) extends Ex[Double] {
     type Repr[T <: Txn[T]] = IExpr[T, Double]
 
@@ -64,6 +99,13 @@ object DoubleField {
     }
   }
 
+  object Max extends ProductReader[Max] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Max = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[DoubleField]()
+      new Max(_w)
+    }
+  }
   final case class Max(w: DoubleField) extends Ex[Double] {
     type Repr[T <: Txn[T]] = IExpr[T, Double]
 
@@ -75,6 +117,13 @@ object DoubleField {
     }
   }
 
+  object Step extends ProductReader[Step] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Step = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[DoubleField]()
+      new Step(_w)
+    }
+  }
   final case class Step(w: DoubleField) extends Ex[Double] {
     type Repr[T <: Txn[T]] = IExpr[T, Double]
 
@@ -86,6 +135,13 @@ object DoubleField {
     }
   }
 
+  object Decimals extends ProductReader[Decimals] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Decimals = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[DoubleField]()
+      new Decimals(_w)
+    }
+  }
   final case class Decimals(w: DoubleField) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
 
@@ -97,6 +153,13 @@ object DoubleField {
     }
   }
 
+  object Unit extends ProductReader[Unit] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Unit = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[DoubleField]()
+      new Unit(_w)
+    }
+  }
   final case class Unit(w: DoubleField) extends Ex[String] {
     type Repr[T <: Txn[T]] = IExpr[T, String]
 
@@ -113,6 +176,13 @@ object DoubleField {
     ExSeq(w.min :: w.max :: seq0: _*)
   }
 
+  object Prototype extends ProductReader[Prototype] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Prototype = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[DoubleField]()
+      new Prototype(_w)
+    }
+  }
   final case class Prototype(w: DoubleField) extends Ex[Seq[Double]] {
     type Repr[T <: Txn[T]] = IExpr[T, Seq[Double]]
 
@@ -124,6 +194,13 @@ object DoubleField {
     }
   }
 
+  object Editable extends ProductReader[Editable] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Editable = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[DoubleField]()
+      new Editable(_w)
+    }
+  }
   final case class Editable(w: DoubleField) extends Ex[Boolean] {
     type Repr[T <: Txn[T]] = IExpr[T, Boolean]
 
@@ -209,7 +286,6 @@ object DoubleField {
   }
 }
 trait DoubleField extends NumberField[Double] {
-//  type C = de.sciss.audiowidgets.ParamField[Double]
   type C = View.Component
 
   var decimals: Ex[Int]

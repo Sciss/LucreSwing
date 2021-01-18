@@ -15,8 +15,8 @@ package de.sciss.lucre.swing.graph
 
 import java.awt.Dimension
 import java.awt.datatransfer.{DataFlavor, Transferable}
-
 import de.sciss.lucre.Txn.peer
+import de.sciss.lucre.expr.ExElem.{ProductReader, RefMapIn}
 import de.sciss.lucre.expr.graph.{Control, Ex, Trig}
 import de.sciss.lucre.expr.impl.IControlImpl
 import de.sciss.lucre.expr.{Context, IControl, ITrigger}
@@ -28,15 +28,20 @@ import de.sciss.lucre.swing.{TargetIcon, View}
 import de.sciss.lucre.{Adjunct, Caching, Cursor, IChangeEvent, IEvent, IExpr, IPublisher, IPull, IPush, ITargets, ProductWithAdjuncts, Txn}
 import de.sciss.model.Change
 import de.sciss.serial.DataInput
+
 import javax.swing.TransferHandler.TransferSupport
 import javax.swing.{JLabel, TransferHandler}
-
 import scala.concurrent.stm.Ref
 import scala.swing.Graphics2D
 import scala.util.control.NonFatal
 
-object DropTarget {
+object DropTarget extends ProductReader[DropTarget] {
   def apply(): DropTarget = Impl()
+
+  override def read(in: RefMapIn, key: String, arity: Int, adj: Int): DropTarget = {
+    require (arity == 0 && adj == 0)
+    DropTarget()
+  }
 
   private lazy val _init: Unit = {
     Adjunct.addFactory(Selector.String)
@@ -135,6 +140,13 @@ object DropTarget {
     def changed: IEvent[T, Unit] = this
   }
 
+  object Value extends ProductReader[Value[_]] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Value[_] = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[Select[Any]]()
+      new Value(_w)
+    }
+  }
   final case class Value[A](s: Select[A]) extends Ex[A] {
     type Repr[T <: Txn[T]] = IExpr[T, A]
 
@@ -147,6 +159,13 @@ object DropTarget {
     }
   }
 
+  object Received extends ProductReader[Received[_]] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Received[_] = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[Select[Any]]()
+      new Received(_w)
+    }
+  }
   final case class Received[A](s: Select[A]) extends Trig {
     type Repr[T <: Txn[T]] = ITrigger[T]
 
@@ -182,6 +201,14 @@ object DropTarget {
     def changed: IEvent[T, A] = this
   }
 
+  object Select extends ProductReader[Select[_]] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Select[_] = {
+      require (arity == 1 && adj == 1)
+      val _w = in.readProductT[DropTarget]()
+      val _selector: Selector[Any] = in.readAdjunct()
+      new Select[Any](_w)(_selector)
+    }
+  }
   final case class Select[A](w: DropTarget)(implicit val selector: Selector[A])
     extends Control with ProductWithAdjuncts {
 

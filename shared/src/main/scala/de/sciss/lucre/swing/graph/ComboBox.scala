@@ -13,6 +13,7 @@
 
 package de.sciss.lucre.swing.graph
 
+import de.sciss.lucre.expr.ExElem.{ProductReader, RefMapIn}
 import de.sciss.lucre.expr.graph.Ex
 import de.sciss.lucre.expr.{Context, Graph, IControl, Model}
 import de.sciss.lucre.swing.graph.impl.ComponentImpl
@@ -20,13 +21,26 @@ import de.sciss.lucre.swing.graph.impl.ComboBoxExpandedPlatform
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.{IExpr, Txn}
 
-object ComboBox {
+object ComboBox extends ProductReader[ComboBox[_]] {
 
   def apply[A](items: Ex[Seq[A]]): ComboBox[A] = Impl(items)
+
+  override def read(in: RefMapIn, key: String, arity: Int, adj: Int): ComboBox[_] = {
+    require (arity == 1 && adj == 0)
+    val _items = in.readEx[Seq[Any]]()
+    ComboBox(_items)
+  }
 
   private[graph] final val keyIndex          = "index"
   private[graph] final val keyValueOption    = "valueOption"
 
+  object Index extends ProductReader[Index[_]] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Index[_] = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[ComboBox[Any]]()
+      new Index(_w)
+    }
+  }
   final case class Index[A](w: ComboBox[A]) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
 
@@ -38,6 +52,13 @@ object ComboBox {
     }
   }
 
+  object ValueOption extends ProductReader[ValueOption[_]] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): ValueOption[_] = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[ComboBox[Any]]()
+      new ValueOption(_w)
+    }
+  }
   final case class ValueOption[A](w: ComboBox[A]) extends Ex[Option[A]] {
     type Repr[T <: Txn[T]] = IExpr[T, Option[A]]
 

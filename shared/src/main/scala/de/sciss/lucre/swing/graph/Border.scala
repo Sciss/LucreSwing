@@ -13,16 +13,24 @@
 
 package de.sciss.lucre.swing.graph
 
+import de.sciss.lucre.expr.ExElem.{ProductReader, RefMapIn}
 import de.sciss.lucre.expr.graph.Ex
 
 object Border {
-  object Empty {
-    def apply(weight: Int): Border = Empty(weight, weight, weight, weight)
+  object Empty extends ProductReader[Empty] {
+    def apply(weight: Int): Empty = Empty(weight, weight, weight, weight)
 
-    def apply(top: Int, left: Int, bottom: Int, right: Int): Border =
+    def apply(top: Int, left: Int, bottom: Int, right: Int): Empty =
       EmptyImpl(top = top, left = left, bottom = bottom, right = right)
 
-//    def unapply(b: Empty): Option[Empty] = Some(b)
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Empty = {
+      require (arity == 4 && adj == 0)
+      val _top    = in.readInt()
+      val _left   = in.readInt()
+      val _bottom = in.readInt()
+      val _right  = in.readInt()
+      Empty(_top, _left, _bottom, _right)
+    }
   }
   trait Empty extends Border {
     def top   : Int

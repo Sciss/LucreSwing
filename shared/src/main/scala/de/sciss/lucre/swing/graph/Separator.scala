@@ -14,12 +14,18 @@
 package de.sciss.lucre.swing.graph
 
 import de.sciss.lucre.Txn
-import de.sciss.lucre.expr.{Context, IControl}
+import de.sciss.lucre.expr.ExElem.{ProductReader, RefMapIn}
+import de.sciss.lucre.expr.{Context, ExElem, IControl}
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.impl.SeparatorExpandedImpl
 
-object Separator {
+object Separator extends ProductReader[Separator] {
   def apply(): Separator = Impl()
+
+  override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Separator = {
+    require (arity == 0 && adj == 0)
+    Separator()
+  }
 
   private final case class Impl() extends Separator {
     override def productPrefix = "Separator"  // serialization

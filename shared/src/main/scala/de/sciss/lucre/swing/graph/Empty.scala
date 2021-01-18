@@ -14,14 +14,18 @@
 package de.sciss.lucre.swing.graph
 
 import de.sciss.lucre.Txn
+import de.sciss.lucre.expr.ExElem.{ProductReader, RefMapIn}
 import de.sciss.lucre.expr.{Context, IControl}
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.impl.EmptyExpandedImpl
 
-object Empty {
+object Empty extends ProductReader[Empty] {
   def apply(): Empty = Impl() // instance
 
-//  private[graph] val instance: Empty = Impl()
+  override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Empty = {
+    require (arity == 0 && adj == 0)
+    Empty()
+  }
 
   private final case class Impl() extends Empty {
     override def productPrefix = "Empty"  // serialization

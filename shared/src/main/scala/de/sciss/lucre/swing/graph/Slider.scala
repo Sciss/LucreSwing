@@ -13,6 +13,7 @@
 
 package de.sciss.lucre.swing.graph
 
+import de.sciss.lucre.expr.ExElem.{ProductReader, RefMapIn}
 import de.sciss.lucre.expr.graph.{Const, Ex}
 import de.sciss.lucre.expr.{Context, Graph, IControl, Model}
 import de.sciss.lucre.swing.graph.impl.ComponentImpl
@@ -20,8 +21,22 @@ import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.impl.SliderExpandedImpl
 import de.sciss.lucre.{IExpr, Txn}
 
-object Slider {
+object Slider extends ProductReader[Slider] {
   def apply(): Slider = Impl()
+
+  def apply(min: Ex[Int] = defaultMin,
+            max: Ex[Int] = defaultMax,
+           ): Slider = {
+    val res = Slider()
+    if (min != Const(defaultMin)) res.min = min
+    if (max != Const(defaultMax)) res.max = max
+    res
+  }
+
+  override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Slider = {
+    require (arity == 0 && adj == 0)
+    Slider()
+  }
 
   private[graph] final val defaultValue  =  50
   private[graph] final val defaultMin    =   0
@@ -31,6 +46,13 @@ object Slider {
   private[graph] final val keyMin        = "min"
   private[graph] final val keyMax        = "max"
 
+  object Value extends ProductReader[Value] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Value = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[Slider]()
+      new Value(_w)
+    }
+  }
   final case class Value(w: Slider) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
 
@@ -42,6 +64,13 @@ object Slider {
     }
   }
 
+  object Min extends ProductReader[Min] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Min = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[Slider]()
+      new Min(_w)
+    }
+  }
   final case class Min(w: Slider) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
 
@@ -53,6 +82,13 @@ object Slider {
     }
   }
 
+  object Max extends ProductReader[Max] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Max = {
+      require (arity == 1 && adj == 0)
+      val _w = in.readProductT[Slider]()
+      new Max(_w)
+    }
+  }
   final case class Max(w: Slider) extends Ex[Int] {
     type Repr[T <: Txn[T]] = IExpr[T, Int]
 

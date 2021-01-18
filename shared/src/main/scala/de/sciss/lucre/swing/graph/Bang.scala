@@ -14,13 +14,14 @@
 package de.sciss.lucre.swing.graph
 
 import de.sciss.lucre.Txn
+import de.sciss.lucre.expr.ExElem.{ProductReader, RefMapIn}
 import de.sciss.lucre.expr.graph.{Act, Trig}
 import de.sciss.lucre.expr.{Context, IAction, IControl, ITrigger}
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.impl.ComponentImpl
 import de.sciss.lucre.swing.graph.impl.BangExpandedImpl
 
-object Bang {
+object Bang extends ProductReader[Bang] {
   def apply(): Bang = Impl()
 
   private final case class Impl() extends Bang with ComponentImpl {
@@ -30,6 +31,11 @@ object Bang {
       import ctx.{cursor, targets}
       new BangExpandedImpl[T](this).initComponent()
     }
+  }
+
+  override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Bang = {
+    require (arity == 0 && adj == 0)
+    Bang()
   }
 }
 trait Bang extends Component with Act with Trig {
