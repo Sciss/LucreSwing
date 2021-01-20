@@ -1,10 +1,19 @@
 package de.sciss.lucre.swing
 
+import de.sciss.lucre.expr.LucreExpr
 import de.sciss.serial.{DataInput, DataOutput}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
+/*
+
+  sbt 'testOnly de.sciss.lucre.expr.LucreExpr.SerializationSpec'
+
+ */
 class SerializationSpec extends AnyFlatSpec with Matchers {
+  LucreExpr .init()
+  LucreSwing.init()
+
   "An graph" should "be serializable" in {
     import graph._
     val gIn = Graph {
