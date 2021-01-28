@@ -34,10 +34,14 @@ trait BangExpandedPlatform[T <: Txn[T]]
 
   type C = View.Component
 
-  private[this] var active = false
-  private[this] var timer: Timer = _
+  // ---- abstract ----
 
   protected def bang(): Unit
+
+  // ---- impl ----
+
+  private[this] var active = false
+  private[this] var timer: Timer = _
 
   protected def activate()(implicit tx: T): Unit = {
     deferTx {

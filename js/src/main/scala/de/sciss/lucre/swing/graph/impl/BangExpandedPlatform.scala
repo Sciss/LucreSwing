@@ -17,7 +17,7 @@ package impl
 
 import com.raquo.laminar.api.L
 import com.raquo.laminar.api.L._
-import de.sciss.lucre.{Cursor, Txn}
+import de.sciss.lucre.Txn
 import de.sciss.lucre.expr.Context
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
@@ -34,8 +34,6 @@ trait BangExpandedPlatform[T <: Txn[T]]
   // ---- abstract ----
 
   protected def bang(): Unit
-
-  protected def cursor: Cursor[T]
 
   // ---- impl ----
 
@@ -70,9 +68,7 @@ trait BangExpandedPlatform[T <: Txn[T]]
       )
 
       val obs = Observer[dom.MouseEvent] { _ =>
-        cursor.step { implicit tx =>
-          activate()
-        }
+        bang()
       }
 
       val c = button(
