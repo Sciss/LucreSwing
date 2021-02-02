@@ -15,7 +15,7 @@ package de.sciss.lucre.swing.graph
 
 import de.sciss.lucre.Txn
 import de.sciss.lucre.expr.ExElem.{ProductReader, RefMapIn}
-import de.sciss.lucre.expr.{Context, ExElem, IControl}
+import de.sciss.lucre.expr.{Context, IControl}
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.impl.SeparatorExpandedImpl
 

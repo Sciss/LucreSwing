@@ -11,11 +11,11 @@ lazy val deps = new {
   val main = new {
     val desktop   = "0.11.3"
     val laminar   = "0.11.0"
-    val lucre     = "4.4.0"
+    val lucre     = "4.4.1-SNAPSHOT"
     val model     = "0.3.5"
     val swingPlus = "0.5.0"
     val treeTable = "1.6.1"
-    val widgets   = "2.3.1"
+    val widgets   = "2.3.2"
   }
   val test = new {
     val fileUtil  = "1.1.5"
@@ -25,7 +25,7 @@ lazy val deps = new {
 }
 
 lazy val commonJvmSettings = Seq(
-  crossScalaVersions   := Seq("3.0.0-M2", "2.13.4", "2.12.12"),
+  crossScalaVersions   := Seq("3.0.0-M3", "2.13.4", "2.12.12"),
 )
 
 // sonatype plugin requires that these are in global
