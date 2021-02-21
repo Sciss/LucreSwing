@@ -59,8 +59,8 @@ class TestTreeTableApp[T1 <: Txn[T1]]()(implicit val cursor: Cursor[T1]) { app =
     }
   }
 
-  sealed trait Node[T <: Txn[T]] extends Obj[T] with
-    Publisher[T, Node.Update[T]] with Event.Node[T] {
+  sealed trait Node[T <: Txn[T]] extends Obj[T]
+    with Publisher[T, Node.Update[T]] with Event.Node[T] {
 
     def tpe: Obj.Type = Node
 

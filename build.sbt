@@ -2,7 +2,7 @@ lazy val baseName   = "Lucre-Swing"
 lazy val baseNameL  = baseName.toLowerCase
 lazy val gitProject = "LucreSwing"
 
-lazy val projectVersion = "2.6.1"
+lazy val projectVersion = "2.6.2"
 lazy val mimaVersion    = "2.6.0"
 
 // ---- dependencies ----
@@ -11,7 +11,7 @@ lazy val deps = new {
   val main = new {
     val desktop   = "0.11.3"
     val laminar   = "0.11.0"
-    val lucre     = "4.4.1"
+    val lucre     = "4.4.2"
     val model     = "0.3.5"
     val swingPlus = "0.5.0"
     val treeTable = "1.6.1"
@@ -19,13 +19,13 @@ lazy val deps = new {
   }
   val test = new {
     val fileUtil  = "1.1.5"
-    val scalaTest = "3.2.3"
+    val scalaTest = "3.2.4"
     val submin    = "0.3.4"
   }
 }
 
 lazy val commonJvmSettings = Seq(
-  crossScalaVersions   := Seq("3.0.0-M3", "2.13.4", "2.12.13"),
+  crossScalaVersions   := Seq("3.0.0-RC1", "2.13.4", "2.12.13"),
 )
 
 // sonatype plugin requires that these are in global
