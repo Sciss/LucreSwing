@@ -20,7 +20,7 @@ To use the library in your project:
 
     "de.sciss" %% "lucre-swing" % v
 
-The current version `v` is `"2.6.2"`.
+The current version `v` is `"2.6.3"`.
 
 Note that you cannot compile with the combination of Dotty and JDK 9 or greater, because the
 `-release` scalac option is not supported.

@@ -2,7 +2,7 @@ lazy val baseName   = "Lucre-Swing"
 lazy val baseNameL  = baseName.toLowerCase
 lazy val gitProject = "LucreSwing"
 
-lazy val projectVersion = "2.6.2"
+lazy val projectVersion = "2.6.3"
 lazy val mimaVersion    = "2.6.0"
 
 // ---- dependencies ----
@@ -11,7 +11,7 @@ lazy val deps = new {
   val main = new {
     val desktop   = "0.11.3"
     val laminar   = "0.11.0"
-    val lucre     = "4.4.2"
+    val lucre     = "4.4.4"
     val model     = "0.3.5"
     val swingPlus = "0.5.0"
     val treeTable = "1.6.1"
@@ -19,13 +19,13 @@ lazy val deps = new {
   }
   val test = new {
     val fileUtil  = "1.1.5"
-    val scalaTest = "3.2.4"
+    val scalaTest = "3.2.7"
     val submin    = "0.3.4"
   }
 }
 
 lazy val commonJvmSettings = Seq(
-  crossScalaVersions   := Seq("3.0.0-RC1", "2.13.4", "2.12.13"),
+  crossScalaVersions   := Seq("3.0.0-RC2", "2.13.5", "2.12.13"),
 )
 
 // sonatype plugin requires that these are in global
@@ -38,7 +38,7 @@ lazy val root = crossProject(JVMPlatform, JSPlatform).in(file("."))
     name                 := baseName,
 //    version              := projectVersion,
 //    organization         := "de.sciss",
-    scalaVersion         := "2.13.4",
+    scalaVersion         := "2.13.5",
     description          := "Swing support for Lucre, and common views",
     homepage             := Some(url(s"https://git.iem.at/sciss/$gitProject")),
     licenses             := Seq("AGPL v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
