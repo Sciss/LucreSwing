@@ -19,13 +19,13 @@ lazy val deps = new {
   }
   val test = new {
     val fileUtil  = "1.1.5"
-    val scalaTest = "3.2.8"
+    val scalaTest = "3.2.9"
     val submin    = "0.3.4"
   }
 }
 
 lazy val commonJvmSettings = Seq(
-  crossScalaVersions   := Seq("3.0.0-RC3", "2.13.5", "2.12.13"),
+  crossScalaVersions   := Seq("3.0.0", "2.13.5", "2.12.13"),
 )
 
 // sonatype plugin requires that these are in global
@@ -49,9 +49,10 @@ lazy val root = crossProject(JVMPlatform, JSPlatform).in(file("."))
     ),
     scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8"),
     scalacOptions ++= {
-      if (isDotty.value) Nil else Seq("-Xlint", "-Xsource:2.13")
+      // if (isDotty.value) Nil else 
+      Seq("-Xlint", "-Xsource:2.13")
     },
-    scalacOptions in (Compile, compile) ++= (if (!isDotty.value && scala.util.Properties.isJavaAtLeast("9")) Seq("-release", "8") else Nil), // JDK >8 breaks API; skip scala-doc
+    scalacOptions in (Compile, compile) ++= (if (/* !isDotty.value && */ scala.util.Properties.isJavaAtLeast("9")) Seq("-release", "8") else Nil), // JDK >8 breaks API; skip scala-doc
     // ---- compatibility ----
     mimaPreviousArtifacts := Set("de.sciss" %% baseNameL % mimaVersion),
     updateOptions := updateOptions.value.withLatestSnapshots(false)
